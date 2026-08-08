@@ -1,0 +1,87 @@
+# === Secretos y credenciales — NUNCA subir a GitHub ===
+.env
+.env.*
+!.env.example
+*.env
+secrets.yaml
+secrets.yml
+*.secret
+*.secrets
+
+# Claves y certificados
+*.pem
+*.key
+!**/testdata/*.key
+*.crt
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+*.kubeconfig
+kubeconfig
+.kube/
+
+# SOPS / Age (módulo 8 — GitOps)
+age.agekey
+*.agekey
+.sops.yaml.local
+
+# Tokens de nube y registries
+.docker/config.json
+.aws/
+.azure/
+.gcloud/
+service-account*.json
+
+# === Paquetes de investigación (material de trabajo, no contenido del curso) ===
+# Solo la carpeta de la raíz. La barra inicial es deliberada: sin ella, el patrón
+# también ignoraría modulo3/research/, que SÍ se versiona (reporte + auditoría + README
+# son material que los estudiantes leen).
+/research/
+
+# === Artefactos de herramientas de IA ===
+# Contexto para agentes, no contenido para estudiantes. Sin barra inicial: aplica al
+# CLAUDE.md de la raíz y al de cada módulo.
+CLAUDE.md
+.claude/settings.local.json
+.aider*
+.cursorignore
+
+# === Sistema operativo ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === Editores ===
+.vscode/
+!.vscode/extensions.json
+.idea/
+*.swp
+*.swo
+*~
+
+# === Lenguajes y build ===
+node_modules/
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+target/
+vendor/
+
+# === Kubernetes / Helm / Terraform ===
+charts/*.tgz
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+
+# === Logs y temporales ===
+*.log
+tmp/
+.tmp/
+*.tmp

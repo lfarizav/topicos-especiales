@@ -1,66 +1,109 @@
-# Estación 1 — Introducción y Demostración
+# Módulo 2 — AI & Agentic Engineering
 
-Bienvenido/a a la primera estación de Hardcore AI, Cohorte 3.
+**Sesión 2 · sábado 8 de agosto de 2026 · 9:00–12:00**
 
-En esta carpeta encuentras todo el material que necesitas para completar tu primera tarea. Léelo en orden.
+Este módulo arranca el hilo que atraviesa todo el semestre. A partir de hoy no
+estudias Kubernetes en abstracto: eliges **un producto** y lo construyes módulo a
+módulo hasta llevarlo a producción en la sesión 14.
+
+---
+
+## El arco completo del curso
+
+```
+Módulo 2  →  idea validada       →  Product Vision Board  (pvb.md)
+Módulo 3  →  requisitos          →  PRD                   (prd.md)
+Módulos 3-7 →  capacidad técnica →  contenedores, K8s, CKA, CKAD, CKS
+Módulo 8  →  producción          →  GitOps, agentes en el clúster, observabilidad
+Sesión 16 →  sustentación        →  proyecto final
+```
+
+Tu entregable final no es solo el software: es **la fábrica que lo produce** y la
+evidencia verificable en cada paso.
 
 ---
 
 ## Qué hay en esta carpeta
 
-| Archivo | Qué es | Para qué lo necesitas |
-|---------|--------|-----------------------|
-| **hcai-c3-product-vision-board.md** | Template del Product Vision Board (PVB) + guía y ejemplo completo | Si vas a construir un **producto propio o startup**, completa este documento. Incluye la explicación de cada sección, errores comunes y un ejemplo de referencia |
-| **hcai-c3-internal-solution-brief.md** | Template del Internal Solution Brief (ISB) | Si vienes de una **empresa** y vas a resolver un problema interno de tu organización, completa este en lugar del PVB |
-| **hcai-c3-banco-productos.md** | Banco de productos | Si no tienes idea propia, elige un producto de este catálogo y constrúyelo durante el programa |
-| **demo/** | Demo de referencia end-to-end con AI-DLC (Spec-Driven Development) | El ejemplo construido en vivo: backend, frontend e infraestructura, más los *steering files* del framework AI-DLC (`.aidlc-rule-details/`). Estúdialo para ver el método en acción |
+| Archivo | Qué es |
+|---|---|
+| `README.md` | Esta guía. Léela primero. |
+| `pvb.md` | Plantilla del **Product Vision Board** + reglas de llenado + un ejemplo completo de referencia al final |
 
 ---
 
-## Tu tarea
+## Tu tarea para la sesión 3 (sábado 15 de agosto de 2026)
 
-Tu entregable para la **Estación 2 (miércoles 17 de junio)** es llegar con tu artefacto de producto completado.
+Llegas con tu `pvb.md` completado y tu investigación documentada.
 
-### Paso a paso
+### 1. Elige tu producto
 
-1. **Decide qué vas a construir.** Tienes tres opciones:
-   - Idea propia (producto, app, herramienta).
-   - Proyecto de tu empresa (problema interno que quieras resolver con AI).
-   - Un producto del banco de productos (`hcai-c3-banco-productos.md`).
+Una idea propia que cumpla **dos condiciones no negociables**:
 
-2. **Elige tu template según tu caso:**
-   - Producto propio / startup → usa `hcai-c3-product-vision-board.md`
-   - Problema interno de tu empresa → usa `hcai-c3-internal-solution-brief.md`
+- **Corre sobre Kubernetes.** No "podría desplegarse en Kubernetes algún día":
+  la arquitectura tiene sentido en un clúster.
+- **Usa IA de forma defendible.** IA dentro del producto, o agentes operándolo.
+  Si al quitar la IA el producto sigue funcionando igual, no cuenta.
 
-3. **Lee el template antes de empezar.** El PVB (`hcai-c3-product-vision-board.md`) contiene:
-   - Explicación de cada sección del PVB y del ISB.
-   - Errores comunes que debes evitar.
-   - Un ejemplo de referencia ya completado para que veas el nivel de detalle esperado.
+Si tu idea no pasa esas dos condiciones, no vas a poder construirla en los módulos
+siguientes ni sustentarla en la sesión 16.
 
-4. **Haz tu investigación con AI:**
-   - Genera un **deep research de validación** — investiga si tu idea tiene fundamento real, cómo otros han resuelto problemas similares, qué tecnologías aplican.
-   - Genera un **deep research de crítica** — busca las debilidades, riesgos y razones por las que este tipo de soluciones fallan. Estúdialo.
+### 2. Investiga con IA — dos investigaciones, no una
 
-5. **Documenta todo en Markdown.** Transcripciones de entrevistas, análisis, investigación, notas. Esta documentación te va a servir durante todo el programa (y la vas a usar para co-crear tu PRD en la Estación 2).
+**Deep research de validación.** ¿El problema existe de verdad? ¿Quién más lo ha
+resuelto y cómo? ¿Qué herramientas del ecosistema CNCF ya cubren parte de esto?
 
-6. **Completa tu template** (PVB o ISB) con base en tu investigación.
+**Deep research de crítica (adversarial).** Esta es la que importa y la que casi
+nadie hace. Pídele explícitamente a la IA que **ataque tu idea**: por qué fallaría,
+quién ya la está comoditizando gratis, qué riesgo técnico la mata. Estúdiala tan en
+serio como la de validación.
 
-### Checklist antes de la Estación 2
+> **Regla de evidencia:** toda cifra que escribas lleva fuente. Si tu investigación
+> dice "el mercado es de $X mil millones", quiero el enlace y la fecha. Una cifra
+> sin fuente es una cifra inventada, y en la sustentación se cae sola.
 
-- [ ] Producto seleccionado (idea propia, proyecto de empresa o banco de productos)
-- [ ] Deep research de validación completado y estudiado
-- [ ] Deep research de crítica/riesgos completado y estudiado
-- [ ] Información documentada en archivos Markdown
-- [ ] PVB o ISB completado
-- [ ] Listo para presentar el miércoles 17 de junio
+### 3. Documenta todo en Markdown
 
----
+Transcripciones de entrevistas, notas, análisis, capturas de la investigación.
+Este material lo vas a reusar para co-crear tu PRD en el módulo 3.
 
-## Dudas
+### 4. Completa `pvb.md`
 
-- **WhatsApp:** escribe al grupo de la cohorte si necesitas ayuda.
-- **Soporte (tutorías / bonus):** por confirmar para C3 — se anunciará en el grupo de la cohorte.
+Llena cada sección con base en tu investigación, no en tu intuición.
 
 ---
 
-*Hardcore AI by 30X — Cohorte 3 — Junio–Julio 2026*
+## Reglas de llenado
+
+- **Sé específico.** "Empresas" no es un segmento. "Equipos de plataforma de 3 a 15
+  ingenieros que ya operan Kubernetes en producción" sí lo es.
+- **No escribas "queremos usar IA para X".** Escribe el dolor concreto que resuelves.
+- **Si no puedes responder una sección con confianza, no la rellenes con humo** —
+  esa es exactamente la señal de que te falta investigación.
+- Trae tus dudas a clase.
+
+---
+
+## Checklist antes de la sesión 3
+
+- [ ] Producto seleccionado, corre sobre Kubernetes y usa IA de forma defendible
+- [ ] Deep research de **validación** completado y estudiado
+- [ ] Deep research de **crítica** completado y estudiado
+- [ ] Investigación documentada en archivos Markdown, con fuentes
+- [ ] `pvb.md` completado
+- [ ] Ejemplo de referencia (final de `pvb.md`) leído — ese es el nivel esperado
+
+---
+
+## Cómo se evalúa este entregable
+
+| Criterio | Qué busco |
+|---|---|
+| Especificidad | Segmento, dolor y métricas concretas, no genéricas |
+| Evidencia | Afirmaciones con fuente verificable |
+| Honestidad crítica | Que hayas encontrado y aceptado las debilidades reales de tu idea |
+| Coherencia técnica | Que Kubernetes e IA sean centrales, no decorativos |
+| Viabilidad | Que sea construible en lo que queda del semestre |
+
+La sección más valiosa de tu PVB es la de **riesgos críticos**. Un PVB sin riesgos
+reales es un PVB que no se investigó.
