@@ -1,7 +1,7 @@
 # Ideal Customer Profile — Timonel
 
 > Perfil de cliente ideal del caso de estudio. Derivado del PVB y de la investigación
-> auditada en [`research/`](./research/).
+> auditada en [`research/`](../research/).
 >
 > **Timonel es una empresa ficticia.** El ICP es una hipótesis construida sobre hechos
 > verificados del mercado; no es un hallazgo de investigación. Tu ICP tendrá el mismo

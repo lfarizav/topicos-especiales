@@ -12,7 +12,7 @@ módulo hasta llevarlo a producción en la sesión 14.
 
 ```
 Módulo 2  →  idea validada       →  Product Vision Board  (pvb.md)
-Módulo 3  →  requisitos          →  PRD                   (prd.md)
+                                 →  requisitos            (prd.md)
 Módulos 3-7 →  capacidad técnica →  contenedores, K8s, CKA, CKAD, CKS
 Módulo 8  →  producción          →  GitOps, agentes en el clúster, observabilidad
 Sesión 16 →  sustentación        →  proyecto final
@@ -23,18 +23,68 @@ evidencia verificable en cada paso.
 
 ---
 
-## Qué hay en esta carpeta
+## Ruta de entrega — resumen
+
+Dos entregables, una semana, cinco pasos. El detalle de cada paso está más abajo.
+
+| # | Paso | Resultado |
+|---|---|---|
+| 1 | Elegir el producto — corre sobre Kubernetes **y** usa IA de forma defendible | Idea fijada |
+| 2 | Dos investigaciones con IA: **validación** y **crítica adversarial** | Research documentado |
+| 3 | Documentar todo en Markdown, con fuentes | Insumos del PRD |
+| 4 | Completar la plantilla del Product Vision Board | **`modulo2/pvb.md`** |
+| 5 | Co-crear el PRD con el Prompt 1, segmento por segmento | **`modulo3/specs/prd.md`** |
+
+### Dónde queda cada archivo
+
+```
+modulo2/
+└── pvb.md                          ← ENTREGABLE 1
+
+modulo3/
+├── docs/                           ← tus insumos (reemplazan el caso de referencia)
+│   ├── pvb.md                        copia de tu PVB
+│   ├── overview.md                   panorama del dominio
+│   ├── mercado.md                    análisis de mercado
+│   ├── icp.md                        perfil de cliente ideal
+│   ├── critica.md                    investigación adversarial
+│   └── ...                           entrevistas, benchmarks, notas
+├── specs/
+│   └── prd.md                      ← ENTREGABLE 2
+└── prompts-para-especificacion.md    el Prompt 1 que produce el PRD
+```
+
+### Archivos de este módulo
 
 | Archivo | Qué es |
 |---|---|
 | `README.md` | Esta guía. Léela primero. |
+| **[`INSTRUCCIONES-ENTREGA.md`](./INSTRUCCIONES-ENTREGA.md)** | **Las instrucciones completas de entrega, paso a paso.** Documento autocontenido: si solo vas a leer una cosa antes de entregar, es esta |
 | `pvb.md` | Plantilla del **Product Vision Board** + reglas de llenado + un ejemplo completo de referencia al final |
+
+Para el PRD trabajas en la carpeta del módulo 3:
+[`../modulo3/prompts-para-especificacion.md`](../modulo3/prompts-para-especificacion.md).
+
+---
+
+## Cómo entregar
+
+> [!IMPORTANT]
+> **El mecanismo de entrega se anuncia en la sesión 2.** Anótalo aquí cuando lo tengas.
+>
+> Este repositorio es material de consulta: las rutas de arriba indican **cómo se llaman
+> tus archivos y cómo se organizan**, no que edites este repositorio directamente.
+> Trabaja sobre tu propia copia y conserva esa misma estructura de carpetas.
 
 ---
 
 ## Tu tarea para la sesión 3 (sábado 15 de agosto de 2026)
 
-Llegas con tu `pvb.md` completado y tu investigación documentada.
+Llegas con **dos entregables**: `pvb.md` y `prd.md`, más tu investigación documentada.
+
+> **Es una sola semana para ambos.** El PRD no se escribe desde cero: sale del PVB y de
+> tu investigación, co-creado con IA segmento por segmento. Si el PVB queda flojo, el PRD
+> hereda el problema — por eso el orden importa y no conviene dejarlo para el viernes.
 
 ### 1. Elige tu producto
 
@@ -65,11 +115,28 @@ serio como la de validación.
 ### 3. Documenta todo en Markdown
 
 Transcripciones de entrevistas, notas, análisis, capturas de la investigación.
-Este material lo vas a reusar para co-crear tu PRD en el módulo 3.
+Este material alimenta directamente el PRD del paso 5.
 
 ### 4. Completa `pvb.md`
 
 Llena cada sección con base en tu investigación, no en tu intuición.
+
+### 5. Co-crea tu `prd.md`
+
+Con el PVB listo, conviertes la visión en requisitos.
+
+1. Copia tus documentos (PVB, investigación de validación, investigación de crítica,
+   entrevistas) a `modulo3/docs/`, reemplazando los del caso de referencia.
+2. Abre [`../modulo3/prompts-para-especificacion.md`](../modulo3/prompts-para-especificacion.md)
+   y usa el **Prompt 1**.
+3. Adjunta todos tus documentos y trabaja **segmento por segmento**, aprobando cada uno
+   antes de avanzar.
+4. Guarda el resultado consolidado en `modulo3/specs/prd.md`.
+
+> **La regla del curso, aplicada aquí:** *el agente propone, tú apruebas*. Si dejas que
+> la IA escupa el PRD completo y lo apruebas en bloque, perdiste el control del alcance
+> — y eso se nota en la sustentación. Es la misma frontera que en el módulo 8 separa a un
+> agente que sugiere de uno que rompe producción.
 
 ---
 
@@ -84,14 +151,17 @@ Llena cada sección con base en tu investigación, no en tu intuición.
 
 ---
 
-## Checklist antes de la sesión 3
+## Checklist antes de la sesión 3 (sábado 15 de agosto de 2026)
 
 - [ ] Producto seleccionado, corre sobre Kubernetes y usa IA de forma defendible
 - [ ] Deep research de **validación** completado y estudiado
 - [ ] Deep research de **crítica** completado y estudiado
 - [ ] Investigación documentada en archivos Markdown, con fuentes
-- [ ] `pvb.md` completado
 - [ ] Ejemplo de referencia (final de `pvb.md`) leído — ese es el nivel esperado
+- [ ] **Entregable 1:** `pvb.md` completado
+- [ ] Documentos copiados a `modulo3/docs/`
+- [ ] Análisis de conflictos (Paso 0 del Prompt 1) resuelto por ti, no por la IA
+- [ ] **Entregable 2:** `modulo3/specs/prd.md` consolidado, segmento por segmento
 
 ---
 

@@ -6,7 +6,7 @@
 > evidencia favorable no sirve ni para vender ni para decidir.
 >
 > Toda cifra externa está confirmada en
-> [`research/deep-research-ai-k8s-cncf.AUDIT.md`](./research/deep-research-ai-k8s-cncf.AUDIT.md).
+> [`research/deep-research-ai-k8s-cncf.AUDIT.md`](../research/deep-research-ai-k8s-cncf.AUDIT.md).
 > Lo que no resistió la auditoría está en la sección final, con el nombre del error.
 
 ---

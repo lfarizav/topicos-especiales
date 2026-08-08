@@ -1,8 +1,8 @@
 # Product Vision Board — Timonel
 
 > **Caso de estudio de referencia.** Versión extendida del ejemplo que aparece en
-> [`../modulo2/pvb.md`](../modulo2/pvb.md), ampliada con la investigación auditada en
-> [`research/`](./research/).
+> [`../modulo2/pvb.md`](../../modulo2/pvb.md), ampliada con la investigación auditada en
+> [`research/`](../research/).
 >
 > **Timonel es una empresa ficticia.** Los hechos externos (proyectos, empresas,
 > financiación, cifras de analistas) son reales y verificados. Las cifras internas

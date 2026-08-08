@@ -5,6 +5,9 @@
 Este es tu primer artefacto de producto. Lo completas como tarea de la sesión 2
 (8 de agosto de 2026) y lo traes listo a la sesión 3 (**sábado 15 de agosto de 2026**).
 
+**Ese mismo día entregas también tu `prd.md`**, que se co-crea a partir de este documento.
+El PVB va primero: el PRD hereda todo lo que aquí quede flojo.
+
 Las instrucciones de la tarea, las dos investigaciones que debes hacer y el
 checklist de entrega están en el [`README.md`](./README.md) de este módulo.
 
@@ -170,6 +173,7 @@ _______________________________________
 - [ ] Deep research de crítica completado y estudiado
 - [ ] Investigación documentada en archivos Markdown, con fuentes
 - [ ] Product Vision Board completado (este documento)
+- [ ] `prd.md` co-creado a partir de este PVB (ver `../modulo3/prompts-para-especificacion.md`)
 - [ ] Listo para presentar en la sesión 3 (sábado 15 de agosto de 2026)
 
 ---

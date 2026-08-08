@@ -2,7 +2,7 @@
 
 > Documento de contexto para el caso de estudio **Timonel**.
 > Cada cifra de aquí está confirmada contra fuente primaria en
-> [`research/deep-research-ai-k8s-cncf.AUDIT.md`](./research/deep-research-ai-k8s-cncf.AUDIT.md).
+> [`research/deep-research-ai-k8s-cncf.AUDIT.md`](../research/deep-research-ai-k8s-cncf.AUDIT.md).
 
 ---
 

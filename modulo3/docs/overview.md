@@ -1,7 +1,7 @@
 # Panorama del dominio: agentes de IA operando Kubernetes
 
 > Documento de contexto para el caso de estudio **Timonel**.
-> Toda cifra de este documento pasó por [`research/deep-research-ai-k8s-cncf.AUDIT.md`](./research/deep-research-ai-k8s-cncf.AUDIT.md).
+> Toda cifra de este documento pasó por [`research/deep-research-ai-k8s-cncf.AUDIT.md`](../research/deep-research-ai-k8s-cncf.AUDIT.md).
 > Lo que no se pudo verificar contra fuente primaria **no está aquí**.
 
 ---

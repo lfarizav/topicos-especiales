@@ -57,35 +57,70 @@ el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Docume
 
 ---
 
-## Entregable de producto: el PRD
+## Entregable de producto: PVB + PRD
 
-Traes tu `pvb.md` del módulo 2 completado. En este módulo lo conviertes en un PRD.
+> **Ambos se entregan hoy, sábado 15 de agosto de 2026.** El trabajo se hace durante la
+> semana posterior al módulo 2; esta carpeta contiene las herramientas y el caso de
+> referencia que necesitas para hacerlo.
 
-**La patología conocida del PRD:** cada sesión con el agente abre direcciones nuevas
-y el alcance crece sin que nadie haya decidido que creciera. La salida no es más
-disciplina personal — es volver al tablero y hacer **una sola pregunta de corte**:
+Tu `pvb.md` (módulo 2) y tu `prd.md` co-creado con IA, segmento por segmento.
+
+### Cómo está organizada esta carpeta
+
+```
+modulo3/
+├── docs/      ← INPUTS: lo que alimenta la especificación
+├── specs/     ← OUTPUTS: lo que produces (tu prd.md va aquí)
+├── research/  ← el reporte de investigación crudo y su auditoría
+└── prompts-para-especificacion.md
+```
+
+**`docs/`** trae el caso de referencia completo (**Timonel**), para que veas la
+profundidad esperada. Reemplázalos por los tuyos:
+
+| Archivo | Qué es |
+|---|---|
+| `docs/pvb.md` | Product Vision Board del caso |
+| `docs/overview.md` | Panorama del dominio, con fuentes |
+| `docs/mercado.md` | Análisis de mercado y competencia |
+| `docs/icp.md` | Perfil de cliente ideal y buyer personas |
+| `docs/critica.md` | Investigación adversarial: por qué la idea podría fracasar |
+
+Puedes añadir todos los archivos que tengas: transcripciones de entrevistas, benchmarks,
+notas de campo. Todos se adjuntan al prompt.
+
+Lee `docs/critica.md` con especial atención. Es lo que separa un PVB de tarea de un PVB
+defendible. Y lee [`research/README.md`](./research/README.md): documenta cómo un reporte
+de deep research llegó con cifras inventadas, autocitadas y con la dirección del dato
+invertida. **Ese es el fallo que el proceso de este módulo existe para prevenir.**
+
+### El proceso
+
+1. Reemplaza los archivos de `docs/` por los de tu producto.
+2. Abre [`prompts-para-especificacion.md`](./prompts-para-especificacion.md) y copia el
+   **Prompt 1**.
+3. Pégalo en una conversación nueva y adjunta **todos** los archivos de tu `docs/`.
+4. La IA empieza por un **análisis de conflictos** entre tus documentos. Decide tú cada
+   conflicto antes de avanzar.
+5. Co-crea **segmento por segmento**. No apruebes en bloque.
+6. Consolida el resultado en `specs/prd.md`.
+
+### La patología conocida del PRD
+
+Cada sesión con el agente abre direcciones nuevas y el alcance crece sin que nadie haya
+decidido que creciera. La salida no es más disciplina personal — es volver al tablero y
+hacer **una sola pregunta de corte**:
 
 > ¿esto sigue siendo el producto que quiero construir?
 
 La técnica concreta: dale al agente el PVB y el PRD **juntos** y pídele que señale
-conflictos y desalineaciones, **no que decida por ti**. El PRD está terminado cuando
-no le falta ni le sobra nada respecto de la visión.
+conflictos y desalineaciones, **no que decida por ti**. El PRD está terminado cuando no
+le falta ni le sobra nada respecto de la visión.
 
-### Material de referencia en esta carpeta
-
-Los archivos de investigación y análisis de un caso de estudio completo, para que veas
-el nivel de profundidad esperado antes de escribir el tuyo:
-
-| Archivo | Qué es |
-|---|---|
-| `overview.md` | Panorama del dominio, con fuentes |
-| `pvb.md` | Product Vision Board completo del caso |
-| `icp.md` | Perfil de cliente ideal y buyer personas |
-| `mercado.md` | Análisis de mercado y marco regulatorio |
-| `critica.md` | Investigación adversarial: por qué la idea podría fracasar |
-
-Lee `critica.md` con especial atención. Es el documento que separa un PVB de tarea de
-un PVB defendible.
+> **Por qué segmento por segmento.** Es la misma regla del módulo 8 —*el agente propone,
+> el humano aprueba*— aplicada a escribir especificaciones en vez de a operar un clúster.
+> Si dejas que la IA produzca el PRD completo de una vez y lo apruebas en bloque, ya
+> perdiste el control del alcance, y eso se nota en la sustentación.
 
 ---
 

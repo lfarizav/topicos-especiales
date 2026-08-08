@@ -51,8 +51,8 @@ Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
 |---|---|---|---|
 | 1 | sáb 1 ago 2026 | Módulo 1 — Fundamentos de Linux | — |
 | 2 | sáb 8 ago 2026 | Módulo 2 — AI & Agentic Engineering | — |
-| 3 | sáb 15 ago 2026 | Módulo 3 — Docker, Compose y Runtimes | **PVB** |
-| 4 | sáb 22 ago 2026 | Módulo 4 — Kubernetes Fundamentals (KCNA) | **PRD** |
+| 3 | sáb 15 ago 2026 | Módulo 3 — Docker, Compose y Runtimes | **PVB + PRD** |
+| 4 | sáb 22 ago 2026 | Módulo 4 — Kubernetes Fundamentals (KCNA) | — |
 | 5 | sáb 29 ago 2026 | **Examen 1** — módulos 1 a 4 | — |
 | 6 | sáb 5 sep 2026 | Módulo 5 — CKA (1/2) | — |
 | 7 | sáb 12 sep 2026 | Módulo 5 — CKA (2/2) | — |
