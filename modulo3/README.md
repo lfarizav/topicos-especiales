@@ -40,6 +40,15 @@ el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Docume
 
 ---
 
+## Laboratorio en clase — runtimes y virtualización
+
+Antes de este laboratorio de Compose, en clase se hace
+[`laboratorio-virtualizacion-contenedores.md`](./laboratorio-virtualizacion-contenedores.md)
+— 75-90 minutos, en vivo: namespaces/cgroups compartidos, contenedor de sistema (LXC/LXD)
+vs contenedor de aplicación (Docker), máquina virtual ligera, y por qué el tamaño de una
+imagen y el usuario del proceso son decisiones de seguridad medibles, no solo de buenas
+prácticas. Es un laboratorio distinto de este; los dos son complementarios.
+
 ## Laboratorio
 
 **Dockerfile multi-stage y Compose de producción** — 60 minutos, 7 pasos:
@@ -69,9 +78,10 @@ Tu `pvb.md` (módulo 2) y tu `prd.md` co-creado con IA, segmento por segmento.
 
 ```
 modulo3/
+├── laboratorio-virtualizacion-contenedores.md  ← lab en clase (OCI/LXC/LXD/Docker)
 ├── docs/      ← INPUTS: lo que alimenta la especificación
 ├── specs/     ← OUTPUTS: lo que produces (tu prd.md va aquí)
-├── research/  ← el reporte de investigación crudo y su auditoría
+├── research/  ← los reportes de investigación crudos y sus auditorías
 └── prompts-para-especificacion.md
 ```
 
