@@ -91,6 +91,29 @@ afuera. Eso es exactamente lo que el laboratorio de Compose te hace comprobar de
 forma en su paso 7: sin remapping, "root dentro del contenedor" y "root en el host" son,
 a nivel de kernel, la misma identidad.
 
+**Salida real de esta máquina** (los números de inodo van a ser distintos en la tuya —
+lo que importa es el patrón: cinco valores diferentes, uno igual):
+
+```
+--- adentro del contenedor ---
+pid: pid:[4026533981]
+net: net:[4026534027]
+mnt: mnt:[4026533890]
+uts: uts:[4026533973]
+ipc: ipc:[4026533979]
+user: user:[4026531837]
+--- tu shell (host) ---
+pid: pid:[4026531836]
+net: net:[4026531833]
+mnt: mnt:[4026531832]
+uts: uts:[4026531838]
+ipc: ipc:[4026531839]
+user: user:[4026531837]
+```
+
+Fíjate: `user` es `4026531837` en ambas — idéntico. Los otros cinco no coinciden en
+ningún caso.
+
 Ahora el cgroup:
 
 ```bash
@@ -101,6 +124,18 @@ cat /proc/self/cgroup
 El contenedor ve `0::/` — su propia raíz de cgroup, aislada por el namespace de cgroup.
 Tu shell ve una ruta larga anidada bajo tu sesión de usuario. Es la misma jerarquía de
 cgroups v2 del kernel, dos vistas distintas de ella.
+
+**Salida real de esta máquina:**
+
+```
+--- cgroup del contenedor ---
+0::/
+--- cgroup de tu shell ---
+0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-org.gnome.Terminal.slice/vte-spawn-<uuid>.scope
+```
+
+(la ruta exacta de tu shell va a depender de tu sesión gráfica/terminal — lo que importa
+es que el contenedor ve `0::/` y tú ves algo largo y anidado).
 
 ```bash
 docker exec ns-demo uname -r
@@ -184,7 +219,23 @@ lxc exec c1 -- systemctl is-system-running
 
 Vas a ver `/sbin/init` como PID 1, y detrás de él `systemd-journald`,
 `systemd-udevd`, `systemd-resolved`, `systemd-networkd`, `cron`, `dbus` — un sistema
-completo arrancando adentro. `systemctl is-system-running` puede responder `starting`
+completo arrancando adentro.
+
+**Salida real de esta máquina** (`ps aux` dentro de `c1`, primeras líneas):
+
+```
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.0  21992 13364 ?        Ss   21:16   0:00 /sbin/init
+root          53  0.0  0.0  33972 14156 ?        Ss   21:16   0:00 /usr/lib/systemd/systemd-journald
+root         112  0.0  0.0  25320  7544 ?        Ss   21:16   0:00 /usr/lib/systemd/systemd-udevd
+systemd+     197  0.0  0.0  21476 13280 ?        Ss   21:16   0:00 /usr/lib/systemd/systemd-resolved
+systemd+     420  0.0  0.0  19008  9552 ?        Ss   21:16   0:00 /usr/lib/systemd/systemd-networkd
+root         458  0.0  0.0   7232  2748 ?        Ss   21:16   0:00 /usr/sbin/cron -f -P
+message+     459  0.0  0.0   9600  5396 ?        Ss   21:16   0:00 @dbus-daemon --system --address=systemd: ...
+```
+
+Compáralo con el `ps aux` de `ns-demo` en el Paso 1: ahí solo hubieras visto una línea
+(`sleep 300`). Aquí hay un sistema completo. `systemctl is-system-running` puede responder `starting`
 si lo corres en los primeros segundos (el sistema adentro todavía está arrancando
 servicios, igual que le pasaría a una máquina física recién encendida); espera unos
 segundos y repite el comando hasta que responda `running`:
@@ -194,9 +245,8 @@ until lxc exec c1 -- systemctl is-system-running 2>/dev/null | grep -q running; 
 lxc exec c1 -- systemctl is-system-running
 ```
 
-Compáralo mentalmente con el `ps aux` que hubieras visto en `ns-demo` del Paso 1: ahí
-solo había un proceso (`sleep`). Esa es la diferencia entre contenedor de aplicación y
-contenedor de sistema, vista, no leída.
+Esa es la diferencia entre contenedor de aplicación y contenedor de sistema, vista, no
+leída.
 
 ```bash
 lxc delete c1 --force
@@ -226,6 +276,15 @@ uname -r
 **Estas dos líneas deben ser DIFERENTES.** `v1` corre su propio kernel de invitado,
 separado del kernel de tu host — al revés de todo lo que viste en los pasos 1 y 3.
 
+**Salida real de esta máquina:**
+
+```
+--- kernel dentro de v1 (invitado) ---
+6.8.0-136-generic
+--- kernel de tu host ---
+6.17.0-1032-oem
+```
+
 ```bash
 lxc exec v1 -- systemd-detect-virt
 ```
@@ -239,6 +298,7 @@ systemd-detect-virt
 ```
 
 En tu host debería responder `none` (a menos que tu propia máquina ya sea una VM).
+Confirmado en esta máquina: `kvm` adentro de `v1`, `none` en el host.
 
 **La tabla que resume los pasos 1, 3 y 4:**
 
@@ -317,6 +377,28 @@ lxc network show lxdbr0
 lxc storage show default
 ```
 
+**Salida real de esta máquina** (recortada a lo esencial):
+
+```
+$ lxc network show lxdbr0
+name: lxdbr0
+type: bridge
+managed: true
+config:
+  ipv4.address: 10.70.168.1/24
+  ipv4.nat: "true"
+used_by:
+- /1.0/profiles/default
+
+$ lxc storage show default
+name: default
+driver: dir
+config:
+  source: /var/snap/lxd/common/lxd/storage-pools/default
+used_by:
+- /1.0/profiles/default
+```
+
 Cada instancia que lanzas se conecta a `lxdbr0` y usa el pool `default` sin que tengas
 que declarar nada — lo viste ya en los pasos 3 y 4 sin darte cuenta.
 
@@ -332,6 +414,20 @@ lxc exec c1 -- ping -c2 c2
 `c1` le hace ping a `c2` **por nombre**, sin haber configurado DNS ni red: LXD resuelve
 `<nombre-de-instancia>.lxd` automáticamente entre todo lo que corre en el mismo proyecto.
 
+**Salida real de esta máquina:**
+
+```
+PING c2 (fd42:62a9:e9db:6dda:216:3eff:fe22:e38e) 56 data bytes
+64 bytes from c2.lxd (fd42:62a9:e9db:6dda:216:3eff:fe22:e38e): icmp_seq=1 ttl=64 time=0.095 ms
+64 bytes from c2.lxd (fd42:62a9:e9db:6dda:216:3eff:fe22:e38e): icmp_seq=2 ttl=64 time=0.063 ms
+
+--- c2 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1061ms
+```
+
+Fíjate en `c2.lxd` — LXD resolvió el nombre solo, sin ningún paso de configuración de tu
+parte.
+
 Ahora el contraste con Docker. Un `docker run` normal, sin Compose, **no** te da eso:
 
 ```bash
@@ -340,7 +436,8 @@ docker run -d --name client alpine sleep 300
 docker exec client ping -c2 web
 ```
 
-Vas a ver `ping: bad address 'web'`. La red *default* de Docker (el bridge `docker0`) no
+Vas a ver `ping: bad address 'web'` (confirmado en esta máquina: exactamente ese
+mensaje). La red *default* de Docker (el bridge `docker0`) no
 tiene DNS embebido entre contenedores — es una limitación real y conocida, no un error
 tuyo. Ahora compara con un `compose.yaml` mínimo:
 
@@ -361,7 +458,18 @@ docker compose up -d
 docker compose exec client ping -c2 web
 ```
 
-Esta vez sí responde. La diferencia no es que Compose "sepa hacer algo mágico": Compose
+Esta vez sí responde. **Salida real de esta máquina:**
+
+```
+PING web (172.22.0.2): 56 data bytes
+64 bytes from 172.22.0.2: seq=0 ttl=64 time=0.048 ms
+64 bytes from 172.22.0.2: seq=1 ttl=64 time=0.105 ms
+
+--- web ping statistics ---
+2 packets transmitted, 2 packets received, 0% packet loss
+```
+
+La diferencia no es que Compose "sepa hacer algo mágico": Compose
 crea automáticamente una red *bridge* con nombre propio para tu proyecto (revisa
 `docker network ls` y busca `lab-compose_default`), y esa red sí tiene DNS embebido. Es
 la misma primitiva de Docker (una red *user-defined*) que tú mismo declaras a mano en
@@ -408,9 +516,10 @@ trivy image --scanners vuln --severity HIGH,CRITICAL -q alpine:3.20        # est
 > de abajo usa la primera, que es la que cambia drásticamente entre `python:3.13` y
 > `python:3.13-slim`.
 
-En la corrida de referencia de este laboratorio (base de datos de vulnerabilidades de
-Trivy actualizada al 2026-08-07 — **tu número exacto va a ser distinto** porque la base
-de datos de CVEs cambia todos los días; lo que no cambia es el patrón):
+En la corrida de referencia de este laboratorio (re-confirmada en esta máquina el
+2026-08-14 con la base de datos de vulnerabilidades de Trivy actualizada ese mismo día —
+**tu número exacto va a ser distinto** porque la base de datos de CVEs cambia todos los
+días; lo que no cambia es el patrón):
 
 | Imagen | Tamaño | HIGH + CRITICAL |
 |---|---|---|
@@ -444,6 +553,17 @@ Como root (el *default* si no pones `--user`), instalar un paquete funciona. Con
 `--user 1000:1000`, falla — el UID 1000 no tiene permiso de escritura en `/etc` ni en
 `/lib/apk`, exactamente como le pasaría a un usuario sin privilegios en cualquier Linux.
 
+**Salida real de esta máquina:**
+
+```
+=== como root ===
+UID: 0 (root)
+instalar paquete: OK
+=== como UID 1000 ===
+UID: 1000
+instalar paquete: FALLÓ
+```
+
 Ahora la evidencia a nivel de kernel, no solo de permisos de archivo:
 
 ```bash
@@ -451,10 +571,25 @@ docker run --rm alpine sh -c 'grep CapEff /proc/self/status'
 docker run --rm --user 1000:1000 alpine sh -c 'grep CapEff /proc/self/status'
 ```
 
+**Salida real de esta máquina:**
+
+```
+=== CapEff como root ===
+CapEff:	00000000a80425fb
+=== CapEff como UID 1000 ===
+CapEff:	0000000000000000
+```
+
+Decodificado con `capsh --decode=00000000a80425fb` en esta misma máquina:
+`cap_chown, cap_dac_override, cap_fowner, cap_fsetid, cap_kill, cap_setgid, cap_setuid,
+cap_setpcap, cap_net_bind_service, cap_net_raw, cap_sys_chroot, cap_mknod,
+cap_audit_write, cap_setfcap`.
+
 La máscara de capacidades de Linux (`CapEff`) del proceso root **no es cero**: trae
 capacidades reales como `cap_net_bind_service` (abrir puertos <1024),
 `cap_sys_chroot`, `cap_setuid`/`cap_setgid` (cambiar de identidad), `cap_dac_override`
-(saltarse permisos de archivo). La del proceso no-root es literalmente
+(saltarse permisos de archivo) — las cuatro confirmadas arriba, entre las catorce que
+Docker concede por defecto. La del proceso no-root es literalmente
 `0000000000000000` — cero capacidades especiales, aunque el contenedor haya sido
 comprometido, un atacante que ejecute código ahí adentro no tiene ninguna de esas
 palancas.
