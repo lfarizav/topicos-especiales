@@ -498,13 +498,74 @@ palancas.
 
 ---
 
-## Para profundizar (pendiente de investigación auditada)
+## Para profundizar
 
 Este laboratorio se apoya solo en lo que pudiste observar directamente en tu propia
-terminal — ninguna cifra de mercado, adopción o historia de gobierno de proyecto entra
-aquí sin pasar primero por el proceso de `research/` de este módulo (ver
-[`research/README.md`](./research/README.md)). Si quieres profundizar con fuentes
-verificadas en vez de solo lo empírico, el paquete de investigación para Gemini está en
-[`research/gemini-bundle-oci-lxc-lxd/`](./research/gemini-bundle-oci-lxc-lxd/):
-gobernanza exacta de OCI, historia y relación de LXC/LXD con el proyecto Linux
-Containers y Canonical, y el programa de imágenes oficiales de Docker Hub en detalle.
+terminal. Lo que sigue es material de enriquecimiento conceptual — gobernanza, historia
+de proyecto, estudios publicados — que un comando de terminal no puede darte. Viene del
+research de Gemini en
+[`research/deep-research-oci-lxc-lxd.md`](./research/deep-research-oci-lxc-lxd.md),
+auditado claim por claim contra sus fuentes primarias antes de entrar aquí (ver
+[`research/deep-research-oci-lxc-lxd.AUDIT.md`](./research/deep-research-oci-lxc-lxd.AUDIT.md)
+para el detalle de qué se descartó y por qué — incluye una cadencia de parches de Docker
+Hub que el reporte presentó como política oficial y resultó ser un hilo de queja de un
+usuario, no una política).
+
+**OCI (Open Container Initiative).** Se fundó el 22 de junio de 2015 en DockerCon San
+Francisco, bajo el paraguas de The Linux Foundation, cuando Docker donó el código de
+`libcontainer` (refactorizado como `runc`) y CoreOS aportó el liderazgo técnico de su
+iniciativa rival *appc*, para evitar una fragmentación del ecosistema entre dos
+estándares de contenedores competidores. Hoy mantiene tres especificaciones: la
+`runtime-spec` y la `image-spec` (v1.0, julio 2017) y la `distribution-spec` (v1.0, mayo
+2021). Su gobernanza separa el **Trademark Board** (marcas, membresía) del **Technical
+Oversight Board** (arbitraje técnico entre proyectos), delegando el trabajo diario a una
+comunidad abierta de desarrolladores (la TDC). (Fuente:
+opencontainers.org/posts/announcements/ — buscar el post de junio 2015 y el
+`CHARTER.md` de github.com/opencontainers/tob.)
+
+**LXC.** El proyecto nació en 2008 para darle una interfaz de espacio de usuario
+coherente a las primitivas de kernel (cgroups, namespaces) que venían apareciendo desde
+2006. Sigue activamente mantenido bajo el paraguas comunitario de linuxcontainers.org,
+con lanzamientos LTS de cinco años de soporte cada uno: LXC 5.0 (2022, soporte hasta
+junio 2027), LXC 6.0 (abril 2024, hasta junio 2029) y LXC 7.0 (abril 2026, hasta junio
+2031). (Fuente: linuxcontainers.org/lxc/news/.)
+
+**LXD → Incus: la bifurcación real.** Esta es la historia que este laboratorio te pidió
+investigar con más cuidado, sin suavizar si resultaba incómoda — y resultó ser cierta.
+LXD nació en Canonical (anunciado noviembre 2014) y vivió más de ocho años como
+subproyecto de la comunidad linuxcontainers.org. El 4 de julio de 2023, Canonical
+decidió unilateralmente sacar LXD de esa infraestructura comunitaria hacia sus propios
+dominios (`github.com/canonical/lxd`, `ubuntu.com/lxd`); el mantenedor histórico,
+Stéphane Graber, dejó Canonical ese mismo mes. En diciembre de 2023, Canonical
+relicenció LXD de Apache 2.0 a **AGPLv3** y exigió a cualquier colaborador externo
+firmar un **Contributor License Agreement (CLA)** que le transfiere derechos a
+Canonical. La comunidad respondió con un fork: **Incus**, creado por Aleksa Sarai a
+partir de LXD 5.16 y adoptado por linuxcontainers.org el 7 de agosto de 2023, mantenido
+por el equipo histórico completo de LXD (Graber, Christian Brauner, Serge Hallyn, Tycho
+Andersen, más Sarai), bajo Apache 2.0 sin CLA (usa el estándar DCO en su lugar). Incus
+0.1 salió el 7 de octubre de 2023. (Fuente: linuxcontainers.org/lxd/ y
+linuxcontainers.org/incus/announcement/ — nota: el relato de la relicencia viene de un
+post del propio equipo de Linux Containers describiendo la decisión de Canonical, no de
+un comunicado oficial de Canonical.)
+
+**Docker Hub — "imágenes oficiales".** El programa opera bajo el namespace `library/`
+(ej. `library/python`), gestionado públicamente en
+`github.com/docker-library/official-images`. Los criterios: solo software libre y de
+código abierto, compromiso de mantenimiento upstream, versiones fijadas, y ninguna
+imagen oficial puede construirse (`FROM`) sobre una imagen no oficial (salvo `scratch` u
+otra imagen oficial) — todo construido con la herramienta `bashbrew` para soporte
+multi-arquitectura. (Fuente: README de `github.com/docker-library/official-images/`. No
+existe una cadencia de reconstrucción declarada públicamente — ver el AUDIT para el
+detalle de por qué esa cifra específica se descartó.)
+
+**NIST SP 800-190.** La guía "Application Container Security Guide" (Souppaya, Morello,
+Scarfone; septiembre 2017) recomienda imágenes base minimalistas para reducir la
+superficie de ataque de un contenedor. (Fuente: csrc.nist.gov/pubs/sp/800/190/final.)
+
+**"Contenedor de sistema" vs "contenedor de aplicación".** La documentación oficial de
+Incus (linuxcontainers.org) usa exactamente estos términos: *"System containers run full
+Linux distributions using a shared kernel... very similar to a virtual machine but
+sharing kernel with the host system."* vs *"Application containers run a single
+application through a pre-built image... popularized by the likes of Docker and
+Kubernetes."* (Fuente: linuxcontainers.org/incus/docs/main/explanation/instances/ —
+verificado palabra por palabra contra la página en vivo.)
