@@ -1,14 +1,22 @@
 # Laboratorio — Runtimes de contenedores y virtualización ligera
 
-**Módulo 3 · en clase · 75–90 minutos** (Pasos 0–5: núcleo, ~50 min. Pasos 6–7: red,
-almacenamiento, vulnerabilidades y privilegios, ~25–30 min más. Si la clase va corta de
-tiempo, los Pasos 6 y 7 son los primeros que se pueden dejar como lectura/práctica en
-casa sin romper la progresión — el resto sí depende uno del otro en orden.)
+**Módulo 3 · en clase · 100–120 minutos.** Es más de lo que cabe cómodo en una sola
+sesión, así que está pensado por bloques:
+
+| Bloque | Pasos | Tiempo | ¿Se puede dejar para casa? |
+|---|---|---|---|
+| **Núcleo** (qué es un contenedor) | 0–5 | ~55 min | No: cada paso depende del anterior |
+| **Construir y comparar** | 6–7 | ~25 min | Se puede, pero es el más práctico de todos |
+| **Red, almacenamiento y seguridad** | 8–9 | ~27 min | Sí, es el primer candidato a recortar |
+
+Si la clase va corta de tiempo, recorta desde el final (9, luego 8). El Paso 7 (construir
+tu propia imagen) es el que más se recuerda a largo plazo: si hay que sacrificar algo,
+sacrifica antes el 8 y el 9 que el 7.
 
 > Este laboratorio es distinto del laboratorio de `README.md` (Dockerfile multi-stage +
 > Compose de producción, para la entrega de PVB/PRD). Este se hace **en vivo, en clase**,
 > antes o junto con ese trabajo: el objetivo aquí no es producir un artefacto, es que
-> las cuatro palabras que más se confunden en contenedores — **OCI, LXC, LXD, Docker** —
+> las palabras que más se confunden en contenedores — **OCI, LXC, LXD, Docker, Podman** —
 > dejen de ser sinónimos vagos y se conviertan en cosas que viste con tus propios ojos
 > en una terminal.
 
@@ -16,7 +24,7 @@ casa sin romper la progresión — el resto sí depende uno del otro en orden.)
 
 ## Objetivo
 
-Al terminar, vas a poder responder estas cuatro preguntas señalando la evidencia en tu
+Al terminar, vas a poder responder estas preguntas señalando la evidencia en tu
 propia terminal, no repitiendo una definición de memoria:
 
 1. ¿Qué es, concretamente, lo que hace que un proceso normal de Linux se convierta en
@@ -33,6 +41,11 @@ propia terminal, no repitiendo una definición de memoria:
    Docker tienes que declarar tú mismo — a mano, o dejando que Compose lo declare?
 6. ¿Qué diferencia real, medible a nivel de kernel, hay entre un proceso root y un
    proceso sin privilegios dentro del mismo contenedor?
+7. Si Docker y Podman corren las mismas imágenes con casi los mismos comandos, ¿en qué
+   se diferencian de verdad, y por qué "root dentro del contenedor" no significa lo
+   mismo en cada uno?
+8. ¿Por qué el **orden** de las instrucciones de un Dockerfile cambia cuánto tarda cada
+   reconstrucción, y cómo lo compruebas en lugar de creerlo?
 
 **Requisito:** haber pasado por el módulo 1 (namespaces y cgroups se mencionan ahí como
 teoría; aquí se asume que sabes qué es `systemd`, `systemctl` y `journalctl`).
@@ -145,7 +158,7 @@ uname -r
 Estas dos líneas deben imprimir **exactamente lo mismo**. Guárdalo en la cabeza: un
 contenedor Docker no tiene su propio kernel. Corre sobre el kernel del host, aislado por
 namespaces y limitado por cgroups. Esto es cierto para Docker y, como vas a comprobar en
-el Paso 3, también para un contenedor de LXC/LXD — y **deja de ser cierto** en el Paso 4.
+el Paso 4, también para un contenedor de LXC/LXD — y **deja de ser cierto** en el Paso 5.
 
 ```bash
 docker rm -f ns-demo
@@ -186,7 +199,125 @@ info` alguna vez no te dan suficiente contexto sobre por qué algo falló, `jour
 
 ---
 
-## Paso 3 — LXC/LXD: un contenedor **de sistema** (12 min)
+## Paso 3 — Docker vs Podman: el mismo estándar, dos arquitecturas (12 min)
+
+Docker no es "los contenedores". Es *una* implementación. Podman es otra, y corre las
+mismas imágenes OCI con casi los mismos comandos. Lo interesante no es el cambio de
+nombre, es la diferencia de arquitectura, y se puede ver.
+
+```bash
+podman --version
+docker --version
+```
+
+### 3.1 ¿Quién ejecuta realmente el contenedor?
+
+Lanza el mismo contenedor con cada herramienta:
+
+```bash
+docker run -d --name t-docker alpine sleep 120
+podman run -d --name t-podman alpine sleep 120
+```
+
+Ahora mira **quién es el dueño del proceso en el host**:
+
+```bash
+ps -C sleep -o user,pid,args --no-headers | grep "sleep 120"
+```
+
+**Salida real de esta máquina** (los PID van a ser otros en la tuya):
+
+```
+root      572520 sleep 120
+lfarizav  572734 sleep 120
+```
+
+El contenedor de Docker corre como **root**. El de Podman corre como **tu usuario**. Y el
+árbol de procesos explica por qué. En vez de adivinar el PID, pregúntaselo a cada motor:
+
+```bash
+pstree -sp $(docker inspect -f '{{.State.Pid}}' t-docker)
+pstree -sp $(podman inspect -f '{{.State.Pid}}' t-podman)
+```
+
+**Salida real de esta máquina** (primera línea de cada árbol):
+
+```
+systemd(1)---containerd-shim(572497)---sleep(572520)          <- Docker
+systemd(1)---systemd(4848)---conmon(572715)---sleep(572734)   <- Podman
+```
+
+El contenedor de Docker cuelga de `containerd-shim`, lanzado por un daemon central que
+corre como root. El de Podman cuelga de `conmon`, que a su vez cuelga del **systemd de tu
+propia sesión de usuario**: no hay un daemon privilegiado en el medio.
+
+> **Precisión, porque aquí se exagera mucho.** Es probable que veas
+> `systemctl is-active podman.socket` responder `active`. Eso **no** contradice lo
+> anterior: ese socket es una API opcional compatible con Docker, activada bajo demanda
+> para herramientas que esperan hablar con un daemon. El contenedor que acabas de lanzar
+> no pasó por ahí. Decir "Podman no tiene daemon" a secas es inexacto; lo correcto es
+> "Podman no necesita un daemon privilegiado para ejecutar un contenedor".
+
+### 3.2 La diferencia que de verdad importa: qué significa "root" adentro
+
+Los dos contenedores dicen que adentro eres root:
+
+```bash
+docker exec t-docker id
+podman exec t-podman id
+```
+
+Los dos responden `uid=0(root)`. Pero eso es la mitad de la historia. Pregúntale al
+kernel a qué UID del **host** corresponde ese root:
+
+```bash
+docker exec t-docker cat /proc/self/uid_map
+podman exec t-podman cat /proc/self/uid_map
+```
+
+**Salida real de esta máquina:**
+
+```
+--- docker ---
+         0          0 4294967295
+--- podman ---
+         0       1000          1
+         1     100000      65536
+```
+
+Lee la primera columna como "UID adentro", la segunda como "UID afuera":
+
+- **Docker:** el UID 0 de adentro es el UID 0 de afuera. Root en el contenedor **es** root
+  en tu host. Es exactamente el hallazgo del Paso 1 (namespace `user` compartido), ahora
+  visto desde el otro lado.
+- **Podman:** el UID 0 de adentro es el UID **1000** de afuera, o sea *tú*. Y el resto se
+  mapea a un rango alto (`100000+`) que no corresponde a ningún usuario real del sistema.
+  Si ese "root" se escapa del contenedor, afuera es un usuario sin privilegios.
+
+Esa es la diferencia arquitectónica, y no es cosmética: es la razón por la que Podman se
+usa en entornos donde no se quiere dar acceso equivalente a root (recuerda la nota del
+Paso 0 sobre el grupo `docker`).
+
+```bash
+docker rm -f t-docker
+podman rm -f t-podman
+```
+
+> Es normal que `podman rm -f` imprima un aviso tipo `StopSignal SIGTERM failed to stop
+> container ... resorting to SIGKILL`. No es un error: `sleep` ignora SIGTERM, así que
+> tras 10 segundos Podman lo mata con SIGKILL. El contenedor se borra igual.
+
+| | Docker | Podman |
+|---|---|---|
+| Ejecuta el contenedor | daemon central (`dockerd` + `containerd`), como root | tu propia sesión de usuario, vía `conmon` |
+| Root adentro es... | root del host (sin `userns-remap`) | tu usuario (UID 1000), rootless por defecto |
+| Requiere grupo privilegiado | sí (`docker` = root efectivo) | no, para el modo rootless |
+| Imágenes | OCI | OCI (las mismas) |
+| CLI | `docker ...` | `podman ...` (casi idéntica) |
+
+---
+
+## Paso 4 — LXC/LXD: un contenedor **de sistema** (12 min)
 
 Hasta aquí, "contenedor" significó un solo proceso (`sleep 300`). Eso es un
 **contenedor de aplicación** — el modelo por defecto de Docker: una imagen empaqueta un
@@ -254,7 +385,7 @@ lxc delete c1 --force
 
 ---
 
-## Paso 4 — LXC/LXD: la misma herramienta, ahora una VM real (10 min)
+## Paso 5 — LXC/LXD: la misma herramienta, ahora una VM real (10 min)
 
 La misma CLI (`lxc`) que acabas de usar para lanzar un contenedor de sistema también
 sabe lanzar una **máquina virtual ligera**, con un solo flag:
@@ -316,7 +447,7 @@ lxc delete v1 --force
 
 ---
 
-## Paso 5 — OCI, Docker Hub y por qué el tamaño de una imagen importa (10 min)
+## Paso 6 — OCI, Docker Hub y por qué el tamaño de una imagen importa (10 min)
 
 **OCI** (Open Container Initiative) es la especificación que define el formato de una
 imagen de contenedor y el formato de un runtime que la ejecuta — es lo que hace que una
@@ -359,12 +490,222 @@ imagen en producción, mira explícitamente en qué namespace vive y quién la m
 no lo asumas por el nombre bonito del repositorio.
 
 ```bash
-docker rmi python:3.13 python:3.13-slim alpine:3.20
+docker rmi python:3.13 alpine:3.20
+```
+
+> Nota: dejamos `python:3.13-slim` en disco a propósito, porque el Paso 7 la usa como
+> imagen base. Si ya la borraste, no pasa nada: `docker build` la vuelve a descargar.
+
+---
+
+## Paso 7 — Construir tu propia imagen con un Dockerfile (15 min)
+
+Hasta aquí solo has *consumido* imágenes que hizo otra persona. Ahora vas a producir una,
+y a ver por qué el **orden de las instrucciones** es una decisión de ingeniería, no un
+detalle de estilo.
+
+### 7.1 El proyecto
+
+```bash
+mkdir -p ~/lab-dockerfile && cd ~/lab-dockerfile
+
+cat > app.py <<'EOF'
+import sys
+print(f"Hola desde un contenedor. Python {sys.version.split()[0]}")
+EOF
+
+cat > requirements.txt <<'EOF'
+requests==2.32.3
+EOF
+```
+
+Y el `Dockerfile`. Lee los comentarios antes de construir: cada línea es una decisión.
+
+```bash
+cat > Dockerfile <<'EOF'
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Las dependencias PRIMERO: esta capa se cachea y casi nunca cambia
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# El código DESPUÉS: es lo que más cambia, y solo invalida esta capa
+COPY app.py .
+
+USER 1000:1000
+CMD ["python", "app.py"]
+EOF
+```
+
+Cuatro decisiones deliberadas ahí:
+- **`FROM python:3.13-slim`** y no `python:3.13`: el Paso 6 ya te mostró que son 178 MB
+  contra 1.62 GB.
+- **`requirements.txt` antes que `app.py`**: es el truco de caché que compruebas en 7.3.
+- **`USER 1000:1000`**: el proceso no corre como root. Lo verificas abajo.
+- **`--no-cache-dir`** en `pip`: no deja el caché de descargas dentro de la imagen.
+
+### 7.2 Construir y ejecutar
+
+```bash
+docker build -t mi-app:v1 .
+docker run --rm mi-app:v1
+```
+
+**Salida real de esta máquina:**
+
+```
+Hola desde un contenedor. Python 3.13.15
+```
+
+Comprueba que `USER` funcionó de verdad (no basta con que esté escrito):
+
+```bash
+docker run --rm mi-app:v1 id
+docker images mi-app:v1 --format '{{.Repository}}:{{.Tag}}  {{.Size}}'
+```
+
+**Salida real de esta máquina:**
+
+```
+uid=1000 gid=1000 groups=1000
+mi-app:v1  194MB
+```
+
+No dice `uid=0(root)`. Ese contenedor ya nace sin privilegios, que es justo lo que el
+Paso 9 va a medir a nivel de capacidades del kernel.
+
+### 7.3 La caché de capas: por qué el orden importa
+
+Cambia **solo el código** y reconstruye:
+
+```bash
+echo 'import sys' > app.py
+echo 'print(f"Hola v2. Python {sys.version.split()[0]}")' >> app.py
+
+docker build -t mi-app:v2 .
+```
+
+**Salida real de esta máquina** (recortada a las líneas de cada capa):
+
+```
+#5 [1/5] FROM docker.io/library/python:3.13-slim@sha256:ffb752e139c0a19...
+#6 [3/5] COPY requirements.txt .
+#6 CACHED
+#7 [2/5] WORKDIR /app
+#7 CACHED
+#8 [4/5] RUN pip install --no-cache-dir -r requirements.txt
+#8 CACHED
+#9 [5/5] COPY app.py .
+#9 DONE 0.0s
+```
+
+Dos cosas que ver aquí:
+
+- `pip install` dice **CACHED**: no reinstaló nada. La única capa que dice `DONE` (es
+  decir, la única que se rehizo) es `COPY app.py .`, la del código que cambiaste.
+- Los pasos **no salen en orden** (`[3/5]` aparece antes que `[2/5]`). No es un error:
+  BuildKit resuelve capas en paralelo y las imprime según van terminando. Fíjate en el
+  `CACHED`/`DONE` de cada una, no en el orden de las líneas.
+
+> Si repites este build una segunda vez sin cambiar nada, `COPY app.py .` también dirá
+> `CACHED`: ya existe una capa para ese contenido exacto. Para volver a ver el `DONE`,
+> cambia otra vez el archivo.
+Ahora mira cuánto pesa cada capa:
+
+```bash
+docker history mi-app:v1 --format '{{.CreatedBy}}\t{{.Size}}' | head -6
+```
+
+**Salida real de esta máquina:**
+
+```
+CMD ["python" "app.py"]                          0B
+USER 1000:1000                                   0B
+COPY app.py . # buildkit                         12.3kB
+RUN /bin/sh -c pip install --no-cache-dir -r…    13.5MB
+COPY requirements.txt . # buildkit               12.3kB
+WORKDIR /app                                     8.19kB
+```
+
+Tu código pesa 12.3 kB. Tus dependencias pesan 13.5 MB. **Si hubieras puesto
+`COPY app.py .` antes del `pip install`, cada cambio de una línea de código reinstalaría
+los 13.5 MB.** Esa es toda la razón del orden.
+
+### 7.4 El mismo Dockerfile, con Podman
+
+Vuelve al Paso 3 por un momento. Si Docker y Podman comparten el estándar OCI, el mismo
+archivo debería construir en los dos:
+
+```bash
+podman build -t mi-app-podman:v1 .
+podman run --rm mi-app-podman:v1
+```
+
+**Salida real de esta máquina:**
+
+```
+Successfully tagged localhost/mi-app-podman:v1
+Hola v2. Python 3.13.15
+```
+
+> **Si `podman build` falla con `unable to retrieve auth token: invalid username/password`,
+> no es culpa tuya y vale la pena entender por qué.** Podman no tiene su propio login, así
+> que cae a leer `~/.docker/config.json`. Si alguna vez hiciste `docker login`, ahí quedaron
+> credenciales que Docker sabe renovar solas pero Podman no: Podman las manda tal cual y el
+> registro las rechaza. Nos pasó preparando este laboratorio, y es **determinista**: falla
+> solo cuando Podman tiene que **descargar** la imagen base (si `python:3.13-slim` ya está
+> en el almacén de Podman, no hay descarga y el build funciona). Compruébalo con
+> `podman images`. La solución no destructiva (no toca tu sesión de Docker) es construir
+> con un archivo de credenciales vacío:
+>
+> ```bash
+> echo '{}' > /tmp/auth-vacio.json
+> podman build --authfile /tmp/auth-vacio.json -t mi-app-podman:v1 .
+> ```
+>
+> Es un buen recordatorio de que "misma imagen, misma CLI" no significa "misma
+> configuración": la autenticación a registros es justo donde las dos herramientas
+> divergen.
+
+Mismo archivo, misma imagen, otra herramienta. Dos detalles que sí cambian:
+
+```bash
+docker images --format '{{.Repository}}:{{.Tag}}' | grep mi-app
+podman images --format '{{.Repository}}:{{.Tag}}' | grep mi-app
+```
+
+Cada herramienta tiene su **propio almacén de imágenes**: una imagen construida con
+Docker no aparece en `podman images` y viceversa. Y Podman prefija con `localhost/` las
+imágenes locales, porque no asume `docker.io` por defecto. Aun así son formato OCI, y se
+pueden mover entre almacenes:
+
+```bash
+docker save mi-app:v1 -o mi-app.tar
+podman load -i mi-app.tar
+```
+
+**Salida real de esta máquina:**
+
+```
+Loaded image: docker.io/library/mi-app:v1
+```
+
+Eso es el estándar OCI haciendo su trabajo: el artefacto es portable entre
+implementaciones. (Podman también acepta llamar al archivo `Containerfile` en vez de
+`Dockerfile`; es el mismo formato con el nombre neutral respecto de la marca.)
+
+```bash
+# limpieza
+docker rmi mi-app:v1 mi-app:v2
+podman rmi localhost/mi-app-podman:v1 docker.io/library/mi-app:v1
+cd ~ && rm -rf ~/lab-dockerfile
 ```
 
 ---
 
-## Paso 6 — Red y almacenamiento: qué te da LXD gratis y qué te da Compose (12 min)
+## Paso 8 — Red y almacenamiento: qué te da LXD gratis y qué te da Compose (12 min)
 
 Módulo aparte: el laboratorio de Compose de este módulo ya te hace escribir una red y
 un volumen con nombre explícito (sus prácticas #3 y #4). Aquí no repetimos eso — aquí
@@ -492,9 +833,9 @@ default distintos para casos de uso distintos.
 
 ---
 
-## Paso 7 — Por qué el tamaño de la imagen y el usuario del proceso son decisiones de seguridad (15 min)
+## Paso 9 — Por qué el tamaño de la imagen y el usuario del proceso son decisiones de seguridad (15 min)
 
-Ya viste en el Paso 5 que `python:3.13` pesa 9× más que `python:3.13-slim`. Ahora vas a
+Ya viste en el Paso 6 que `python:3.13` pesa 9× más que `python:3.13-slim`. Ahora vas a
 medir **qué compra ese peso extra**, no solo en disco.
 
 ### 7.1 — Vulnerabilidades: escanea las tres imágenes con Trivy
@@ -603,14 +944,15 @@ palancas.
 
 ---
 
-## Síntesis — las cuatro piezas, una tabla
+## Síntesis — las cinco piezas, una tabla
 
 | Término | Qué es | Qué NO es |
 |---|---|---|
 | **OCI** | especificación de formato de imagen y de runtime de contenedores | un programa que se instala; es un estándar |
-| **Docker** | motor + CLI que construye y corre imágenes OCI como contenedores de **aplicación** | un mecanismo de aislamiento nuevo (usa namespaces/cgroups del kernel, igual que todo lo demás) |
+| **Docker** | motor + CLI que construye y corre imágenes OCI como contenedores de **aplicación**, vía un daemon central que corre como root | un mecanismo de aislamiento nuevo (usa namespaces/cgroups del kernel, igual que todo lo demás) |
+| **Podman** | otra implementación de lo mismo, sin daemon privilegiado: el contenedor cuelga de tu propia sesión y su "root" se mapea a tu UID | un formato ni un estándar distinto — corre las mismas imágenes OCI con casi la misma CLI |
 | **LXC** | interfaz de espacio de usuario a namespaces/cgroups del kernel, orientada a contenedores de **sistema** | un formato de imagen OCI |
-| **LXD** | daemon y CLI (`lxc`) que gestiona LXC **y además** máquinas virtual ligeras vía KVM, con la misma interfaz | solo un envoltorio de LXC — desde el Paso 4 sabes que también virtualiza de verdad |
+| **LXD** | daemon y CLI (`lxc`) que gestiona LXC **y además** máquinas virtuales ligeras vía KVM, con la misma interfaz | solo un envoltorio de LXC — desde el Paso 5 sabes que también virtualiza de verdad |
 
 ---
 
@@ -623,10 +965,10 @@ palancas.
   compartido es la misma verdad de fondo que el paso 7 del laboratorio de Compose
   comprueba desde otro ángulo (pertenecer al grupo `docker` = ser root en el host).
 - **Módulo 5 (CKA):** un Pod de Kubernetes, por debajo, es un grupo de contenedores de
-  **aplicación** (el modelo del Paso 1 y 3, no el del Paso 4) compartiendo namespaces
+  **aplicación** (el modelo del Paso 1 y 4, no el del Paso 5) compartiendo namespaces
   entre sí. El 30% de troubleshooting de CKA empieza exactamente en el runtime del nodo
   que acabas de inspeccionar aquí.
-- **Módulo 7 (CKS):** el `CapEff` en cero del Paso 7 es el mismo principio detrás de
+- **Módulo 7 (CKS):** el `CapEff` en cero del Paso 9 es el mismo principio detrás de
   `securityContext.runAsNonRoot` y `capabilities.drop` en un `PodSecurityContext` de
   Kubernetes — CKS dedica un dominio completo a exactamente esta decisión, ahora ya la
   viste funcionar a nivel de un solo contenedor Docker.
