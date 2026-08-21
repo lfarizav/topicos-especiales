@@ -1,26 +1,29 @@
-# Laboratorio – Kubernetes: reconciliación, EndpointSlices y Admission
+# Laboratorio – Kubernetes: primeras cargas de trabajo y el loop de reconciliación
 
-**Módulo 4 · en clase · 105–120 minutos.** Es más de lo que cabe cómodo en una sola
-sesión, así que está pensado por bloques:
+**Módulo 4 · en clase · 70–80 minutos.** Es la primera clase de Kubernetes: el objetivo es
+entender cómo funciona la plataforma y desplegar cargas de trabajo básicas. Nada más, y
+nada menos.
 
 | Bloque | Pasos | Tiempo | ¿Se puede dejar para casa? |
 |---|---|---|---|
-| **Núcleo** (arquitectura y el loop) | 0–3 | ~60 min | No: cada paso depende del anterior |
-| **Admission control** | 4 | ~30 min | El 4.1 no; el 4.2 (el webhook) sí, es el más largo |
-| **Swap, cgroups y escalado** | 5–6 | ~25 min | Sí, es el primer candidato a recortar |
+| **Preparación** (herramientas y clúster) | 0 | ~7 min | No |
+| **Arquitectura, de verdad** | 1 | ~13 min | No |
+| **Desplegar cargas de trabajo** | 2 | ~30 min | No: es el corazón de la clase |
+| **Auto-reparación y escalado** | 3 | ~20 min | No |
+| **Limpieza y síntesis** | – | ~5 min | No |
+| **Anexo opcional** (admission, swap, cgroups) | A0–A2 | ~50 min | **Sí: no se hace en clase** |
 
-Si la clase va corta de tiempo, recorta desde el final (6, luego 5). El Paso 4.2
-(escribir y registrar tu propio `MutatingWebhookConfiguration`) es el que más se recuerda
-a largo plazo, pero también el que más falla en vivo: si vas corto, haz el 4.1 en clase y
-deja el 4.2 para casa **con el archivo abierto**, no de memoria.
+Los pasos 0 a 3 son el laboratorio de la sesión y cada uno depende del anterior. El
+**Anexo opcional** del final es material avanzado para quien quiera seguir en casa: no se
+hace en clase y no se evalúa en la sesión.
 
-> Este es el laboratorio que el `README.md` del módulo promete. La idea central del módulo
-> cabe en una frase: **Kubernetes no ejecuta tu aplicación, reconcilia un estado deseado
-> con el estado real, una y otra vez, para siempre.** Todo lo que vas a hacer aquí es una
-> forma distinta de ver esa misma frase funcionando. El objetivo no es producir un
-> artefacto entregable: es que las palabras que más se repiten en Kubernetes (*control
-> plane*, *reconciliación*, *EndpointSlice*, *admission*) dejen de ser vocabulario y se
-> conviertan en cosas que viste con tus propios ojos en una terminal.
+> La idea central del módulo cabe en una frase: **Kubernetes no ejecuta tu aplicación,
+> reconcilia un estado deseado con el estado real, una y otra vez, para siempre.** Todo lo
+> que vas a hacer aquí es una forma distinta de ver esa misma frase funcionando. El
+> objetivo no es producir un artefacto entregable: es que las palabras que más se repiten
+> en Kubernetes (*control plane*, *Pod*, *Deployment*, *Service*, *reconciliación*) dejen
+> de ser vocabulario y se conviertan en cosas que viste con tus propios ojos en una
+> terminal.
 
 ---
 
@@ -33,37 +36,30 @@ terminal, no repitiendo una definición de memoria:
    literalmente, un contenedor Docker que comparte el kernel de tu máquina (módulo 3)?
 2. ¿Por qué `etcd`, `kube-apiserver`, `kube-scheduler` y `kube-controller-manager`
    aparecen como Pods si nadie los desplegó con `kubectl`, y quién los arranca?
-3. ¿Cómo llega un `Service` a sus Pods, concretamente, qué objeto guarda esa lista de IPs
-   y qué componente la traduce a reglas de red en el nodo?
-4. ¿Qué es el loop **Watch-Diff-Update**, y cómo lo distingues de "Kubernetes reinició mi
-   contenedor" mirando `spec`, `status` y los eventos?
-5. ¿En qué punto exacto del camino de una petición se intercepta y **modifica** un objeto
-   antes de guardarlo en `etcd`, y por qué eso pasa dos veces (un plugin compilado en el
-   API server y un webhook tuyo)?
-6. ¿Por qué un Pod `Guaranteed` no puede usar swap y uno `Burstable` sí, y de dónde sale
-   el número exacto de bytes de swap que recibe?
-7. Cuando escalas un Deployment, ¿qué cambia primero y qué cambia después, y cómo se ve
-   esa cascada en vivo?
-8. ¿Por qué CoreDNS te resuelve `web` por nombre sin que hayas configurado nada, cuando
+3. ¿Cómo se crea un Pod, un Deployment y un Service **sin memorizar YAML**, y de dónde
+   sale el YAML cuando lo necesitas?
+4. ¿Cómo llega un `Service` a sus Pods, concretamente, qué objeto guarda esa lista de IPs?
+5. ¿Por qué CoreDNS te resuelve `web` por nombre sin que hayas configurado nada, cuando
    en el módulo 3 (paso 8) un `docker run` normal te respondía `ping: bad address 'web'`?
+6. Si borras un Pod, ¿vuelve el mismo o aparece otro? ¿Y si lo que muere es solo el
+   contenedor, por debajo de Kubernetes?
 
 **Requisito:** haber pasado por el módulo 1 (`systemd`, `systemctl`, `journalctl`) y por
-el módulo 3 (contenedores, namespaces, cgroups, imágenes OCI). Este laboratorio se apoya
-en los dos todo el tiempo y lo dice explícitamente cuando lo hace.
+el módulo 3 (contenedores, namespaces, imágenes OCI). Este laboratorio se apoya en los dos
+y lo dice explícitamente cuando lo hace.
 
-**Entorno:** Linux con Docker Engine activo, `kind`, `kubectl` y `openssl`. El clúster se
-crea desde cero en el Paso 0 y se borra completo al final: no necesitas ningún clúster
-previo ni acceso a la nube.
+**Entorno:** Linux con Docker Engine activo, `kind` y `kubectl`. El clúster se crea desde
+cero en el Paso 0 y se borra completo al final: no necesitas ningún clúster previo ni
+acceso a la nube. (El Anexo opcional añade `openssl`.)
 
 ---
 
-## Paso 0: Verificar herramientas y crear el clúster (10 min)
+## Paso 0: Verificar herramientas y crear el clúster (7 min)
 
 ```bash
 docker version --format '{{.Server.Version}}'
 kind version
 kubectl version --client=true
-openssl version
 ```
 
 **Mínimos verificados para este laboratorio:** `kind` v0.32.0 (necesita conocer la imagen
@@ -82,71 +78,20 @@ sean *menores* que estas):
 kind v0.32.0 go1.26.3 linux/amd64
 Client Version: v1.36.1
 Kustomize Version: v5.8.1
-OpenSSL 3.0.13 30 Jan 2024 (Library: OpenSSL 3.0.13 30 Jan 2024)
 ```
 
-### 0.1 El archivo de configuración del clúster
-
-`kind` levanta un clúster de Kubernetes usando contenedores Docker como nodos. Escribe
-este archivo antes de crear nada: cada línea es una decisión que vas a comprobar más
-adelante.
+Ahora crea el clúster. `kind` levanta un clúster de Kubernetes usando contenedores Docker
+como nodos, y para un clúster de un solo nodo no hace falta ningún archivo de
+configuración:
 
 ```bash
-mkdir -p ~/lab-k8s && cd ~/lab-k8s
-
-cat > kind-topicos-m4.yaml <<'EOF'
-kind: Cluster
-apiVersion: kind.x-k8s.io/v1alpha4
-name: topicos-m4
-nodes:
-  - role: control-plane
-    # Imagen fijada por tag + digest: el tag puede reapuntarse, el digest no.
-    image: kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
-# Este parche configura el kubelet de TODOS los nodos. Lo verificas en el Paso 5.
-kubeadmConfigPatches:
-  - |
-    kind: KubeletConfiguration
-    failSwapOn: false
-    memorySwap:
-      swapBehavior: LimitedSwap
-EOF
-```
-
-Cuatro decisiones deliberadas ahí:
-
-- **`image: ...@sha256:...`**: el mismo principio del módulo 3: un tag es una etiqueta
-  móvil, un digest es contenido inmutable. Fijar `tag@digest` es lo que hace que este
-  laboratorio dé el mismo resultado hoy y en seis meses. Este digest corresponde a la
-  imagen `kindest/node:v1.36.1` tal como estaba en caché local el **20 de agosto de
-  2026**; si `kind` te dice que no la encuentra, borra la parte `@sha256:...` y déjalo
-  solo en `kindest/node:v1.36.1`, aceptando que ya no está fijado.
-- **`name: topicos-m4`**: nombre propio, para no chocar con ningún otro clúster que
-  tengas.
-- **`failSwapOn: false`**: sin esto, el kubelet **no arranca** en un nodo con swap. La
-  documentación oficial lo dice sin rodeos: *"By default, the kubelet will not start on a
-  Linux node that has swap enabled."*
-- **`memorySwap.swapBehavior: LimitedSwap`**: el valor por defecto es `NoSwap`. Con
-  `NoSwap`, aunque el kubelet tolere el swap, **ningún** workload lo usa.
-
-> **Lo que NO hay que poner aquí, y por qué importa.** Mucho material sobre Node Memory
-> Swap te dice que añadas el *feature gate* `NodeSwap`. Eso ya no aplica: la tabla oficial
-> de feature gates registra `NodeSwap` como **Alpha en 1.22–1.27, Beta (apagado) en
-> 1.28–1.29, Beta (encendido) en 1.30–1.33 y GA desde 1.34**, sin versión de retiro. En un
-> clúster 1.36 como este, la funcionalidad está siempre activa y el gate no hace falta.
-> Si lo copias de un tutorial viejo, en el mejor de los casos es ruido. (Fuente:
-> `kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/`, fila
-> `NodeSwap`.)
-
-### 0.2 Crear el clúster
-
-```bash
-time kind create cluster --config kind-topicos-m4.yaml
+time kind create cluster --name topicos-m4
 kubectl config current-context
 kubectl cluster-info
 ```
 
-**Salida real de esta máquina** (recortada; el puerto de `cluster-info` es aleatorio en
-cada creación, y el tiempo depende mucho de si ya tenías la imagen en caché):
+**Salida real de esta máquina** (el puerto de `cluster-info` es aleatorio en cada
+creación, y el tiempo depende mucho de si ya tenías la imagen en caché):
 
 ```
 Creating cluster "topicos-m4" ...
@@ -158,29 +103,44 @@ Creating cluster "topicos-m4" ...
  ✓ Installing StorageClass 💾
 Set kubectl context to "kind-topicos-m4"
 
-real	0m10.203s
+real	0m9.645s
 
 kind-topicos-m4
-Kubernetes control plane is running at https://127.0.0.1:37177
-CoreDNS is running at https://127.0.0.1:37177/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+Kubernetes control plane is running at https://127.0.0.1:40691
+CoreDNS is running at https://127.0.0.1:40691/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
 ```
 
-> **Sobre ese `real 0m10.203s`.** Diez segundos es lo que tarda **con la imagen de nodo ya
+> **Sobre ese `real 0m9.645s`.** Diez segundos es lo que tarda **con la imagen de nodo ya
 > descargada** (1.31 GB) en una máquina rápida. La primera vez que la descargues, cuenta
 > varios minutos según tu conexión. No te alarmes si tu número es 20 veces mayor: no es un
 > error, es la descarga.
+
+> **La imagen del nodo y por qué a veces conviene fijarla.** Sin configuración, `kind`
+> v0.32.0 usa su imagen de nodo por defecto, que en esta versión es
+> `kindest/node:v1.36.1` (lo ves en la primera línea de la salida). Un *tag* es una
+> etiqueta móvil y un *digest* es contenido inmutable, exactamente como viste en el módulo
+> 3. Si necesitas que este laboratorio dé el mismo resultado hoy y en seis meses, se fija
+> `tag@digest`. El digest verificado en esta máquina el **20 de agosto de 2026** es:
+>
+> ```
+> kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
+> ```
+>
+> Para el núcleo de este laboratorio no hace falta: el comando de arriba, tal cual, es
+> suficiente. Fijar el digest requiere un archivo de configuración de `kind`, y eso lo
+> haces en el Anexo opcional.
 
 `kind` acaba de cambiar tu contexto activo de `kubectl` a `kind-topicos-m4`. De aquí en
 adelante, todo comando `kubectl` habla con este clúster.
 
 ---
 
-## Paso 1: La arquitectura, de verdad (15 min)
+## Paso 1: La arquitectura, de verdad (13 min)
 
 Las diapositivas del módulo tienen el diagrama de cajas: API server, etcd, scheduler,
 controller manager, kubelet, kube-proxy, runtime, CNI. Aquí vas a tocar cada caja.
 
-### 1.1 El nodo
+### 1.1 El nodo es un contenedor (módulo 3)
 
 ```bash
 kubectl wait --for=condition=Ready node --all --timeout=180s
@@ -191,44 +151,37 @@ kubectl get nodes -o wide
 
 ```
 NAME                       STATUS   ROLES           AGE   VERSION   INTERNAL-IP   EXTERNAL-IP   OS-IMAGE                       KERNEL-VERSION            CONTAINER-RUNTIME
-topicos-m4-control-plane   Ready    control-plane   21s   v1.36.1   172.18.0.9    <none>        Debian GNU/Linux 13 (trixie)   6.17.0-1032-oem (amd64)   containerd://2.3.1
+topicos-m4-control-plane   Ready    control-plane   19s   v1.36.1   172.18.0.5    <none>        Debian GNU/Linux 13 (trixie)   6.17.0-1032-oem (amd64)   containerd://2.3.1
 ```
 
 Tres columnas que valen todo el paso:
 
 - **`CONTAINER-RUNTIME: containerd://2.3.1`**: el runtime es `containerd`, hablando por
   CRI. Es el mismo `containerd` que en el módulo 3 viste colgando de `dockerd` en el
-  `pstree` del Paso 3. Kubernetes no habla con Docker: habla CRI con containerd.
+  `pstree`. Kubernetes no habla con Docker: habla CRI con containerd.
 - **`KERNEL-VERSION: 6.17.0-1032-oem`**: compáralo con tu host ahora mismo.
-- **`INTERNAL-IP: 172.18.0.9`**: una IP de red Docker. Tu "nodo" está en una red bridge
-  de Docker.
+- **`INTERNAL-IP: 172.18.0.5`**: una IP de red Docker. Tu "nodo" está en una red bridge de
+  Docker.
 
 ```bash
 uname -r
 docker exec topicos-m4-control-plane uname -r
-```
-
-**Salida real de esta máquina:**
-
-```
-6.17.0-1032-oem
-6.17.0-1032-oem
-```
-
-**Exactamente lo mismo**, igual que el Paso 1 del laboratorio del módulo 3. El "nodo" de
-Kubernetes que acabas de crear es un contenedor de sistema corriendo sobre el kernel de tu
-portátil. Compruébalo desde el otro lado:
-
-```bash
 docker ps --filter "name=topicos-m4-control-plane" --format 'table {{.Names}}\t{{.Image}}\t{{.Status}}'
 ```
 
 **Salida real de esta máquina:**
 
 ```
+6.17.0-1032-oem
+6.17.0-1032-oem
+
 NAMES                      IMAGE                  STATUS
-topicos-m4-control-plane   kindest/node:v1.36.1   Up 36 seconds
+topicos-m4-control-plane   kindest/node:v1.36.1   Up 25 seconds
 ```
+
+**Exactamente el mismo kernel**, igual que en el Paso 1 del laboratorio del módulo 3. El
+"nodo" de Kubernetes que acabas de crear es un contenedor de sistema corriendo sobre el
+kernel de tu portátil.
 
 > **Precisión, porque aquí se confunde mucho.** Esto es una particularidad de `kind`
 > ("Kubernetes IN Docker"), no de Kubernetes. En un clúster real, un nodo es una máquina
@@ -253,11 +206,11 @@ active
      Loaded: loaded (/etc/systemd/system/kubelet.service; enabled; preset: enabled)
     Drop-In: /etc/systemd/system/kubelet.service.d
              └─10-kubeadm.conf, 11-kind.conf
-     Active: active (running) since Fri 2026-08-21 01:25:37 UTC; 28s ago
-   Main PID: 812 (kubelet)
-      Tasks: 25 (limit: 11423)
-     Memory: 36.7M (peak: 40.6M)
-        CPU: 745ms
+     Active: active (running) since Fri 2026-08-21 02:19:20 UTC; 17s ago
+   Main PID: 806 (kubelet)
+      Tasks: 24 (limit: 11423)
+     Memory: 36.7M (peak: 38.4M)
+        CPU: 583ms
      CGroup: /kubelet.slice/kubelet.service
 ```
 
@@ -265,11 +218,10 @@ Léelo con los ojos del módulo 1: es una unidad de systemd corriente. Tiene `Dr
 (fragmentos que sobreescriben la unidad base, ahí es donde `kubeadm` y `kind` inyectan su
 configuración), tiene un `Main PID`, y **vive dentro de su propio cgroup**
 (`/kubelet.slice/kubelet.service`). El kubelet no es magia distribuida: es un demonio de
-Linux, con las mismas herramientas de diagnóstico que cualquier otro. Si algún día un nodo
-no arranca, `journalctl -u kubelet` es tu primera parada, exactamente igual que en el
-módulo 1.
+Linux. Si algún día un nodo no arranca, `journalctl -u kubelet` es tu primera parada,
+exactamente igual que en el módulo 1.
 
-### 1.3 El control plane son Pods... que nadie desplegó
+### 1.3 El control plane son Pods que nadie desplegó
 
 ```bash
 kubectl get pods -n kube-system
@@ -279,20 +231,20 @@ kubectl get pods -n kube-system
 
 ```
 NAME                                               READY   STATUS              RESTARTS   AGE
-coredns-589f44dc88-5tw5f                           0/1     ContainerCreating   0          11s
-coredns-589f44dc88-72c8b                           0/1     ContainerCreating   0          11s
-etcd-topicos-m4-control-plane                      1/1     Running             0          20s
-kindnet-x8827                                      1/1     Running             0          12s
-kube-apiserver-topicos-m4-control-plane            1/1     Running             0          19s
-kube-controller-manager-topicos-m4-control-plane   1/1     Running             0          19s
-kube-proxy-7sn8h                                   1/1     Running             0          12s
-kube-scheduler-topicos-m4-control-plane            1/1     Running             0          20s
+coredns-589f44dc88-2nw7k                           0/1     ContainerCreating   0          12s
+coredns-589f44dc88-579rf                           0/1     ContainerCreating   0          12s
+etcd-topicos-m4-control-plane                      1/1     Running             0          18s
+kindnet-c4b27                                      1/1     Running             0          12s
+kube-apiserver-topicos-m4-control-plane            1/1     Running             0          18s
+kube-controller-manager-topicos-m4-control-plane   1/1     Running             0          18s
+kube-proxy-lmg7q                                   1/1     Running             0          12s
+kube-scheduler-topicos-m4-control-plane            0/1     Running             0          18s
 ```
 
-Que CoreDNS salga en `ContainerCreating` es normal y vale la pena entender por qué: un
-nodo puede estar `Ready` (el kubelet responde y la red del nodo funciona) mientras algunos
-Pods todavía están arrancando. Repite el comando unos segundos después y los verás en
-`Running` (verificado en esta máquina). El resto ya está arriba desde el primer momento.
+Que CoreDNS salga en `ContainerCreating` y el scheduler en `0/1` es normal: un nodo puede
+estar `Ready` (el kubelet responde y la red del nodo funciona) mientras algunos Pods
+todavía arrancan o todavía no pasan su *readiness probe*. Repite el comando unos segundos
+después y los verás todos en `1/1 Running` (verificado en esta máquina).
 
 Ahí está el diagrama completo del módulo, como Pods reales:
 
@@ -306,9 +258,9 @@ Ahí está el diagrama completo del módulo, como Pods reales:
 | `kindnet-…` | el plugin **CNI** de `kind` (en otro clúster sería Cilium, Calico, Flannel…) |
 | `coredns-…` | DNS interno del clúster |
 
-Fíjate en que los cuatro primeros llevan el nombre del nodo pegado (`-topicos-m4-control-plane`).
-Eso es la firma de un **static Pod**: no lo creó nadie con `kubectl`, lo arranca el kubelet
-leyendo archivos de un directorio del disco.
+Fíjate en que los cuatro primeros llevan el nombre del nodo pegado
+(`-topicos-m4-control-plane`). Eso es la firma de un **static Pod**: no lo creó nadie con
+`kubectl`, lo arranca el kubelet leyendo archivos de un directorio del disco.
 
 ```bash
 docker exec topicos-m4-control-plane ls -1 /etc/kubernetes/manifests/
@@ -332,128 +284,303 @@ pods`. Son *mirror pods*: la entrada en la API es un reflejo, el original es el 
 ### 1.4 El runtime, desde adentro
 
 ```bash
-docker exec topicos-m4-control-plane crictl ps | head -12
+docker exec topicos-m4-control-plane crictl ps
 ```
 
 **Salida real de esta máquina** (recortada a las columnas que importan):
 
 ```
 CONTAINER      CREATED          STATE     NAME                      NAMESPACE
-980aff8679ccf  9 seconds ago    Running   coredns                   kube-system
-2b6ad7f481b1b  9 seconds ago    Running   local-path-provisioner    local-path-storage
-fed437cc9ef1f  21 seconds ago   Running   kindnet-cni               kube-system
-7e0b9cf65d347  21 seconds ago   Running   kube-proxy                kube-system
-065803cf159f5  32 seconds ago   Running   etcd                      kube-system
-add7a4fc46582  32 seconds ago   Running   kube-scheduler            kube-system
-f89f266ec9ca8  32 seconds ago   Running   kube-apiserver            kube-system
-5012f29c23193  32 seconds ago   Running   kube-controller-manager   kube-system
+22fef3765431d  10 seconds ago   Running   kindnet-cni               kube-system
+31caf365be4c2  10 seconds ago   Running   kube-proxy                kube-system
+4139c4fc0b14f  20 seconds ago   Running   etcd                      kube-system
+90156fdaf6718  20 seconds ago   Running   kube-controller-manager   kube-system
+9144216757c24  20 seconds ago   Running   kube-scheduler            kube-system
+9482a5655bf4a  21 seconds ago   Running   kube-apiserver            kube-system
 ```
 
 `crictl` es a CRI lo que `docker` es al daemon de Docker: un cliente de línea de comandos
 del runtime, por debajo de Kubernetes. Estás viendo los **mismos** contenedores que
 `kubectl get pods -n kube-system`, pero desde el otro lado de la frontera: aquí ya no hay
-Pods ni namespaces de Kubernetes como abstracción, hay contenedores OCI corriendo, igual
-que los del módulo 3.
+Pods como abstracción, hay contenedores OCI corriendo, igual que los del módulo 3.
+Guárdalo: en el Paso 3.2 vas a usar `crictl` para romper algo a propósito.
 
 ---
 
-## Paso 2: Deployment, Service y EndpointSlice (20 min)
+## Paso 2: Desplegar cargas de trabajo (30 min)
 
-### 2.1 Desplegar
+Este es el corazón de la clase. Vas a crear las tres cargas básicas de Kubernetes (**Pod**,
+**Deployment**, **Service**) y a verlas conectarse entre sí.
+
+### 2.1 Un Pod, y la forma de trabajar que no exige memorizar YAML
+
+Antes de crear nada, mira cómo se escribiría el YAML **sin escribirlo**:
 
 ```bash
-cd ~/lab-k8s
+kubectl run web-uno --image=nginx:1.29-alpine --dry-run=client -o yaml
+```
 
-cat > web.yaml <<'EOF'
+**Salida real de esta máquina:**
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: web-uno
+  name: web-uno
+spec:
+  containers:
+  - image: nginx:1.29-alpine
+    name: web-uno
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+
+> **TIP: nadie memoriza el YAML de Kubernetes. Se genera.**
+>
+> `--dry-run=client` le dice a `kubectl` que **no** envíe nada al clúster, y `-o yaml` que
+> imprima el objeto que habría enviado. Combinados, convierten cualquier comando
+> imperativo en el manifiesto declarativo equivalente. Redirígelo a un archivo y ya tienes
+> el punto de partida, sin buscar la indentación correcta de memoria:
+>
+> ```bash
+> kubectl create deployment my-nginx --image=nginx --replicas=3 --dry-run=client -o yaml > deployment.yaml
+> ```
+>
+> Funciona igual con las tres familias de comandos que vas a usar hoy:
+> `kubectl run … --dry-run=client -o yaml` (Pods),
+> `kubectl create deployment … --dry-run=client -o yaml` (Deployments) y
+> `kubectl expose … --dry-run=client -o yaml` (Services).
+>
+> No es un truco de laboratorio: es como se trabaja de verdad, y es la técnica que se usa
+> en los exámenes de certificación cronometrados, donde escribir YAML a mano cuesta
+> minutos que no tienes.
+
+Ahora créalo de verdad, sin `--dry-run`:
+
+```bash
+kubectl run web-uno --image=nginx:1.29-alpine
+kubectl wait --for=condition=Ready pod/web-uno --timeout=180s
+kubectl get pod web-uno -o wide
+```
+
+**Salida real de esta máquina:**
+
+```
+pod/web-uno created
+pod/web-uno condition met
+NAME      READY   STATUS    RESTARTS   AGE   IP           NODE                       NOMINATED NODE   READINESS GATES
+web-uno   1/1     Running   0          8s    10.244.0.5   topicos-m4-control-plane   <none>           <none>
+```
+
+Tienes un Pod corriendo, con su propia IP (`10.244.0.5`, se la dio el plugin CNI). Ahora
+bórralo y mira qué pasa:
+
+```bash
+kubectl delete pod web-uno
+kubectl get pods
+```
+
+**Salida real de esta máquina:**
+
+```
+pod "web-uno" deleted from default namespace
+No resources found in default namespace.
+```
+
+Se fue, y **no volvió**. Un Pod suelto no tiene quien lo cuide: si lo borras, o si muere el
+nodo, desaparece y ya. Por eso en la práctica casi nunca se crean Pods sueltos, y por eso
+existe el siguiente objeto.
+
+### 2.2 Un Deployment, generado con el truco del `--dry-run`
+
+La documentación oficial también está a un comando de distancia, sin salir de la terminal:
+
+```bash
+kubectl explain deployment.spec.replicas
+```
+
+**Salida real de esta máquina:**
+
+```
+GROUP:      apps
+KIND:       Deployment
+VERSION:    v1
+
+FIELD: replicas <integer>
+
+DESCRIPTION:
+    Number of desired pods. This is a pointer to distinguish between explicit
+    zero and not specified. Defaults to 1.
+```
+
+> **TIP: consultar la documentación oficial es el método, no una muleta.**
+>
+> La otra mitad de "no memorices YAML" es **consultar `kubernetes.io/docs`**. Es lo que se
+> hace en el trabajo real y es coherente con la regla que atraviesa todo este curso: ante
+> la duda sobre una API, una bandera o un valor por defecto, no adivines, verifica en la
+> fuente oficial. `kubectl explain <recurso>.<campo>` es la misma documentación servida por
+> el propio API server, sin navegador y sin internet.
+>
+> En los exámenes prácticos de la CNCF esto es explícito: la Linux Foundation permite
+> abrir *"Kubernetes Documentation: https://kubernetes.io/docs/"* dentro del navegador del
+> examen para **CKA, CKAD y CKS** (módulos 5, 6 y 7 de este curso), con la advertencia de
+> que *"using the search function on https://kubernetes.io/docs/ is allowed, but you must
+> not open external search results"*. (Fuente:
+> `docs.linuxfoundation.org/tc-docs/certification/certification-resources-allowed`,
+> consultada el 20 de agosto de 2026.) Ojo con generalizarlo: **KCNA**, la certificación de
+> este módulo, **no aparece** en esa lista, porque es un examen de opción múltiple y no
+> práctico. Confirma siempre las reglas en tu propia inscripción antes de presentarte.
+
+Genera el manifiesto con el mismo patrón del TIP anterior, míralo, y recién entonces
+aplícalo:
+
+```bash
+mkdir -p ~/lab-k8s && cd ~/lab-k8s
+
+kubectl create deployment web --image=nginx:1.29-alpine --replicas=3 --dry-run=client -o yaml > deployment.yaml
+cat deployment.yaml
+```
+
+**Salida real de esta máquina:**
+
+```yaml
 apiVersion: apps/v1
 kind: Deployment
 metadata:
+  labels:
+    app: web
   name: web
 spec:
-  replicas: 2
+  replicas: 3
   selector:
     matchLabels:
       app: web
+  strategy: {}
   template:
     metadata:
       labels:
         app: web
     spec:
       containers:
-        - name: nginx
-          image: nginx:1.29-alpine
-          ports:
-            - containerPort: 80
-          resources:
-            requests:
-              cpu: 10m
-              memory: 32Mi
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: web
-spec:
-  selector:
-    app: web
-  ports:
-    - port: 80
-      targetPort: 80
-EOF
+      - image: nginx:1.29-alpine
+        name: nginx
+        resources: {}
+status: {}
+```
 
-kubectl apply -f web.yaml
+Léelo antes de aplicarlo, porque aquí está la estructura que se repite en todo Kubernetes:
+
+- **`spec.replicas: 3`**: cuántos Pods quieres. Este es el número que el controlador va a
+  defender.
+- **`spec.selector.matchLabels`**: **cómo** el Deployment reconoce a "sus" Pods. No los
+  reconoce por nombre, los reconoce por etiqueta.
+- **`spec.template`**: el molde del Pod. Fíjate en que `template.metadata.labels` coincide
+  con el selector: si no coincidieran, el Deployment crearía Pods que después no
+  reconocería como propios.
+
+Ahora aplícalo:
+
+```bash
+kubectl apply -f deployment.yaml
 kubectl rollout status deployment/web --timeout=180s
 kubectl get deploy,rs,pods -o wide
 ```
 
-**Salida real de esta máquina** (recortada):
+**Salida real de esta máquina:**
 
 ```
 deployment.apps/web created
-service/web created
+Waiting for deployment "web" rollout to finish: 0 of 3 updated replicas are available...
+Waiting for deployment "web" rollout to finish: 1 of 3 updated replicas are available...
+Waiting for deployment "web" rollout to finish: 2 of 3 updated replicas are available...
 deployment "web" successfully rolled out
 
-NAME                  READY   UP-TO-DATE   AVAILABLE   AGE
-deployment.apps/web   2/2     2            2           6s
+NAME                  READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES              SELECTOR
+deployment.apps/web   3/3     3            3           1s    nginx        nginx:1.29-alpine   app=web
 
-NAME                             DESIRED   CURRENT   READY   AGE   SELECTOR
-replicaset.apps/web-55fcb869b7   2         2         2       6s    app=web,pod-template-hash=55fcb869b7
+NAME                             DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES              SELECTOR
+replicaset.apps/web-7fbc579fd4   3         3         3       1s    nginx        nginx:1.29-alpine   app=web,pod-template-hash=7fbc579fd4
 
 NAME                       READY   STATUS    RESTARTS   AGE   IP           NODE
-pod/web-55fcb869b7-7vd6z   1/1     Running   0          6s    10.244.0.5   topicos-m4-control-plane
-pod/web-55fcb869b7-84n86   1/1     Running   0          6s    10.244.0.6   topicos-m4-control-plane
+pod/web-7fbc579fd4-6xs7k   1/1     Running   0          1s    10.244.0.8   topicos-m4-control-plane
+pod/web-7fbc579fd4-7dpbg   1/1     Running   0          1s    10.244.0.7   topicos-m4-control-plane
+pod/web-7fbc579fd4-vz57m   1/1     Running   0          1s    10.244.0.6   topicos-m4-control-plane
 ```
 
 (Los nombres con hash y las IPs `10.244.0.x` van a ser distintos en tu máquina.)
 
-Tú creaste **un** objeto (`Deployment`) y aparecieron **tres niveles**. No es casualidad,
-es una cadena de propiedad que puedes leer:
+Tú creaste **un** objeto y aparecieron **tres niveles**. No es casualidad, es una cadena de
+propiedad que puedes leer:
 
 ```bash
-NUEVO=$(kubectl get pods -l app=web -o jsonpath='{.items[0].metadata.name}')
-kubectl get pod "$NUEVO" -o jsonpath='{.metadata.name} <- {.metadata.ownerReferences[0].kind}/{.metadata.ownerReferences[0].name}{"\n"}'
+UNO=$(kubectl get pods -l app=web -o jsonpath='{.items[0].metadata.name}')
+kubectl get pod "$UNO" -o jsonpath='{.metadata.name} <- {.metadata.ownerReferences[0].kind}/{.metadata.ownerReferences[0].name}{"\n"}'
 kubectl get rs -l app=web -o jsonpath='{.items[0].metadata.name} <- {.items[0].metadata.ownerReferences[0].kind}/{.items[0].metadata.ownerReferences[0].name}{"\n"}'
 ```
 
-**Salida real de esta máquina** (capturada después del Paso 3, por eso el Pod se llama
-`…-bl8vx`; en tu Paso 2 será uno de los dos originales, y la relación es la misma):
+**Salida real de esta máquina:**
 
 ```
-web-55fcb869b7-bl8vx <- ReplicaSet/web-55fcb869b7
-web-55fcb869b7 <- Deployment/web
+web-7fbc579fd4-6xs7k <- ReplicaSet/web-7fbc579fd4
+web-7fbc579fd4 <- Deployment/web
 ```
 
 **Deployment → ReplicaSet → Pod.** Cada eslabón lo crea un controlador distinto vigilando
 al anterior. Guárdalo: en el Paso 3 vas a ver ese mismo encadenamiento reaccionar en vivo.
 
-### 2.2 El EndpointSlice: cómo un Service encuentra a sus Pods
+### 2.3 Un Service con `kubectl expose`, y el EndpointSlice
 
-Un `Service` tiene una IP virtual y un selector de etiquetas. Pero el selector no se
-evalúa en cada paquete: hay un objeto intermedio que guarda la lista concreta de IPs, y lo
-mantiene un controlador.
+Tres Pods con tres IPs que cambian cada vez que uno se recrea no sirven como dirección
+estable. Para eso está el `Service`. Y se crea, otra vez, sin escribir YAML:
 
 ```bash
+kubectl expose deployment web --port=80 --target-port=80 --dry-run=client -o yaml
+```
+
+**Salida real de esta máquina:**
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: web
+  name: web
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: web
+status:
+  loadBalancer: {}
+```
+
+`kubectl expose` copió el selector `app: web` del Deployment. Ese selector es todo el
+vínculo entre el Service y los Pods: no hay una lista de nombres en ninguna parte.
+
+```bash
+kubectl expose deployment web --port=80 --target-port=80
 kubectl get svc web
+```
+
+**Salida real de esta máquina:**
+
+```
+service/web exposed
+NAME   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
+web    ClusterIP   10.96.175.77   <none>        80/TCP    0s
+```
+
+Pero el selector no se evalúa en cada paquete: hay un objeto intermedio que guarda la lista
+concreta de IPs, y lo mantiene un controlador. Se llama **EndpointSlice**:
+
+```bash
 kubectl get endpointslices -l kubernetes.io/service-name=web
 kubectl get pods -l app=web -o custom-columns=NAME:.metadata.name,IP:.status.podIP
 ```
@@ -461,140 +588,51 @@ kubectl get pods -l app=web -o custom-columns=NAME:.metadata.name,IP:.status.pod
 **Salida real de esta máquina:**
 
 ```
-NAME   TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)   AGE
-web    ClusterIP   10.96.94.167   <none>        80/TCP    13s
-
-NAME        ADDRESSTYPE   PORTS   ENDPOINTS               AGE
-web-s6zxh   IPv4          80      10.244.0.5,10.244.0.6   13s
+NAME        ADDRESSTYPE   PORTS   ENDPOINTS                          AGE
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.8   0s
 
 NAME                   IP
-web-55fcb869b7-7vd6z   10.244.0.5
-web-55fcb869b7-84n86   10.244.0.6
+web-7fbc579fd4-6xs7k   10.244.0.8
+web-7fbc579fd4-7dpbg   10.244.0.7
+web-7fbc579fd4-vz57m   10.244.0.6
 ```
 
-Las dos IPs del EndpointSlice son, exactamente, las dos IPs de tus Pods. Míralo con
-detalle:
+Las tres IPs del EndpointSlice son, exactamente, las tres IPs de tus Pods. Mira quién lo
+escribió y qué guarda de cada endpoint:
 
 ```bash
-kubectl get endpointslice -l kubernetes.io/service-name=web -o yaml | head -40
+kubectl get endpointslice -l kubernetes.io/service-name=web -o jsonpath='{range .items[0].endpoints[*]}{.addresses[0]}{"  ready="}{.conditions.ready}{"  pod="}{.targetRef.name}{"\n"}{end}'
+kubectl get endpointslice -l kubernetes.io/service-name=web -o jsonpath='{.items[0].metadata.labels}{"\n"}'
 ```
 
-**Salida real de esta máquina** (recortada; se quitaron `creationTimestamp`,
-`resourceVersion`, `uid` y `managedFields`, que son ruido):
+**Salida real de esta máquina:**
 
-```yaml
-addressType: IPv4
-endpoints:
-- addresses:
-  - 10.244.0.5
-  conditions:
-    ready: true
-    serving: true
-    terminating: false
-  nodeName: topicos-m4-control-plane
-  targetRef:
-    kind: Pod
-    name: web-55fcb869b7-7vd6z
-    namespace: default
-- addresses:
-  - 10.244.0.6
-  conditions:
-    ready: true
-    serving: true
-    terminating: false
-  nodeName: topicos-m4-control-plane
-  targetRef:
-    kind: Pod
-    name: web-55fcb869b7-84n86
-    namespace: default
-metadata:
-  labels:
-    endpointslice.kubernetes.io/managed-by: endpointslice-controller.k8s.io
-    kubernetes.io/service-name: web
-  name: web-s6zxh
-  ownerReferences:
-  - kind: Service
-    name: web
-ports:
-- name: ""
-  port: 80
-  protocol: TCP
+```
+10.244.0.6  ready=true  pod=web-7fbc579fd4-vz57m
+10.244.0.7  ready=true  pod=web-7fbc579fd4-7dpbg
+10.244.0.8  ready=true  pod=web-7fbc579fd4-6xs7k
+
+{"app":"web","endpointslice.kubernetes.io/managed-by":"endpointslice-controller.k8s.io","kubernetes.io/service-name":"web"}
 ```
 
-Tres cosas que leer aquí:
+Dos cosas que leer aquí, y con eso basta por hoy:
 
 - **`managed-by: endpointslice-controller.k8s.io`**: este objeto no lo escribió ningún
   humano. Lo escribe un controlador que vive dentro de `kube-controller-manager`, el Pod
   que viste en el Paso 1.3.
-- **`conditions: ready/serving/terminating`**: no es una lista plana de IPs. Cada endpoint
-  lleva su estado, y por eso un Pod que se está apagando puede dejar de ser `ready` sin
-  desaparecer de golpe.
-- **`ownerReferences: Service/web`**: si borras el Service, el EndpointSlice se va con él.
-
-> **¿Y `kubectl get endpoints`?** Existe todavía, y esto es lo que te dice el clúster
-> cuando lo usas:
->
-> ```
-> Warning: v1 Endpoints is deprecated in v1.33+; use discovery.k8s.io/v1 EndpointSlice
-> NAME   ENDPOINTS                     AGE
-> web    10.244.0.6:80,10.244.0.8:80   5m41s
-> ```
->
-> (Salida real de esta máquina. Se capturó más tarde en la sesión, por eso las IPs y la
-> edad no coinciden con las de arriba: lo que importa aquí es la línea de advertencia.) La
-> API `Endpoints` original guardaba **todas** las IPs de
-> un Service en un solo objeto, que había que reescribir entero por cada cambio: con miles
-> de Pods, eso satura al API server y a etcd. Los EndpointSlice parten esa lista: por
-> defecto el control plane crea *slices* de **no más de 100 endpoints cada uno**,
-> configurable con la bandera `--max-endpoints-per-slice` de `kube-controller-manager`
-> hasta un máximo de 1000. Y son la **fuente de verdad para `kube-proxy`**. (Fuente:
-> `kubernetes.io/docs/concepts/services-networking/endpoint-slices/`.)
-
-### 2.3 De EndpointSlice a reglas de red: dónde entra kube-proxy
-
-El EndpointSlice es una lista en la API. Alguien tiene que convertirla en algo que el
-kernel entienda. Ese alguien es `kube-proxy`.
-
-```bash
-kubectl logs -n kube-system -l k8s-app=kube-proxy --tail=20 | grep -i "Proxier"
-docker exec topicos-m4-control-plane iptables-save -t nat | grep "default/web"
-```
-
-**Salida real de esta máquina** (recortada; además, las líneas de `iptables-save` están
-**reordenadas** para poder leerlas de arriba abajo: `iptables-save` las imprime agrupadas
-por cadena, no en el orden en que se recorren. También se quitaron las líneas
-`KUBE-MARK-MASQ`, que son de enmascaramiento y no de enrutamiento):
-
-```
-I0821 01:25:45.426414       1 server_linux.go:137] "Using iptables Proxier"
-
--A KUBE-SERVICES -d 10.96.94.167/32 -p tcp --dport 80 -j KUBE-SVC-LOLE4ISW44XBNF3G
--A KUBE-SVC-LOLE4ISW44XBNF3G -m comment --comment "default/web -> 10.244.0.5:80" -m statistic --mode random --probability 0.50000000000 -j KUBE-SEP-XZM42ADG6Z7RUM24
--A KUBE-SVC-LOLE4ISW44XBNF3G -m comment --comment "default/web -> 10.244.0.6:80" -j KUBE-SEP-XBXNMJVLFJ54CH32
--A KUBE-SEP-XZM42ADG6Z7RUM24 -p tcp -j DNAT --to-destination 10.244.0.5:80
--A KUBE-SEP-XBXNMJVLFJ54CH32 -p tcp -j DNAT --to-destination 10.244.0.6:80
-```
-
-Léelo de arriba abajo, es toda la historia del Service en cinco líneas:
-
-1. Todo lo que va a `10.96.94.167:80` (la ClusterIP) salta a la cadena `KUBE-SVC-…`.
-2. Esa cadena tiene dos ramas, y elige la primera **con probabilidad 0.5**. Ese es el
-   balanceo de carga: `--mode random`, no un algoritmo sofisticado.
-3. Cada rama hace `DNAT` a la IP real de un Pod, las mismas dos del EndpointSlice.
-
-La ClusterIP `10.96.94.167` no existe en ninguna interfaz de red: es una IP ficticia que
-solo tiene sentido como criterio de una regla `iptables`. Por eso no puedes hacerle `ping`
-y sí puedes conectarte a ella por TCP.
+- **`ready=true` por endpoint**: no es una lista plana de IPs. Cada entrada lleva su
+  estado, y por eso un Pod que se está apagando puede dejar de ser `ready` sin desaparecer
+  de golpe. En el Paso 3 vas a ver esa lista moverse sola.
 
 ### 2.4 CoreDNS: el contraste con el módulo 3
 
-En el módulo 3 (Paso 8), dos contenedores lanzados con `docker run` normal no podían
-verse por nombre: `ping: bad address 'web'`. Hacía falta declarar una red *user-defined*
-(a mano o vía Compose) para tener DNS. En Kubernetes eso viene puesto.
+En el módulo 3 (Paso 8), dos contenedores lanzados con `docker run` normal no podían verse
+por nombre: `ping: bad address 'web'`. Hacía falta declarar una red *user-defined* (a mano
+o vía Compose) para tener DNS. En Kubernetes eso viene puesto.
 
 ```bash
 kubectl run cliente --image=alpine:3.20 --restart=Never --command -- sleep 3600
-kubectl wait --for=condition=Ready pod/cliente --timeout=120s
+kubectl wait --for=condition=Ready pod/cliente --timeout=180s
 
 kubectl exec cliente -- cat /etc/resolv.conf
 kubectl exec cliente -- nslookup web.default.svc.cluster.local
@@ -612,7 +650,7 @@ Server:		10.96.0.10
 Address:	10.96.0.10:53
 
 Name:	web.default.svc.cluster.local
-Address: 10.96.94.167
+Address: 10.96.175.77
 
 <!DOCTYPE html>
 <html>
@@ -623,48 +661,35 @@ Address: 10.96.94.167
 Nadie configuró DNS. El `/etc/resolv.conf` lo escribió el kubelet al crear el Pod,
 apuntando a `10.96.0.10`, que es la ClusterIP del Service de CoreDNS. Y el nombre corto
 `web` funciona por la línea `search`: el resolver prueba `web.default.svc.cluster.local`
-primero.
+primero. La dirección que devolvió el DNS (`10.96.175.77`) es exactamente la ClusterIP del
+Service que creaste en 2.3.
 
 > **Dos precisiones honestas sobre este paso.**
 >
 > 1. Si corres `kubectl exec cliente -- nslookup web` (nombre corto en vez de FQDN), el
 >    `nslookup` de BusyBox imprime varios `** server can't find web.svc.cluster.local:
->    NXDOMAIN` **y termina con código de salida 1**, aunque la resolución haya funcionado:
->    en medio del ruido aparece `Name: web.default.svc.cluster.local / Address:
->    10.96.94.167`. No es un fallo del clúster, es que BusyBox reporta como error cada
->    dominio de búsqueda que no resolvió. Por eso arriba usamos el FQDN completo, que sale
->    limpio. El `wget http://web` con el nombre corto sí funciona sin ruido.
+>    NXDOMAIN` **y termina con código de salida 1**, aunque la resolución haya funcionado.
+>    No es un fallo del clúster, es que BusyBox reporta como error cada dominio de búsqueda
+>    que no resolvió. Por eso arriba usamos el FQDN completo, que sale limpio. El
+>    `wget http://web` con el nombre corto sí funciona sin ruido.
 > 2. El Service de DNS se llama `kube-dns` aunque el software que corre sea **CoreDNS**:
->    `kubectl get svc -n kube-system kube-dns` te devuelve `10.96.0.10`, y
->    `kubectl get pods -n kube-system -l k8s-app=kube-dns` te devuelve dos Pods
->    `coredns-…`. Es compatibilidad hacia atrás con el DNS anterior, que sí se llamaba
->    kube-dns. Verificado en esta máquina.
+>    `kubectl get svc -n kube-system kube-dns` te devuelve `10.96.0.10` (verificado en esta
+>    máquina). Es compatibilidad hacia atrás con el DNS anterior, que sí se llamaba
+>    kube-dns.
 
 ---
 
-## Paso 3 – Watch-Diff-Update: el loop, en vivo (15 min)
+## Paso 3: Auto-reparación y escalado (20 min)
 
-Esta es la idea central del módulo. Un controlador hace tres cosas, para siempre:
-**observa** (watch) el estado deseado y el real, **compara** (diff), y **actúa** (update)
-para acercarlos. No hay un "instalador" ni un "supervisor de arranque": hay un bucle.
+Ya tienes cargas de trabajo corriendo. Ahora rómpelas.
 
-### 3.1 Spec contra status
+Todo lo que sigue es el **loop de reconciliación**: cada controlador de Kubernetes hace lo
+mismo, para siempre. Observa el estado deseado (`spec`) y el real (`status`), compara, y
+actúa para acercarlos. En la bibliografía vas a encontrar ese ciclo con el nombre
+**Watch-Diff-Update**. No hay un "instalador" ni un "supervisor de arranque": hay un bucle,
+y lo vas a ver correr tres veces en este paso.
 
-```bash
-kubectl get deploy web -o jsonpath='spec.replicas={.spec.replicas}  status.replicas={.status.replicas}  status.readyReplicas={.status.readyReplicas}{"\n"}'
-```
-
-**Salida real de esta máquina:**
-
-```
-spec.replicas=2  status.replicas=2  status.readyReplicas=2
-```
-
-`spec` es lo que **tú** pediste. `status` es lo que el controlador **observó**. Tú solo
-escribes `spec`; `status` lo escribe el sistema. Cuando los dos coinciden, el controlador
-no hace nada. El loop existe para el momento en que dejan de coincidir.
-
-### 3.2 Romper el estado a propósito
+### 3.1 Borra un Pod y mira quién lo repone
 
 Abre una **segunda terminal** y déjala mirando:
 
@@ -688,109 +713,462 @@ iguales):
 
 ```
 NAME                   READY   STATUS    RESTARTS   AGE
-web-55fcb869b7-7vd6z   1/1     Running   0          55s
-web-55fcb869b7-84n86   1/1     Running   0          55s
-web-55fcb869b7-7vd6z   1/1     Terminating   0          58s
-web-55fcb869b7-7vd6z   1/1     Terminating   0          58s
-web-55fcb869b7-bl8vx   0/1     Pending       0          0s
-web-55fcb869b7-bl8vx   0/1     Pending       0          0s
-web-55fcb869b7-bl8vx   0/1     ContainerCreating   0          0s
-web-55fcb869b7-7vd6z   0/1     Completed           0          58s
-web-55fcb869b7-bl8vx   0/1     ContainerCreating   0          0s
-web-55fcb869b7-bl8vx   1/1     Running             0          0s
-web-55fcb869b7-7vd6z   0/1     Completed           0          59s
-web-55fcb869b7-7vd6z   0/1     Completed           0          59s
+web-7fbc579fd4-6xs7k   1/1     Running   0          7s
+web-7fbc579fd4-7dpbg   1/1     Running   0          7s
+web-7fbc579fd4-vz57m   1/1     Running   0          7s
+web-7fbc579fd4-6xs7k   1/1     Terminating   0          10s
+web-7fbc579fd4-wkrgm   0/1     Pending       0          0s
+web-7fbc579fd4-6xs7k   1/1     Terminating   0          10s
+web-7fbc579fd4-wkrgm   0/1     Pending       0          0s
+web-7fbc579fd4-wkrgm   0/1     ContainerCreating   0          0s
+web-7fbc579fd4-6xs7k   0/1     Completed           0          10s
+web-7fbc579fd4-6xs7k   0/1     Completed           0          10s
+web-7fbc579fd4-6xs7k   0/1     Completed           0          10s
+web-7fbc579fd4-wkrgm   0/1     ContainerCreating   0          0s
+web-7fbc579fd4-wkrgm   1/1     Running             0          0s
 ```
 
 Lee las tres líneas que importan, en orden:
 
-1. `web-…-7vd6z` pasa a **`Terminating`**: el Pod que borraste.
-2. En el **mismo segundo**, aparece `web-…-bl8vx` en **`Pending`**. Es un Pod **nuevo**,
+1. `web-…-6xs7k` pasa a **`Terminating`**: el Pod que borraste.
+2. En el **mismo segundo**, aparece `web-…-wkrgm` en **`Pending`**. Es un Pod **nuevo**,
    con **nombre distinto**.
 3. Ese Pod nuevo pasa a `ContainerCreating` y luego a `Running`.
 
-Fíjate bien en el detalle que más se malinterpreta: **el nombre cambió**. Kubernetes no
-"reinició" tu Pod ni lo "revivió". El Pod que borraste está muerto y no vuelve. Lo que
-pasó es que el ReplicaSet, que estaba haciendo *watch* sobre los Pods con la etiqueta
-`app=web`, vio que su `status` bajó a 1 mientras su `spec` seguía en 2, calculó la
-diferencia y creó **otro** Pod para cerrarla. Diferencia = 1, acción = crear 1.
+Fíjate en el detalle que más se malinterpreta: **el nombre cambió**. Kubernetes no
+"reinició" tu Pod ni lo "revivió". El Pod que borraste está muerto y no vuelve. Lo que pasó
+es que el ReplicaSet, que estaba observando los Pods con la etiqueta `app=web`, vio que su
+`status` bajó a 2 mientras su `spec` seguía en 3, calculó la diferencia y creó **otro** Pod
+para cerrarla. Diferencia = 1, acción = crear 1.
 
-### 3.3 Quién hizo qué: los eventos
-
-```bash
-kubectl get events --sort-by=.lastTimestamp \
-  -o custom-columns=TIME:.lastTimestamp,TYPE:.type,OBJECT:.involvedObject.name,REASON:.reason,MESSAGE:.message \
-  | grep -E "SuccessfulCreate|Killing|Scheduled" | tail -8
-```
-
-**Salida real de esta máquina** (se acortó el espaciado entre columnas para que quepa; el
-`tail` se come la fila de encabezados, que sería `TIME  TYPE  OBJECT  REASON  MESSAGE`):
-
-```
-2026-08-21T01:26:35Z  Normal  web-55fcb869b7        SuccessfulCreate  Created pod: web-55fcb869b7-7vd6z
-2026-08-21T01:26:35Z  Normal  web-55fcb869b7        SuccessfulCreate  Created pod: web-55fcb869b7-84n86
-2026-08-21T01:26:35Z  Normal  web-55fcb869b7-84n86  Scheduled         Successfully assigned default/web-55fcb869b7-84n86 to topicos-m4-control-plane
-2026-08-21T01:26:35Z  Normal  web-55fcb869b7-7vd6z  Scheduled         Successfully assigned default/web-55fcb869b7-7vd6z to topicos-m4-control-plane
-2026-08-21T01:27:01Z  Normal  cliente               Scheduled         Successfully assigned default/cliente to topicos-m4-control-plane
-2026-08-21T01:27:33Z  Normal  web-55fcb869b7-bl8vx  Scheduled         Successfully assigned default/web-55fcb869b7-bl8vx to topicos-m4-control-plane
-2026-08-21T01:27:33Z  Normal  web-55fcb869b7        SuccessfulCreate  Created pod: web-55fcb869b7-bl8vx
-2026-08-21T01:27:33Z  Normal  web-55fcb869b7-7vd6z  Killing           Stopping container nginx
-```
-
-Las cuatro primeras líneas (`01:26:35`) son del despliegue inicial del Paso 2; la quinta
-es el Pod `cliente` del Paso 2.4. Las tres últimas, todas en el segundo `01:27:33`, son la
-reconciliación que acabas de provocar.
-
-La cascada completa, con marcas de tiempo, en un solo segundo (`01:27:33`):
-
-- `SuccessfulCreate` lo emite el **ReplicaSet** `web-55fcb869b7`: el controlador que
-  cerró la brecha.
-- `Scheduled` lo emite el **kube-scheduler**: decidió el nodo para el Pod nuevo.
-- `Killing` lo emite el **kubelet**: el que realmente para el contenedor.
-
-Tres componentes distintos del Paso 1, cada uno haciendo su parte del mismo loop, sin
-coordinarse entre ellos: cada uno solo mira la API y reacciona.
-
-### 3.4 Y el EndpointSlice también reconcilió
+Y el EndpointSlice del Paso 2.3 se enteró solo:
 
 ```bash
-kubectl get endpointslices -l kubernetes.io/service-name=web
 kubectl get pods -l app=web -o custom-columns=NAME:.metadata.name,IP:.status.podIP
+kubectl get endpointslices -l kubernetes.io/service-name=web
 ```
 
 **Salida real de esta máquina:**
 
 ```
-NAME        ADDRESSTYPE   PORTS   ENDPOINTS               AGE
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8   82s
-
 NAME                   IP
-web-55fcb869b7-84n86   10.244.0.6
-web-55fcb869b7-bl8vx   10.244.0.8
+web-7fbc579fd4-7dpbg   10.244.0.7
+web-7fbc579fd4-vz57m   10.244.0.6
+web-7fbc579fd4-wkrgm   10.244.0.10
+
+NAME        ADDRESSTYPE   PORTS   ENDPOINTS                           AGE
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10   23s
 ```
 
-Compáralo con el Paso 2.2: antes eran `10.244.0.5, 10.244.0.6`; ahora son
-`10.244.0.6, 10.244.0.8`. **El mismo objeto** (`web-s6zxh`, mismo nombre, 82 segundos de
-antigüedad) cambió de contenido. La IP muerta salió y la nueva entró, sin que tocaras
-nada. Ese es un segundo controlador (el de EndpointSlice) corriendo su propio loop sobre
-el resultado del primero. Y `kube-proxy`, a su vez, reescribió las reglas `iptables` sobre
-el resultado del segundo.
+Compáralo con el Paso 2.3: antes eran `.6, .7, .8`; ahora son `.6, .7, .10`. **El mismo
+objeto** (`web-7tml5`, mismo nombre, 23 segundos de antigüedad) cambió de contenido. La IP
+muerta salió y la nueva entró, sin que tocaras nada. Ese es un segundo controlador
+corriendo su propio loop sobre el resultado del primero.
 
-**Esa es toda la arquitectura de Kubernetes:** controladores pequeños, independientes,
-cada uno mirando la API y empujando el mundo hacia el `spec`.
+### 3.2 Mata el contenedor por debajo de Kubernetes
+
+En 3.1 borraste un **Pod** usando la API. Ahora vas a matar un **contenedor** a espaldas de
+Kubernetes, desde el runtime, como si se hubiera caído solo.
+
+Primero mira los contenedores de tus Pods desde el lado del runtime (el mismo `crictl` del
+Paso 1.4, ahora filtrado por nombre de contenedor):
+
+```bash
+docker exec topicos-m4-control-plane crictl ps --name nginx
+```
+
+**Salida real de esta máquina:**
+
+```
+CONTAINER      CREATED          STATE     NAME    ATTEMPT   POD ID          POD                    NAMESPACE
+664b73607d714  13 seconds ago   Running   nginx   0         cb7afda6733f9   web-7fbc579fd4-wkrgm   default
+4e6aa3301b8ce  23 seconds ago   Running   nginx   0         52185c73d4d7f   web-7fbc579fd4-7dpbg   default
+a988cd69264d4  23 seconds ago   Running   nginx   0         b7b0bf3183e5b   web-7fbc579fd4-vz57m   default
+```
+
+Esos son los contenedores reales que sostienen tus Pods. Fíjate en la columna `ATTEMPT`,
+que está en `0` en los tres. Ahora para uno, por su ID de runtime:
+
+```bash
+CID=$(docker exec topicos-m4-control-plane crictl ps --name nginx -q | head -1)
+POD=$(docker exec topicos-m4-control-plane crictl inspect --output go-template \
+        --template '{{index .status.labels "io.kubernetes.pod.name"}}' "$CID")
+echo "contenedor: $CID"
+echo "pod: $POD"
+
+docker exec topicos-m4-control-plane crictl stop "$CID"
+sleep 8
+kubectl get pods -l app=web
+```
+
+**Salida real de esta máquina** (el ID de contenedor sale recortado aquí por espacio):
+
+```
+contenedor: 664b73607d714da94f1669ad3e96c24d…
+pod: web-7fbc579fd4-wkrgm
+
+NAME                   READY   STATUS    RESTARTS     AGE
+web-7fbc579fd4-7dpbg   1/1     Running   0            32s
+web-7fbc579fd4-vz57m   1/1     Running   0            32s
+web-7fbc579fd4-wkrgm   1/1     Running   1 (8s ago)   22s
+```
+
+**El Pod es el mismo** (`web-7fbc579fd4-wkrgm`, mismo nombre, 22 segundos de edad), pero
+ahora marca `RESTARTS 1`. Míralo desde el runtime otra vez:
+
+```bash
+docker exec topicos-m4-control-plane crictl ps --name nginx
+```
+
+**Salida real de esta máquina:**
+
+```
+CONTAINER      CREATED          STATE     NAME    ATTEMPT   POD ID          POD                    NAMESPACE
+c7bc42c1b7c52  7 seconds ago    Running   nginx   1         cb7afda6733f9   web-7fbc579fd4-wkrgm   default
+4e6aa3301b8ce  31 seconds ago   Running   nginx   0         52185c73d4d7f   web-7fbc579fd4-7dpbg   default
+a988cd69264d4  31 seconds ago   Running   nginx   0         b7b0bf3183e5b   web-7fbc579fd4-vz57m   default
+```
+
+El **`POD ID` no cambió** (`cb7afda6733f9`), el **ID de contenedor sí** (`c7bc42…` en vez
+de `664b73…`) y el `ATTEMPT` pasó de `0` a `1`. Los eventos y el estado del Pod lo cuentan
+igual:
+
+```bash
+kubectl get events --field-selector involvedObject.name=$POD --sort-by=.lastTimestamp \
+  -o custom-columns=FIRST:.firstTimestamp,LAST:.lastTimestamp,COUNT:.count,REASON:.reason,MESSAGE:.message
+kubectl get pod $POD -o jsonpath='restartPolicy={.spec.restartPolicy}  restartCount={.status.containerStatuses[0].restartCount}  motivo={.status.containerStatuses[0].lastState.terminated.reason}  exitCode={.status.containerStatuses[0].lastState.terminated.exitCode}{"\n"}'
+```
+
+**Salida real de esta máquina** (recortada en el espaciado para que quepa):
+
+```
+FIRST                  LAST                   COUNT   REASON      MESSAGE
+2026-08-21T02:19:59Z   2026-08-21T02:19:59Z   1       Scheduled   Successfully assigned default/web-7fbc579fd4-wkrgm to topicos-m4-control-plane
+2026-08-21T02:19:59Z   2026-08-21T02:20:14Z   2       Pulled      Container image "nginx:1.29-alpine" already present on machine and can be accessed by the pod
+2026-08-21T02:19:59Z   2026-08-21T02:20:14Z   2       Created     Container created
+2026-08-21T02:19:59Z   2026-08-21T02:20:14Z   2       Started     Container started
+
+restartPolicy=Always  restartCount=1  motivo=Error  exitCode=137
+```
+
+`Scheduled` ocurrió **una** vez (el Pod se programó una sola vez, y sigue en el mismo
+nodo), pero `Created` y `Started` llevan `COUNT 2`: una vez al nacer el Pod y otra 15
+segundos después, cuando tú mataste el contenedor. El `exitCode=137` es `128 + 9`, o sea
+`SIGKILL`: la señal que le llegó al proceso.
+
+**Qué acabas de ver.** El kubelet no adivina el estado de tus contenedores: se lo pregunta
+al runtime por CRI, continuamente, y sincroniza lo que encuentra contra lo que el Pod pide.
+Cuando containerd le reportó que ese contenedor ya no estaba corriendo, el kubelet aplicó
+el `restartPolicy` del Pod (`Always`, el valor por defecto) y le pidió al runtime que
+arrancara uno nuevo dentro del **mismo** Pod. Por eso no hubo `Scheduled` nuevo, ni Pod
+nuevo, ni IP nueva.
+
+**Los dos loops, uno al lado del otro:**
+
+| Qué rompiste | Quién reacciona | Resultado |
+|---|---|---|
+| Borraste el **Pod** (3.1) | el controlador de **ReplicaSet** | Pod **nuevo**, nombre distinto, IP distinta |
+| Mataste el **contenedor** (3.2) | el **kubelet**, avisado por el runtime | **mismo** Pod, `RESTARTS +1`, misma IP |
+
+Dos niveles distintos, dos controladores distintos, el mismo patrón: observar, comparar,
+actuar.
+
+### 3.3 Escalar, y ver la lista de endpoints seguir
+
+Deja una **segunda terminal** mirando los EndpointSlices:
+
+```bash
+# Terminal 2
+kubectl get endpointslices -l kubernetes.io/service-name=web -w
+```
+
+Y en la primera:
+
+```bash
+# Terminal 1
+kubectl scale deployment/web --replicas=5
+kubectl rollout status deployment/web --timeout=120s
+kubectl scale deployment/web --replicas=2
+```
+
+**Salida real de la terminal 2 en esta máquina** (completa, sin recortar):
+
+```
+NAME        ADDRESSTYPE   PORTS   ENDPOINTS                           AGE
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10   32s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10 + 1 more...   35s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10 + 2 more...   35s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10 + 2 more...   38s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10 + 2 more...   38s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10 + 1 more...   38s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7,10.244.0.10               38s
+web-7tml5   IPv4          80      10.244.0.6,10.244.0.7                           38s
+```
+
+Cuenta los endpoints línea a línea: **3 → 4 → 5**, y luego **5 → 4 → 3 → 2**. Y mira la
+columna `AGE`: `32s`, `35s`, `38s`. **Es el mismo objeto todo el tiempo**, `web-7tml5`,
+nunca se recreó. Solo cambió de contenido, siete veces, en seis segundos.
+
+(`kubectl` abrevia con `+ N more...` cuando la columna no cabe; el objeto sí tiene todas
+las direcciones. Hay dos líneas seguidas con `+ 2 more...` a los `38s`: son dos escrituras
+distintas del objeto que en esta vista resumida se ven iguales, porque la columna
+`ENDPOINTS` no muestra las condiciones `ready` de cada dirección.)
+
+Reconstruye la cadena de lo que disparaste con un solo `kubectl scale`:
+
+1. Tú cambiaste `spec.replicas` del **Deployment**.
+2. El controlador de Deployment ajustó el `spec.replicas` del **ReplicaSet**.
+3. El controlador de ReplicaSet vio la diferencia y creó (o borró) **Pods**.
+4. El **scheduler** asignó nodo a cada Pod nuevo.
+5. El **kubelet** de ese nodo le pidió a **containerd** que arrancara los contenedores.
+6. Cuando cada Pod pasó a `Ready`, el controlador de **EndpointSlice** lo añadió a la lista.
+
+Seis componentes. Ninguno se llamó entre sí. Cada uno estaba observando la API y reaccionó
+a lo que vio. Eso es el loop de reconciliación, y es toda la arquitectura de Kubernetes:
+controladores pequeños, independientes, cada uno empujando el mundo hacia el `spec`.
+
+### 3.4 El último eslabón: `kube-proxy` en el kernel
+
+Falta ver quién convierte esa lista de la API en algo que el kernel entienda. Ese alguien
+es `kube-proxy`, y ya lo hizo mientras tú escalabas:
+
+```bash
+kubectl logs -n kube-system -l k8s-app=kube-proxy --tail=30 | grep -i "Proxier"
+docker exec topicos-m4-control-plane iptables-save -t nat | grep "default/web"
+```
+
+**Salida real de esta máquina** (recortada; las líneas de `iptables-save` están
+**reordenadas** para poder leerlas de arriba abajo, porque `iptables-save` las imprime
+agrupadas por cadena y no en el orden en que se recorren; también se quitaron las líneas
+`KUBE-MARK-MASQ`, que son de enmascaramiento y no de enrutamiento):
+
+```
+I0821 02:19:27.424590       1 server_linux.go:137] "Using iptables Proxier"
+
+-A KUBE-SERVICES -d 10.96.175.77/32 -p tcp -m comment --comment "default/web cluster IP" -m tcp --dport 80 -j KUBE-SVC-LOLE4ISW44XBNF3G
+-A KUBE-SVC-LOLE4ISW44XBNF3G -m comment --comment "default/web -> 10.244.0.6:80" -m statistic --mode random --probability 0.50000000000 -j KUBE-SEP-XBXNMJVLFJ54CH32
+-A KUBE-SVC-LOLE4ISW44XBNF3G -m comment --comment "default/web -> 10.244.0.7:80" -j KUBE-SEP-BQUKCVYNN2D77XOH
+-A KUBE-SEP-XBXNMJVLFJ54CH32 -p tcp -m comment --comment "default/web" -m tcp -j DNAT --to-destination 10.244.0.6:80
+-A KUBE-SEP-BQUKCVYNN2D77XOH -p tcp -m comment --comment "default/web" -m tcp -j DNAT --to-destination 10.244.0.7:80
+```
+
+Léelo de arriba abajo, es toda la historia del Service en cuatro líneas:
+
+1. Todo lo que va a `10.96.175.77:80` (la ClusterIP) salta a la cadena `KUBE-SVC-…`.
+2. Esa cadena tiene dos ramas, y elige la primera **con probabilidad 0.5**. Ese es el
+   balanceo de carga: `--mode random`, no un algoritmo sofisticado.
+3. Cada rama hace `DNAT` a la IP real de un Pod: `10.244.0.6` y `10.244.0.7`, que son
+   exactamente las dos que quedaron en el EndpointSlice después de escalar a 2.
+
+La ClusterIP `10.96.175.77` no existe en ninguna interfaz de red: es una IP ficticia que
+solo tiene sentido como criterio de una regla `iptables`. Por eso no puedes hacerle `ping`
+y sí puedes conectarte a ella por TCP.
 
 ---
 
-## Paso 4 – Admission: modificar lo que entra al clúster (30 min)
+## Limpieza (3 min)
+
+```bash
+kind delete cluster --name topicos-m4
+docker ps --filter "name=topicos-m4" --format '{{.Names}}'   # no debe imprimir nada
+rm -rf ~/lab-k8s
+```
+
+**Salida real de esta máquina:**
+
+```
+Deleting cluster "topicos-m4" ...
+Deleted nodes: ["topicos-m4-control-plane"]
+```
+
+Borrar el clúster borra los contenedores-nodo y con ellos etcd: todo el estado que creaste
+desaparece. La imagen `kindest/node` se queda en tu caché de Docker, que es lo que hace que
+la próxima creación tarde diez segundos y no varios minutos.
+
+> Si vas a hacer el **Anexo opcional**, no borres nada todavía: el anexo empieza recreando
+> el clúster con una configuración distinta, así que de todos modos vas a tener que borrar
+> este. Puedes hacer la limpieza ahora y crear el nuevo después, o saltar directo al
+> Anexo A0.
+
+---
+
+## Síntesis: cada componente y lo que le viste hacer
+
+| Componente | Qué le viste hacer, en qué paso |
+|---|---|
+| **kube-apiserver** | única puerta de entrada; todo lo que hiciste con `kubectl` pasó por él (1.3, 2.x) |
+| **etcd** | static Pod en `kube-system`: ahí quedó guardado todo lo que creaste (1.3) |
+| **kube-scheduler** | asignó nodo a cada Pod nuevo, incluido el que repuso el ReplicaSet (1.3, 3.1) |
+| **kube-controller-manager** | contiene el controlador de ReplicaSet (repuso el Pod, 3.1) y el de EndpointSlice (`managed-by`, 2.3) |
+| **kubelet** | unidad de systemd con su propio cgroup (1.2); arranca los static Pods desde `/etc/kubernetes/manifests` (1.3); reinició el contenedor que mataste por CRI (3.2) |
+| **kube-proxy** | tradujo la ClusterIP a reglas `iptables` con `DNAT` y `--probability 0.5` (3.4) |
+| **containerd (CRI)** | el runtime del nodo; los mismos contenedores vistos con `crictl ps` (1.4, 3.2) |
+| **CNI (kindnet)** | dio a cada Pod su IP `10.244.0.x`, enrutable dentro del clúster (2.2) |
+| **CoreDNS** | resolvió `web.default.svc.cluster.local` sin configuración previa (2.4) |
+| **Pod** | la unidad que se programa; suelto no se auto-repara (2.1), dentro de un Deployment sí (3.1) |
+| **Deployment / ReplicaSet** | la cadena de propiedad `Deployment → ReplicaSet → Pod` (2.2) y el loop reaccionando (3.1, 3.3) |
+| **Service / EndpointSlice** | la lista viva de IPs listas, actualizada siete veces en seis segundos al escalar (3.3) |
+| **`--dry-run=client -o yaml`** | generó el YAML del Pod, del Deployment y del Service sin que memorizaras nada (2.1, 2.2, 2.3) |
+
+---
+
+## Cómo conecta con el resto del curso
+
+- **Módulo 1:** el kubelet del Paso 1.2 es una unidad de systemd corriente, con `Drop-In`,
+  `Main PID` y su propio cgroup. Cuando un nodo aparezca `NotReady`,
+  `journalctl -u kubelet` va a ser tu primer comando, exactamente como allá.
+- **Módulo 3:** el nodo del Paso 1.1 comparte kernel con tu host (`uname -r` idéntico),
+  igual que el `docker run` del Paso 1 de aquel laboratorio; `crictl ps` (1.4 y 3.2) te
+  enseña que por debajo de los Pods hay contenedores OCI corrientes; y el contraste de
+  CoreDNS (2.4) es la otra cara del `ping: bad address 'web'` del Paso 8 de aquel
+  laboratorio: la diferencia entre "el DNS lo declaras tú" y "el DNS viene con la
+  plataforma".
+- **Módulo 5 (CKA):** aquí el loop funciona; allá lo depuras cuando **no** funciona. Los
+  comandos de este laboratorio (`kubectl get events`, `crictl ps`, `journalctl -u kubelet`)
+  son literalmente el instrumental del dominio de *troubleshooting*. Y el patrón
+  `--dry-run=client -o yaml` más la documentación oficial abierta es, literalmente, la
+  forma de trabajar en el examen práctico.
+- **Módulo 8 (GitOps):** el bucle del Paso 3 es exactamente el bucle de GitOps, con el
+  estado deseado movido del `spec` de un objeto al contenido de un repositorio Git. El
+  controlador cambia; el patrón es el mismo.
+
+---
+
+## Para profundizar
+
+Lo de arriba lo observaste en tu terminal. Lo que sigue son afirmaciones que un comando no
+te puede dar, verificadas contra la documentación oficial el **20 de agosto de 2026**
+(Kubernetes 1.36).
+
+**EndpointSlices y por qué existen.** La API `Endpoints` original guardaba todas las IPs de
+un Service en un solo objeto, que había que reescribir entero por cada cambio: con miles de
+Pods, eso satura al API server y a etcd. El control plane crea *slices* de **hasta 100
+endpoints** por defecto, configurable con `--max-endpoints-per-slice` en
+`kube-controller-manager` hasta un máximo de **1000**. Los EndpointSlices son la **fuente
+de verdad para `kube-proxy`**, y la API `Endpoints` está **deprecada desde v1.33** (el
+propio `kubectl` te lo advierte en pantalla si corres `kubectl get endpoints`). (Fuente:
+`kubernetes.io/docs/concepts/services-networking/endpoint-slices/`.)
+
+**Version skew.** `kubectl` está soportado dentro de **un** *minor* de diferencia, más
+viejo o más nuevo, respecto del `kube-apiserver`. (Fuente:
+`kubernetes.io/releases/version-skew-policy/`.)
+
+**Documentación permitida en los exámenes de la CNCF.** Para **CKA, CKAD y CKS** la Linux
+Foundation permite abrir `https://kubernetes.io/docs/` en el navegador del examen, con la
+restricción de no abrir resultados de búsqueda externos. **KCNA no figura en esa lista.**
+(Fuente: `docs.linuxfoundation.org/tc-docs/certification/certification-resources-allowed`.)
+
+**Sobre el examen KCNA.** Este laboratorio cubre material de los dominios de fundamentos de
+Kubernetes, orquestación de contenedores y arquitectura cloud native, pero **no** es una
+guía de estudio del examen y aquí no se citan pesos de dominio: el currículo se revisa
+periódicamente y una tabla copiada de un blog envejece mal. Consulta los pesos vigentes en
+la página oficial del examen KCNA de la CNCF, como indica el `README.md` del módulo.
+
+---
+---
+
+# Anexo opcional (para casa)
+
+> **Opcional. No se hace en clase y no se evalúa en la sesión.** Es material avanzado para
+> quien quiera seguir por su cuenta: dura unos **50 minutos**, exige recrear el clúster con
+> una configuración distinta, y toca dos temas que el núcleo del laboratorio deja fuera a
+> propósito: **admission control** (cómo se intercepta y modifica lo que entra al clúster) y
+> **cgroup v2 con Node Memory Swap** (cómo Kubernetes le pone cuotas de memoria y swap a tus
+> contenedores en el kernel).
+>
+> Hazlo con el archivo abierto, no de memoria. El paso A1.2 (escribir y registrar tu propio
+> webhook) es el que más se recuerda a largo plazo y también el que más falla si vas
+> improvisando.
+
+| Bloque | Pasos | Tiempo |
+|---|---|---|
+| Recrear el clúster con configuración de swap | A0 | ~5 min |
+| Admission: `LimitRanger` y tu propio webhook | A1 | ~30 min |
+| cgroup v2 y Node Memory Swap | A2 | ~15 min |
+
+**Requisito extra:** `openssl` instalado, y swap activo en el host si quieres ver números
+reales en A2 (el anexo dice qué cambia si no lo tienes).
+
+## Objetivo del anexo
+
+1. ¿En qué punto exacto del camino de una petición se intercepta y **modifica** un objeto
+   antes de guardarlo en `etcd`, y por qué eso pasa dos veces (un plugin compilado en el
+   API server y un webhook tuyo)?
+2. ¿Por qué un Pod `Guaranteed` no puede usar swap y uno `Burstable` sí, y de dónde sale el
+   número exacto de bytes de swap que recibe?
+3. ¿Qué relación hay entre la clase de QoS de un Pod y la jerarquía de cgroups v2 en el
+   disco del nodo?
+
+---
+
+## A0: Recrear el clúster con configuración de kubelet (5 min)
+
+El paso A2 necesita un kubelet configurado para tolerar y usar swap, y eso solo se puede
+hacer **al crear el clúster**. Si todavía tienes el clúster del núcleo, bórralo:
+
+```bash
+kind delete cluster --name topicos-m4
+```
+
+Escribe la configuración. Cada línea es una decisión que vas a comprobar en A2:
+
+```bash
+mkdir -p ~/lab-k8s && cd ~/lab-k8s
+
+cat > kind-topicos-m4.yaml <<'EOF'
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+name: topicos-m4
+nodes:
+  - role: control-plane
+    # Imagen fijada por tag + digest: el tag puede reapuntarse, el digest no.
+    image: kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5
+# Este parche configura el kubelet de TODOS los nodos. Lo verificas en A2.2.
+kubeadmConfigPatches:
+  - |
+    kind: KubeletConfiguration
+    failSwapOn: false
+    memorySwap:
+      swapBehavior: LimitedSwap
+EOF
+
+kind create cluster --config kind-topicos-m4.yaml
+kubectl wait --for=condition=Ready node --all --timeout=180s
+```
+
+Cuatro decisiones deliberadas ahí:
+
+- **`image: …@sha256:…`**: el mismo principio del módulo 3, un tag es una etiqueta móvil y
+  un digest es contenido inmutable. Este digest corresponde a `kindest/node:v1.36.1` tal
+  como estaba en caché local el **20 de agosto de 2026**; si `kind` te dice que no la
+  encuentra, borra la parte `@sha256:…` y déjalo solo en `kindest/node:v1.36.1`, aceptando
+  que ya no está fijado.
+- **`name: topicos-m4`**: nombre propio, para no chocar con otros clústeres tuyos.
+- **`failSwapOn: false`**: sin esto, el kubelet **no arranca** en un nodo con swap. La
+  documentación oficial lo dice sin rodeos: *"By default, the kubelet will not start on a
+  Linux node that has swap enabled."*
+- **`memorySwap.swapBehavior: LimitedSwap`**: el valor por defecto es `NoSwap`. Con
+  `NoSwap`, aunque el kubelet tolere el swap, **ningún** workload lo usa.
+
+> **Lo que NO hay que poner aquí, y por qué importa.** Mucho material sobre Node Memory
+> Swap te dice que añadas el *feature gate* `NodeSwap`. Eso ya no aplica: la tabla oficial
+> de feature gates registra `NodeSwap` como **Alpha en 1.22–1.27, Beta (apagado) en
+> 1.28–1.29, Beta (encendido) en 1.30–1.33 y GA desde 1.34**, sin versión de retiro. En un
+> clúster 1.36 como este, la funcionalidad está siempre activa y el gate no hace falta. Si
+> lo copias de un tutorial viejo, en el mejor de los casos es ruido. (Fuente:
+> `kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/`, fila
+> `NodeSwap`.)
+
+---
+
+## A1: Admission, modificar lo que entra al clúster (30 min)
 
 Antes de guardar cualquier objeto en etcd, el API server lo pasa por una cadena de
 **admission controllers**. Los hay de dos tipos: los que **modifican** el objeto
-(*mutating*) y los que solo lo **aceptan o rechazan** (*validating*).
+(*mutating*) y los que solo lo **aceptan o rechazan** (*validating*). Vas a ver los dos
+mecanismos que existen: uno compilado dentro del API server, y uno tuyo, colgado por HTTPS.
 
-Vas a ver los dos mecanismos que existen para esto: uno compilado dentro del API server, y
-uno tuyo, colgado por HTTPS.
-
-### 4.1 Un plugin de admission que ya está encendido: LimitRanger (10 min)
+### A1.1 Un plugin que ya está encendido: LimitRanger (10 min)
 
 ```bash
 kubectl create namespace admision
@@ -856,13 +1234,13 @@ enviaste**: el API server lo modificó en vuelo. Y dejó su firma: la anotación
 `kubernetes.io/limit-ranger` dice literalmente qué plugin tocó qué. Esa anotación es la
 prueba de que hubo mutación, no una inferencia tuya.
 
-Efecto secundario que vas a necesitar en el Paso 5: como ahora `requests` ≠ `limits`, el
-Pod quedó en clase de calidad de servicio **`Burstable`**.
+Efecto secundario que vas a necesitar en A2: como ahora `requests` ≠ `limits`, el Pod quedó
+en clase de calidad de servicio **`Burstable`**.
 
-`LimitRanger` no lo activaste tú. Está en el conjunto por defecto: la documentación
-oficial lista, para Kubernetes 1.36, los plugins encendidos de fábrica, e incluye
-`LimitRanger`, `MutatingAdmissionWebhook`, `ValidatingAdmissionWebhook`, `PodSecurity`,
-`ResourceQuota`, `ServiceAccount`, `NamespaceLifecycle` y varios más. (Fuente:
+`LimitRanger` no lo activaste tú. Está en el conjunto por defecto: la documentación oficial
+lista, para Kubernetes 1.36, los plugins encendidos de fábrica, e incluye `LimitRanger`,
+`MutatingAdmissionWebhook`, `ValidatingAdmissionWebhook`, `PodSecurity`, `ResourceQuota`,
+`ServiceAccount`, `NamespaceLifecycle` y varios más. (Fuente:
 `kubernetes.io/docs/reference/access-authn-authz/admission-controllers/`, sección *"Which
 plugins are enabled by default?"*.)
 
@@ -870,13 +1248,13 @@ Fíjate en que ahí están **`MutatingAdmissionWebhook`** y **`ValidatingAdmissi
 Esos dos plugins no hacen nada por sí solos: son los puntos de extensión que llaman a
 webhooks que **tú** registres. Es exactamente lo que vas a hacer ahora.
 
-### 4.2 Tu propio MutatingWebhookConfiguration (20 min)
+### A1.2 Tu propio MutatingWebhookConfiguration (20 min)
 
 El plan: un servidor HTTPS mínimo en Python que reciba un `AdmissionReview`, devuelva un
 parche JSON que añade una etiqueta, y registrarlo para que el API server lo consulte antes
 de crear cualquier Pod **en un solo namespace**.
 
-#### 4.2.1 TLS: por qué es obligatorio y con qué nombre
+#### A1.2.1 TLS: por qué es obligatorio y con qué nombre
 
 El API server **solo** habla HTTPS con los webhooks, y valida el certificado contra el
 `caBundle` que tú declares. El certificado tiene que ser válido para el nombre DNS interno
@@ -921,10 +1299,10 @@ X509v3 Subject Alternative Name:
 > verificar el nombre del host: si no hay SAN, el saludo TLS falla y el webhook nunca
 > recibe nada. El archivo `ext.cnf` de arriba existe para eso.
 >
-> `tls.key` es material privado. No lo subas a ningún repositorio, no lo pegues en el
-> chat, no lo imprimas en la terminal. Aquí es desechable, pero la costumbre no lo es.
+> `tls.key` es material privado. No lo subas a ningún repositorio, no lo pegues en el chat,
+> no lo imprimas en la terminal. Aquí es desechable, pero la costumbre no lo es.
 
-#### 4.2.2 El servidor
+#### A1.2.2 El servidor
 
 ```bash
 kubectl create namespace webhooks
@@ -1056,10 +1434,10 @@ deployment "inyector" successfully rolled out
 webhook escuchando en :8443
 ```
 
-(La imagen `python:3.13-slim` es la misma del módulo 3, Paso 7. Si es la primera vez que
-la descarga este clúster, tarda un poco.)
+(La imagen `python:3.13-slim` es la misma del módulo 3, Paso 7. Si es la primera vez que la
+descarga este clúster, tarda un poco.)
 
-#### 4.2.3 Registrar el webhook
+#### A1.2.3 Registrar el webhook
 
 ```bash
 kubectl label namespace admision webhook-topicos=si --overwrite
@@ -1115,21 +1493,21 @@ inyector-de-etiquetas   1          0s
 > Restringirlo a un namespace con una etiqueta que tú controlas es la forma barata de que
 > un error tuyo no se coma el control plane.
 >
-> **`failurePolicy`.** La documentación define los dos valores así: *"`Ignore` means that
-> an error calling the webhook is ignored and the API request is allowed to continue.
-> `Fail` means that an error calling the webhook causes the admission to fail and the API
-> request to be rejected."* Y aclara qué cuenta como error: errores de red, *timeouts*,
-> respuestas no-2xx o mal formadas, y (solo para webhooks *mutating*) un parche
-> indescifrable. Aquí usamos `Ignore` porque es un laboratorio y preferimos que un fallo
-> nuestro no bloquee nada. En un webhook de **seguridad** en producción, `Ignore` sería un
-> agujero: bastaría tumbar el webhook para saltarse la política. Ahí se usa `Fail`, y por
-> eso ahí la alta disponibilidad del webhook deja de ser opcional. (Fuente:
+> **`failurePolicy`.** La documentación define los dos valores así: *"`Ignore` means that an
+> error calling the webhook is ignored and the API request is allowed to continue. `Fail`
+> means that an error calling the webhook causes the admission to fail and the API request
+> to be rejected."* Y aclara qué cuenta como error: errores de red, *timeouts*, respuestas
+> no-2xx o mal formadas, y (solo para webhooks *mutating*) un parche indescifrable. Aquí
+> usamos `Ignore` porque es un laboratorio y preferimos que un fallo nuestro no bloquee
+> nada. En un webhook de **seguridad** en producción, `Ignore` sería un agujero: bastaría
+> tumbar el webhook para saltarse la política. Ahí se usa `Fail`, y por eso ahí la alta
+> disponibilidad del webhook deja de ser opcional. (Fuente:
 > `kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/`,
 > sección *Failure policy*.)
 
-#### 4.2.4 Comprobarlo: las tres pruebas
+#### A1.2.4 Comprobarlo: las tres pruebas
 
-**Prueba 1 – dentro del alcance, webhook vivo:**
+**Prueba 1, dentro del alcance y webhook vivo:**
 
 ```bash
 kubectl run probando -n admision --image=alpine:3.20 --restart=Never --command -- sleep 3600
@@ -1147,12 +1525,12 @@ webhook escuchando en :8443
 mutado: admision/probando
 ```
 
-Ahí está: `inyectado-por=webhook-topicos-m4`. Tú nunca escribiste esa etiqueta. El
-`kubectl run` solo pone `run=probando`. La otra la añadió tu servidor Python, en el
-milisegundo entre que el API server recibió el Pod y lo guardó en etcd. Y el log del
-webhook lo confirma desde el otro lado.
+Ahí está: `inyectado-por=webhook-topicos-m4`. Tú nunca escribiste esa etiqueta. El `kubectl
+run` solo pone `run=probando`. La otra la añadió tu servidor Python, en el milisegundo
+entre que el API server recibió el Pod y lo guardó en etcd. Y el log del webhook lo
+confirma desde el otro lado.
 
-**Prueba 2 – fuera del alcance:**
+**Prueba 2, fuera del alcance:**
 
 ```bash
 kubectl run fuera-de-alcance --image=alpine:3.20 --restart=Never --command -- sleep 300
@@ -1170,7 +1548,7 @@ Sin etiqueta inyectada. Este Pod está en el namespace `default`, que no tiene
 `webhook-topicos=si`, así que el API server ni siquiera llamó al webhook. El
 `namespaceSelector` funciona.
 
-**Prueba 3 – quitar el webhook:**
+**Prueba 3, quitar el webhook:**
 
 ```bash
 kubectl delete mutatingwebhookconfiguration inyector-de-etiquetas
@@ -1179,8 +1557,8 @@ kubectl get pods -n admision --show-labels
 ```
 
 **Salida real de esta máquina** (se quitó una línea: en la corrida de referencia el Pod
-`garantizado` del Paso 5.3 ya existía en este namespace, porque los pasos se ejecutaron en
-otro orden al preparar el laboratorio; tú todavía no lo has creado):
+`garantizado` de A2.3 ya existía en este namespace, porque los pasos se ejecutaron en otro
+orden al preparar el laboratorio; tú todavía no lo has creado):
 
 ```
 NAME                  READY   STATUS              RESTARTS   AGE     LABELS
@@ -1189,17 +1567,19 @@ despues-del-borrado   0/1     ContainerCreating   0          0s      run=despues
 probando              1/1     Running             0          9s      inyectado-por=webhook-topicos-m4,run=probando
 ```
 
-El servidor Python **sigue corriendo** (no lo borraste), pero el `MutatingWebhookConfiguration`
-ya no existe, así que el API server no lo llama. `despues-del-borrado` nace limpio, mientras
-`probando` conserva su etiqueta: la mutación ocurrió una sola vez, al crear el objeto, y
-quedó grabada en etcd. Borrar el webhook no deshace lo ya mutado.
+El servidor Python **sigue corriendo** (no lo borraste), pero el
+`MutatingWebhookConfiguration` ya no existe, así que el API server no lo llama.
+`despues-del-borrado` nace limpio, mientras `probando` conserva su etiqueta: la mutación
+ocurrió una sola vez, al crear el objeto, y quedó grabada en etcd. Borrar el webhook no
+deshace lo ya mutado.
 
 Ese es el punto conceptual completo: **el webhook no es un vigilante permanente, es un
 interceptor en el momento de escritura.**
 
-> **Contexto que vale la pena saber, aunque no lo usemos aquí.** Los webhooks no son ya la
-> única forma de extender admission. Corre `kubectl api-resources --api-group=admissionregistration.k8s.io`
-> en este mismo clúster y vas a ver, además de los `…webhookconfigurations`, los objetos
+> **Contexto que vale la pena saber, aunque no lo usemos aquí.** Los webhooks ya no son la
+> única forma de extender admission. Corre
+> `kubectl api-resources --api-group=admissionregistration.k8s.io` en este mismo clúster y
+> vas a ver, además de los `…webhookconfigurations`, los objetos
 > `validatingadmissionpolicies` y `mutatingadmissionpolicies` (verificado en esta máquina,
 > ambos en `admissionregistration.k8s.io/v1`). Son políticas escritas en CEL que se evalúan
 > **dentro** del API server, sin un servidor HTTPS tuyo en el camino: menos latencia y
@@ -1209,12 +1589,12 @@ interceptor en el momento de escritura.**
 
 ---
 
-## Paso 5: cgroup v2 y Node Memory Swap (15 min)
+## A2: cgroup v2 y Node Memory Swap (15 min)
 
 Módulo 3, Paso 1: viste `cgroup2fs` y `0::/` dentro de un contenedor. Ahora vas a ver a
 Kubernetes usar esa misma jerarquía para algo concreto y medible.
 
-### 5.1 El sustrato
+### A2.1 El sustrato
 
 ```bash
 docker exec topicos-m4-control-plane stat -fc %T /sys/fs/cgroup
@@ -1231,10 +1611,10 @@ Filename				Type		Size		Used		Priority
 ```
 
 Dos cosas: el nodo usa **cgroup v2**, y ve el swap **del host** (`/swap.img`, 8 GiB), no
-uno propio. `/proc/swaps` no está aislado por namespaces, así que el contenedor-nodo lee
-el del kernel que comparte contigo. Es, otra vez, el hallazgo del módulo 3.
+uno propio. `/proc/swaps` no está aislado por namespaces, así que el contenedor-nodo lee el
+del kernel que comparte contigo. Es, otra vez, el hallazgo del módulo 3.
 
-### 5.2 Lo que el kubelet cree que le configuraste
+### A2.2 Lo que el kubelet cree que le configuraste
 
 No confíes en tu archivo YAML: pregúntale al kubelet. El API server sabe hacer de proxy
 hacia el endpoint de configuración de cada nodo.
@@ -1254,8 +1634,8 @@ kubectl get --raw "/api/v1/nodes/topicos-m4-control-plane/proxy/configz" \
 ```
 
 Eso es el kubelet **en ejecución** reportando su configuración efectiva, no lo que tú
-escribiste. Es la diferencia entre "lo configuré" y "está configurado", y es exactamente
-el tipo de comprobación que el módulo 5 (CKA) te va a pedir bajo cronómetro.
+escribiste. Es la diferencia entre "lo configuré" y "está configurado", y es exactamente el
+tipo de comprobación que el módulo 5 (CKA) te va a pedir bajo cronómetro.
 
 Kubernetes también expone la capacidad de swap en el estado del nodo:
 
@@ -1271,16 +1651,16 @@ topicos-m4-control-plane: 8589930496
 
 8 589 930 496 bytes = 8 GiB, el `/swap.img` de tu host visto por Kubernetes.
 
-> **Si tu máquina no tiene swap** (`swapon --show` no imprime nada), este laboratorio
-> sigue funcionando: `failSwapOn: false` es inofensivo cuando no hay swap, el clúster
-> arranca igual y `configz` muestra lo mismo. Lo que cambia es el **estado**: el comando de
-> arriba te va a imprimir `<unknown>`, porque, en palabras de la documentación, *"the node
-> does not have swap provisioned"*. Y siguiendo la fórmula de 5.4, el `memory.swap.max` de
-> tus contenedores será `0`, porque el factor `totalPodsSwapAvailable` vale cero. (Lo
-> primero está documentado; lo segundo se deduce de la fórmula oficial. No se pudo
-> verificar en esta máquina, que sí tiene swap.)
+> **Si tu máquina no tiene swap** (`swapon --show` no imprime nada), esto sigue
+> funcionando: `failSwapOn: false` es inofensivo cuando no hay swap, el clúster arranca
+> igual y `configz` muestra lo mismo. Lo que cambia es el **estado**: el comando de arriba
+> te va a imprimir `<unknown>`, porque, en palabras de la documentación, *"the node does not
+> have swap provisioned"*. Y siguiendo la fórmula de A2.4, el `memory.swap.max` de tus
+> contenedores será `0`, porque el factor `totalPodsSwapAvailable` vale cero. (Lo primero
+> está documentado; lo segundo se deduce de la fórmula oficial. No se pudo verificar en
+> esta máquina, que sí tiene swap.)
 
-### 5.3 La regla: qué Pods pueden usar swap
+### A2.3 La regla: qué Pods pueden usar swap
 
 Esta es la parte que hay que leer de la fuente y no de un blog. Con `LimitedSwap`:
 
@@ -1296,8 +1676,7 @@ declara nada sobre su memoria, así que no hay forma segura de calcularle una cu
 `Guaranteed` pidió memoria exacta e inmediatamente disponible, y darle swap rompería
 justamente esa promesa.
 
-Compruébalo con los dos Pods que ya tienes y uno nuevo. Primero el `Burstable` del Paso
-4.1:
+Compruébalo con el Pod `Burstable` de A1.1 y uno nuevo:
 
 ```bash
 UID_POD=$(kubectl get pod desnudo -n admision -o jsonpath='{.metadata.uid}')
@@ -1319,14 +1698,14 @@ contenedores del Pod):
   memory.swap.max= max
 ```
 
-Antes de nada, mira la **ruta**: `kubelet-kubepods.slice / kubelet-kubepods-burstable.slice
-/ …-pod<uid>.slice / cri-containerd-<id>.scope`. La clase de QoS no es una etiqueta
-decorativa: es un **nivel real de la jerarquía de cgroups v2** en el disco. Y hay dos
-contenedores porque el segundo es el contenedor de pausa (*sandbox*) del Pod, que no lleva
-límites.
+Antes de nada, mira la **ruta**: `kubelet-kubepods.slice /
+kubelet-kubepods-burstable.slice / …-pod<uid>.slice / cri-containerd-<id>.scope`. La clase
+de QoS no es una etiqueta decorativa: es un **nivel real de la jerarquía de cgroups v2** en
+el disco. Y hay dos contenedores porque el segundo es el contenedor de pausa (*sandbox*)
+del Pod, que no lleva límites.
 
 El contenedor de verdad tiene `memory.max = 134217728` (128 MiB, el límite que le puso
-`LimitRanger` en el Paso 4.1) y **`memory.swap.max = 8626176`**: unos 8.2 MiB de swap.
+`LimitRanger` en A1.1) y **`memory.swap.max = 8626176`**: unos 8.2 MiB de swap.
 
 Ahora un Pod `Guaranteed`:
 
@@ -1374,7 +1753,7 @@ memory.swap.max=max
 recomendación: es un número que el runtime escribió en un archivo del kernel, y lo acabas
 de leer.
 
-### 5.4 De dónde sale el 8626176
+### A2.4 De dónde sale el 8626176
 
 La documentación da la fórmula exacta:
 
@@ -1432,87 +1811,7 @@ Dos consecuencias de esa fórmula, ambas en la documentación:
 
 ---
 
-## Paso 6: Escalar y ver los EndpointSlices moverse (10 min)
-
-El cierre: una sola cifra en `spec` que dispara la cascada completa que ya conoces.
-
-Deja una **segunda terminal** mirando los EndpointSlices:
-
-```bash
-# Terminal 2
-kubectl get endpointslices -l kubernetes.io/service-name=web -w
-```
-
-Y en la primera:
-
-```bash
-# Terminal 1
-kubectl scale deployment/web --replicas=5
-kubectl rollout status deployment/web --timeout=120s
-kubectl scale deployment/web --replicas=2
-```
-
-**Salida real de la terminal 2 en esta máquina** (completa, sin recortar):
-
-```
-NAME        ADDRESSTYPE   PORTS   ENDPOINTS               AGE
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8   4m14s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17   4m17s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17 + 1 more...   4m17s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17 + 2 more...   4m17s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17 + 2 more...   4m20s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17 + 2 more...   4m20s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17 + 1 more...   4m20s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8,10.244.0.17               4m20s
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8                           4m20s
-```
-
-Cuenta los endpoints línea a línea: **2 → 3 → 4 → 5**, y luego **5 → 4 → 3 → 2**. Cada
-línea es una escritura distinta del mismo objeto: nueve líneas, ocho cambios, seis
-segundos. (`kubectl` abrevia con `+ N more...` cuando la columna no cabe; el objeto sí
-tiene todas las direcciones. Y sí, hay dos líneas seguidas con `+ 2 more...` a los
-`4m20s`: son dos escrituras distintas del objeto que en esta vista resumida se ven
-iguales. La columna `ENDPOINTS` solo muestra direcciones, no las condiciones
-`ready`/`serving` de cada una, así que un cambio ahí no se nota. No lo comprobamos con
-`-o yaml` en la corrida de referencia; si quieres saber qué cambió exactamente, ese es el
-comando.)
-
-Y fíjate en la columna `AGE`: `4m14s`, `4m17s`, `4m20s`. **Es el mismo objeto todo el
-tiempo**, `web-s6zxh`, nunca se recreó. Solo cambió de contenido, ocho veces, en seis
-segundos.
-
-Reconstruye la cadena completa de lo que acabas de disparar con un solo `kubectl scale`:
-
-1. Tú cambiaste `spec.replicas` del **Deployment**.
-2. El controlador de Deployment ajustó el `spec.replicas` del **ReplicaSet**.
-3. El controlador de ReplicaSet vio la diferencia y creó (o borró) **Pods**.
-4. El **scheduler** asignó nodo a cada Pod nuevo.
-5. El **kubelet** de ese nodo le pidió a **containerd** que arrancara los contenedores.
-6. Cuando cada Pod pasó a `Ready`, el controlador de **EndpointSlice** lo añadió a la lista.
-7. **`kube-proxy`** reescribió las reglas `iptables` del Paso 2.3.
-
-Siete componentes. Ninguno se llamó entre sí. Cada uno estaba haciendo *watch* sobre la
-API y reaccionó a lo que vio. Eso es el loop, y es toda la respuesta a la pregunta 4 del
-objetivo.
-
-```bash
-kubectl get deploy web
-kubectl get endpointslices -l kubernetes.io/service-name=web
-```
-
-**Salida real de esta máquina:**
-
-```
-NAME   READY   UP-TO-DATE   AVAILABLE   AGE
-web    2/2     2            2           5m19s
-
-NAME        ADDRESSTYPE   PORTS   ENDPOINTS               AGE
-web-s6zxh   IPv4          80      10.244.0.6,10.244.0.8   5m19s
-```
-
----
-
-## Limpieza (3 min)
+## Limpieza del anexo (3 min)
 
 ```bash
 kind delete cluster --name topicos-m4
@@ -1527,62 +1826,11 @@ Deleting cluster "topicos-m4" ...
 Deleted nodes: ["topicos-m4-control-plane"]
 ```
 
-Borrar el clúster borra los contenedores-nodo y con ellos etcd: todo el estado que creaste
-desaparece. La imagen `kindest/node` se queda en tu caché de Docker, que es lo que hace que
-la próxima creación tarde 10 segundos y no varios minutos.
-
 ---
 
-## Síntesis: cada componente y lo que le viste hacer
+## Para profundizar (anexo)
 
-| Componente | Qué le viste hacer, en qué paso |
-|---|---|
-| **kube-apiserver** | única puerta de entrada; mutó tu Pod vía `LimitRanger` (4.1) y llamó a tu webhook por HTTPS antes de escribir en etcd (4.2) |
-| **etcd** | static Pod en `kube-system` (1.3); la mutación de `probando` quedó grabada ahí y sobrevivió al borrado del webhook (4.2.4) |
-| **kube-scheduler** | emitió el evento `Scheduled` asignando nodo al Pod que el ReplicaSet acababa de crear (3.3) |
-| **kube-controller-manager** | contiene el controlador de ReplicaSet (recreó el Pod, 3.2) y el de EndpointSlice (`managed-by`, 2.2) |
-| **kubelet** | unidad de systemd con su propio cgroup (1.2); arranca los static Pods desde `/etc/kubernetes/manifests` (1.3); emitió `Killing` (3.3); reportó `swapBehavior` por `configz` (5.2) |
-| **kube-proxy** | tradujo la ClusterIP a reglas `iptables` con `DNAT` y `--probability 0.5` (2.3) |
-| **containerd (CRI)** | el runtime del nodo; los mismos contenedores vistos con `crictl ps` (1.4) |
-| **CNI (kindnet)** | dio a cada Pod su IP `10.244.0.x`, enrutable dentro del clúster (2.1) |
-| **CoreDNS** | resolvió `web.default.svc.cluster.local` sin configuración previa (2.4) |
-| **Pod** | la unidad que se programa; su UID es un nivel de la jerarquía de cgroups v2 (5.3) |
-| **Deployment / ReplicaSet** | la cadena de propiedad `Deployment → ReplicaSet → Pod` (2.1) y el loop reaccionando (3.2, 6) |
-| **Service / EndpointSlice** | la lista viva de IPs listas, actualizada 8 veces en 6 segundos al escalar (6) |
-| **Admission (plugin)** | `LimitRanger` inyectó `resources` y dejó su firma en una anotación (4.1) |
-| **Admission (webhook)** | tu servidor Python inyectó una etiqueta que nadie escribió (4.2.4) |
-
----
-
-## Cómo conecta con el resto del curso
-
-- **Módulo 1:** el kubelet del Paso 1.2 es una unidad de systemd corriente, con
-  `Drop-In`, `Main PID` y su propio cgroup. Cuando un nodo aparezca `NotReady`,
-  `journalctl -u kubelet` va a ser tu primer comando, exactamente como allá.
-- **Módulo 3:** el nodo del Paso 1.1 comparte kernel con tu host (`uname -r` idéntico),
-  igual que el `docker run` del Paso 1 de aquel laboratorio; `crictl ps` (1.4) te enseña
-  que por debajo de los Pods hay contenedores OCI corrientes; y el contraste de CoreDNS
-  (2.4) es la otra cara del `ping: bad address 'web'` del Paso 8 de aquel laboratorio: la
-  diferencia entre "el DNS lo declaras tú" y "el DNS viene con la plataforma". La
-  jerarquía de cgroups v2 del Paso 5.3 es la misma que ahí viste como `0::/`.
-- **Módulo 5 (CKA):** aquí el loop funciona; allá lo depuras cuando **no** funciona. Los
-  comandos de este laboratorio (`kubectl get events`, `configz`, `crictl ps`,
-  `journalctl -u kubelet`) son literalmente el instrumental del dominio de
-  *troubleshooting*.
-- **Módulo 7 (CKS):** el `failurePolicy` del Paso 4.2.3 es la decisión central de todo
-  webhook de política de seguridad: con `Ignore`, tumbar el webhook basta para saltarse la
-  política. Ahí ya no es un detalle de laboratorio.
-- **Módulo 8 (GitOps):** el bucle del Paso 3 es exactamente el bucle de GitOps, con el
-  estado deseado movido del `spec` de un objeto al contenido de un repositorio Git. El
-  controlador cambia; el patrón Watch-Diff-Update es el mismo.
-
----
-
-## Para profundizar
-
-Todo lo de arriba lo pudiste observar en tu terminal. Lo que sigue son afirmaciones que un
-comando no te puede dar, verificadas una por una contra la documentación oficial en la
-fecha de escritura de este laboratorio (**20 de agosto de 2026**, Kubernetes 1.36).
+Verificado contra la documentación oficial el **20 de agosto de 2026** (Kubernetes 1.36).
 
 **Node Memory Swap: en qué etapa está.** El *feature gate* `NodeSwap` fue **Alpha en
 1.22–1.27**, **Beta apagado por defecto en 1.28–1.29**, **Beta encendido por defecto en
@@ -1591,24 +1839,15 @@ fecha de escritura de este laboratorio (**20 de agosto de 2026**, Kubernetes 1.3
 `failSwapOn: false` y `memorySwap.swapBehavior`, porque el comportamiento por defecto sigue
 siendo `NoSwap`. (Fuente:
 `kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/`, fila
-`NodeSwap`; y
-`kubernetes.io/docs/concepts/cluster-administration/swap-memory-management/`.)
+`NodeSwap`; y `kubernetes.io/docs/concepts/cluster-administration/swap-memory-management/`.)
 
 **LimitedSwap: la regla completa.** Solo los Pods `Burstable` pueden usar swap; los
 `BestEffort` y `Guaranteed` lo tienen prohibido, igual que los Pods de prioridad alta. El
 límite por contenedor es `(containerMemoryRequest / nodeTotalMemory) ×
 totalPodsSwapAvailable`. Un contenedor `Burstable` con `requests` igual a `limits` renuncia
 al swap. El scheduler de 1.36 **no** considera el swap al ubicar Pods. El proyecto
-recomienda swap cifrado, en disco dedicado, y nodos de control plane **sin** swap.
-(Fuente: `kubernetes.io/docs/concepts/cluster-administration/swap-memory-management/`.)
-
-**EndpointSlices y por qué existen.** El control plane crea *slices* de **hasta 100
-endpoints** por defecto, configurable con `--max-endpoints-per-slice` en
-`kube-controller-manager` hasta un máximo de **1000**. Los EndpointSlices son la **fuente
-de verdad para `kube-proxy`**. La API `Endpoints` original está **deprecada desde v1.33**
-(el propio `kubectl` te lo advierte en pantalla), y quien necesite declarar endpoints a
-mano para un Service sin selector debe crear objetos `EndpointSlice` directamente.
-(Fuente: `kubernetes.io/docs/concepts/services-networking/endpoint-slices/`.)
+recomienda swap cifrado, en disco dedicado, y nodos de control plane **sin** swap. (Fuente:
+`kubernetes.io/docs/concepts/cluster-administration/swap-memory-management/`.)
 
 **Admission: qué está encendido de fábrica.** Para Kubernetes 1.36 los plugins habilitados
 por defecto son: `CertificateApproval`, `CertificateSigning`,
@@ -1623,20 +1862,14 @@ administrador del clúster puede configurarlos. (Fuente:
 
 **Reinvocación: por qué el orden de los mutating es un problema real.** Un webhook
 *mutating* puede añadir estructura nueva a un objeto (por ejemplo, un contenedor a un Pod)
-sobre la que otros plugins que ya corrieron tendrían opinión. Por eso los plugins
-*mutating* compilados **se vuelven a ejecutar** si un webhook modificó el objeto, y los
-webhooks pueden pedir lo mismo con `reinvocationPolicy`, que admite `Never` (el
-predeterminado) o `IfNeeded`. La documentación también advierte que un webhook que necesite
-ver el estado **final** del objeto debe ser *validating*, no *mutating*, porque un objeto
-puede seguir cambiando después de que un webhook *mutating* lo vio. (Fuente:
+sobre la que otros plugins que ya corrieron tendrían opinión. Por eso los plugins *mutating*
+compilados **se vuelven a ejecutar** si un webhook modificó el objeto, y los webhooks pueden
+pedir lo mismo con `reinvocationPolicy`, que admite `Never` (el predeterminado) o
+`IfNeeded`. La documentación también advierte que un webhook que necesite ver el estado
+**final** del objeto debe ser *validating*, no *mutating*, porque un objeto puede seguir
+cambiando después de que un webhook *mutating* lo vio. (Fuente:
 `kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/`.)
 
-**Version skew.** `kubectl` está soportado dentro de **un** *minor* de diferencia, más
-viejo o más nuevo, respecto del `kube-apiserver`. (Fuente:
-`kubernetes.io/releases/version-skew-policy/`.)
-
-**Sobre el examen KCNA.** Este laboratorio cubre material de los dominios de fundamentos
-de Kubernetes, orquestación de contenedores y arquitectura cloud native, pero **no** es una
-guía de estudio del examen y aquí no se citan pesos de dominio: el currículo se revisa
-periódicamente y una tabla copiada de un blog envejece mal. Consulta los pesos vigentes en
-la página oficial del examen KCNA de la CNCF, como indica el `README.md` del módulo.
+**Cómo conecta el anexo con el módulo 7 (CKS).** El `failurePolicy` de A1.2.3 es la decisión
+central de todo webhook de política de seguridad: con `Ignore`, tumbar el webhook basta para
+saltarse la política. Ahí ya no es un detalle de laboratorio.

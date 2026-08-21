@@ -33,31 +33,36 @@ Certificación de referencia: **KCNA** (Kubernetes and Cloud Native Associate).
 
 ## Laboratorio
 
-[**Kubernetes: reconciliación, EndpointSlices y Admission**](./laboratorio-kubernetes.md),
-en clase, 105–120 minutos, 7 pasos. Se hace sobre un clúster `kind` de un solo nodo que
+[**Kubernetes: primeras cargas de trabajo y el loop de reconciliación**](./laboratorio-kubernetes.md),
+en clase, 70–80 minutos, 4 pasos. Se hace sobre un clúster `kind` de un solo nodo que
 tú creas y borras en la misma sesión:
 
 | Paso | Contenido | Tiempo |
 |---|---|---|
-| 0 | Verificar herramientas y crear el clúster (imagen fijada por digest, swap del kubelet) | ~10 min |
-| 1 | La arquitectura de verdad: static pods, kubelet bajo systemd, `containerd` vía `crictl` | ~15 min |
-| 2 | Deployment + Service → EndpointSlice, reglas de `kube-proxy`, CoreDNS | ~20 min |
-| 3 | Watch-Diff-Update: borrar un pod y ver al ReplicaSet reconciliar | ~15 min |
-| 4 | Admission: `LimitRanger` y tu propio `MutatingWebhookConfiguration` | ~30 min |
-| 5 | cgroup v2 y Node Memory Swap: `configz`, QoS y `memory.swap.max` | ~15 min |
-| 6 | Escalar réplicas y ver los EndpointSlices actualizarse en vivo | ~10 min |
+| 0 | Verificar herramientas y crear el clúster (`kind create cluster`, sin configuración) | ~7 min |
+| 1 | La arquitectura de verdad: static pods, kubelet bajo systemd, `containerd` vía `crictl` | ~13 min |
+| 2 | Desplegar cargas de trabajo: Pod, Deployment y Service sin memorizar YAML (`--dry-run=client -o yaml`), EndpointSlice y CoreDNS | ~30 min |
+| 3 | Auto-reparación y escalado: borrar un pod, matar un contenedor por CRI, escalar 3→5→2 y ver a `kube-proxy` seguir | ~20 min |
 
-Si la clase va corta de tiempo, recorta desde el final (6, luego 5). Los pasos 0–3 son el
-núcleo y no se pueden saltar.
+Los cuatro pasos son el núcleo y cada uno depende del anterior: no se saltan. Dos ideas
+atraviesan el paso 2 y se aplican al resto del curso: **el YAML de Kubernetes no se
+memoriza, se genera** con `kubectl create/run/expose … --dry-run=client -o yaml`, y **la
+documentación oficial de `kubernetes.io/docs` se consulta siempre**, en el trabajo real y
+en los exámenes prácticos de la CNCF.
 
-**Requisitos:** Linux con Docker Engine activo, `kind` v0.32.0+, `kubectl` v1.36.x
-(soportado dentro de un *minor* del API server) y `openssl`. Swap activo en el host es
-opcional: el laboratorio dice qué cambia si no lo tienes.
+**Anexo opcional (para casa, no se hace en clase):** al final del mismo archivo, unos 50
+minutos más con admission control (`LimitRanger` y tu propio `MutatingWebhookConfiguration`)
+y cgroup v2 con Node Memory Swap. Requiere recrear el clúster con un archivo de
+configuración de `kind` y tener `openssl` instalado.
 
-**Herramientas y conceptos:** `kubectl`, `kind`, `crictl`, EndpointSlices, Admission
-Webhooks, `LimitRange`, cgroup v2, Node Memory Swap, CNI (aquí `kindnet`; en producción
-Cilium, Calico, Flannel), `containerd` / CRI. Helm y Kustomize se mencionan en la sesión,
-pero este laboratorio no los usa.
+**Requisitos:** Linux con Docker Engine activo, `kind` v0.32.0+ y `kubectl` v1.36.x
+(soportado dentro de un *minor* del API server). El anexo opcional añade `openssl`, y swap
+activo en el host si quieres ver números reales.
+
+**Herramientas y conceptos:** `kubectl`, `kind`, `crictl`, Pods, Deployments, ReplicaSets,
+Services, EndpointSlices, CoreDNS, `containerd` / CRI, CNI (aquí `kindnet`; en producción
+Cilium, Calico, Flannel). En el anexo: Admission Webhooks, `LimitRange`, cgroup v2, Node
+Memory Swap. Helm y Kustomize se mencionan en la sesión, pero este laboratorio no los usa.
 
 ---
 
