@@ -33,16 +33,31 @@ Certificación de referencia: **KCNA** (Kubernetes and Cloud Native Associate).
 
 ## Laboratorio
 
-**Admission Webhooks y EndpointSlices** — 60 minutos, 5 pasos (requiere Kubernetes 1.28+):
+[**Kubernetes: reconciliación, EndpointSlices y Admission**](./laboratorio-kubernetes.md),
+en clase, 105–120 minutos, 7 pasos. Se hace sobre un clúster `kind` de un solo nodo que
+tú creas y borras en la misma sesión:
 
-1. Desplegar un Deployment y un Service, y observar los EndpointSlices que se crean
-2. Observar el loop Watch-Diff-Update: borrar un pod y ver cómo se recrea
-3. Crear un `MutatingWebhookConfiguration`
-4. Verificar Node Memory Swap y cgroup v2
-5. Escalar réplicas y ver los EndpointSlices actualizarse en vivo
+| Paso | Contenido | Tiempo |
+|---|---|---|
+| 0 | Verificar herramientas y crear el clúster (imagen fijada por digest, swap del kubelet) | ~10 min |
+| 1 | La arquitectura de verdad: static pods, kubelet bajo systemd, `containerd` vía `crictl` | ~15 min |
+| 2 | Deployment + Service → EndpointSlice, reglas de `kube-proxy`, CoreDNS | ~20 min |
+| 3 | Watch-Diff-Update: borrar un pod y ver al ReplicaSet reconciliar | ~15 min |
+| 4 | Admission: `LimitRanger` y tu propio `MutatingWebhookConfiguration` | ~30 min |
+| 5 | cgroup v2 y Node Memory Swap: `configz`, QoS y `memory.swap.max` | ~15 min |
+| 6 | Escalar réplicas y ver los EndpointSlices actualizarse en vivo | ~10 min |
 
-**Herramientas:** `kubectl`, EndpointSlices, Admission Webhooks, Helm, Kustomize,
-CNI (Cilium, Calico, Flannel), `containerd` / CRI-O.
+Si la clase va corta de tiempo, recorta desde el final (6, luego 5). Los pasos 0–3 son el
+núcleo y no se pueden saltar.
+
+**Requisitos:** Linux con Docker Engine activo, `kind` v0.32.0+, `kubectl` v1.36.x
+(soportado dentro de un *minor* del API server) y `openssl`. Swap activo en el host es
+opcional: el laboratorio dice qué cambia si no lo tienes.
+
+**Herramientas y conceptos:** `kubectl`, `kind`, `crictl`, EndpointSlices, Admission
+Webhooks, `LimitRange`, cgroup v2, Node Memory Swap, CNI (aquí `kindnet`; en producción
+Cilium, Calico, Flannel), `containerd` / CRI. Helm y Kustomize se mencionan en la sesión,
+pero este laboratorio no los usa.
 
 ---
 
