@@ -42,6 +42,11 @@ Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
 | 6 | Certified Kubernetes Application Developer | CKAD | [`modulo6/`](./modulo6/) |
 | 7 | Certified Kubernetes Security Specialist | CKS | [`modulo7/`](./modulo7/) |
 | 8 | A Producción: Paisaje CNCF, Agentes y GitOps | — | [`modulo8/`](./modulo8/) |
+| 9 | Helm: el gestor de paquetes de Kubernetes (opcional) | - | [`modulo9/`](./modulo9/) |
+
+> El módulo 9 es opcional: no tiene fecha en el cronograma de abajo, no reemplaza ninguna
+> sesión y no forma parte del proyecto final evaluado. Profundiza en Helm, herramienta que
+> el módulo 8 solo menciona dentro del paisaje CNCF.
 
 ---
 
