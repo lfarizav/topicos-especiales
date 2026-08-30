@@ -35,7 +35,7 @@ terminal, no repitiendo una definición de memoria:
 1. ¿Qué corre realmente en un "nodo" de Kubernetes, y por qué el nodo que vas a usar es,
    literalmente, un contenedor Docker que comparte el kernel de tu máquina (módulo 3)?
 2. ¿Por qué `etcd`, `kube-apiserver`, `kube-scheduler` y `kube-controller-manager`
-   aparecen como Pods si nadie los desplegó con `kubectl`, y quién los arranca?
+   aparecen como Pods de la nada con `kubectl`, y quién los arranca?
 3. ¿Cómo se crea un Pod, un Deployment y un Service **sin memorizar YAML**, y de dónde
    sale el YAML cuando lo necesitas?
 4. ¿Cómo llega un `Service` a sus Pods, concretamente, qué objeto guarda esa lista de IPs?
@@ -221,7 +221,7 @@ configuración), tiene un `Main PID`, y **vive dentro de su propio cgroup**
 Linux. Si algún día un nodo no arranca, `journalctl -u kubelet` es tu primera parada,
 exactamente igual que en el módulo 1.
 
-### 1.3 El control plane son Pods que nadie desplegó
+### 1.3 El control plane son Pods de la nada
 
 ```bash
 kubectl get pods -n kube-system
