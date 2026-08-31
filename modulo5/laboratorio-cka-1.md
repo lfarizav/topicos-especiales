@@ -1702,4 +1702,4 @@ static pod: mover su manifiesto fuera y devolverlo, o reiniciar el kubelet. Comp
 
 ---
 
-_Creado con amor por Luis Felipe Ariza Vesga._
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -150,4 +150,4 @@ Ingress NGINX, Gateway API y NGINX Gateway Fabric, `openssl` y la API de CSR.
 
 ---
 
-_Creado con amor por Luis Felipe Ariza Vesga._
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

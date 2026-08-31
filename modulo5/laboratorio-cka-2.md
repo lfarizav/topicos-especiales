@@ -2509,4 +2509,4 @@ kind get clusters
 
 ---
 
-_Creado con amor por Luis Felipe Ariza Vesga._
+_Creado con ❤️ por Luis Felipe Ariza Vesga._
