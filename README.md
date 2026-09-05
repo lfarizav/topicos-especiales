@@ -61,7 +61,7 @@ Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
 | 5 | sáb 29 ago 2026 | **Examen 1** — módulos 1 a 4 | — |
 | 6 | sáb 5 sep 2026 | Módulo 5 — CKA (1/2) | — |
 | 7 | sáb 12 sep 2026 | Módulo 5 — CKA (2/2) | — |
-| 8 | sáb 19 sep 2026 | Módulo 6 — CKAD (1/2) | — | Semana de receso
+| 8 | sáb 19 sep 2026 | Módulo 6 — CKAD (1/2) | *Semana de receso* | 
 | 9 | sáb 26 sep 2026 | Módulo 6 — CKAD (2/2) | — |
 | 10 | sáb 3 oct 2026 | **Examen 2** — módulos 5 y 6 | — |
 | 11 | sáb 10 oct 2026 | Módulo 7 — CKS (1/2) | — |
