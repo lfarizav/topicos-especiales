@@ -63,6 +63,13 @@ Al terminar esta guía tendrás, en tu propio repositorio de proyecto, una carpe
 
 Todo eso lo produce el marco. Tú **decides, respondes y apruebas**.
 
+> [!TIP]
+> **Mira primero cómo se ve bien hecho.** [`ejemplo-timonel/`](./ejemplo-timonel/) tiene el
+> juego completo de artefactos para el caso de estudio del curso: las 10 unidades, el grafo de
+> dependencias verificado acíclico, el mapa de 36 historias y el plan de tareas de una unidad.
+> Es la vara de calidad de este entregable. **No es una plantilla para copiar:** tus unidades
+> salen de tu PRD.
+
 ### Por qué paramos antes de codificar
 
 Porque la codificación de este proyecto no la hace un humano escribiendo archivo por
@@ -776,6 +783,18 @@ de poder avanzar.
 > hay nada que orquestar con una unidad, y el loop de agentes de los módulos siguientes
 > pierde todo su sentido.
 
+**Compara tu resultado con el del ejemplo.** Los tres artefactos de esta etapa, hechos bien,
+están en [`ejemplo-timonel/`](./ejemplo-timonel/): mira cómo cada unidad declara **qué no
+hace**, cómo el grafo se declara y **se verifica** acíclico, y cómo el mapa demuestra que
+ninguna de las 36 historias quedó huérfana.
+
+> [!CAUTION]
+> **Verifica el grafo con un script, no con la vista.** Un grafo de diez o trece nodos
+> dibujado en Mermaid **se ve bien** aunque tenga un ciclo. Al preparar el ejemplo de este
+> módulo encontramos exactamente eso en el artefacto real que le dio la estructura: dos
+> unidades declaradas dependientes la una de la otra, en un archivo que ya había pasado su
+> compuerta de aprobación. El ciclo solo aparece si lo buscas. Diez líneas de script bastan.
+
 ---
 
 ## 12. Paso 9 — Las tareas de cada unidad, y la parada
@@ -875,6 +894,12 @@ legible en la raíz de tu proyecto: `unidades-y-tareas.md`, con este formato por
 Ese archivo es lo que el orquestador del módulo siguiente va a leer para despachar
 codificadores y revisores. Escríbelo pensando en eso: no es un resumen para tu profesor, es
 la entrada de un programa.
+
+**El ejemplo completo de este archivo está en
+[`ejemplo-timonel/unidades-y-tareas.md`](./ejemplo-timonel/unidades-y-tareas.md)**, con tres
+unidades desarrolladas tarea por tarea y el orden de ejecución sacado del grafo. Y el plan de
+tareas del que salen, tal como lo produce el marco, está en
+[`ejemplo-timonel/U06-puerta-autonomia-code-generation-plan.md`](./ejemplo-timonel/U06-puerta-autonomia-code-generation-plan.md).
 
 > [!NOTE]
 > **Ruta corta, si el presupuesto de tokens se acaba.** Si no alcanzas a recorrer las etapas

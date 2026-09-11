@@ -144,6 +144,12 @@ cada turno y el modelo empieza a saltarse compuertas cuando el contexto se llena
 siempre cargado baja a 134 líneas y cada fase carga su orquestación solo cuando le toca.
 Es puramente aditivo, no modifica ninguna regla del ZIP oficial.
 
+**Y hay un ejemplo de referencia completo.** [`ejemplo-timonel/`](./ejemplo-timonel/) continúa
+el caso de estudio del módulo 3 un paso más allá: las 10 unidades de Timonel con lo que cada
+una **no** hace, el grafo de dependencias verificado acíclico, el mapa de 36 historias con
+criterios verificables, el plan de tareas de la unidad que impone el límite de autonomía, y el
+archivo consolidado que es el formato del entregable. Es la vara de calidad, no una plantilla.
+
 **Te detienes en la aprobación del plan de tareas, sin escribir una línea de código.** La
 codificación se hace en los módulos siguientes con un loop de tres agentes (orquestador,
 codificador y revisor), y ese loop necesita un plan de tareas aprobado para poder funcionar:
