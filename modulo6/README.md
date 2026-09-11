@@ -1,6 +1,6 @@
 # Módulo 6 — Certified Kubernetes Application Developer (CKAD)
 
-**Sesiones 8 y 9 · sábados 19 y 26 de septiembre de 2026 · 9:00–12:00**
+**Sesiones 8 y 9 · sábados 26 de septiembre y 3 de octubre de 2026 · 9:00–12:00**
 
 Cambio de silla. En el módulo 5 el clúster era tuyo; aquí el clúster es de otro y tú
 tienes que desplegar una aplicación en él, sin permisos de administrador y sin romper

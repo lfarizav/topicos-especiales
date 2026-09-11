@@ -114,6 +114,36 @@ libres** (8 GiB con el Paso 10, 10 GiB con el anexo).
 
 ---
 
+## Trabajo de proyecto final — de tu PRD a las unidades con sus tareas
+
+Además de los dos laboratorios de CKA, este módulo lleva el **tercer paso del proyecto
+final**: convertir el `pvb.md` del módulo 2 y el `prd.md` del módulo 3 en la especificación
+ejecutable del producto, usando el marco **AI-DLC de AWS**.
+
+**Guía paso a paso:**
+[`proyecto-final-de-prd-a-unidades-y-tareas.md`](./proyecto-final-de-prd-a-unidades-y-tareas.md)
+
+| Qué produces | Con qué etapa de AI-DLC |
+|---|---|
+| Requisitos trazables desde el PRD | 2.3 Requirements Analysis |
+| Historias y personas con criterios verificables | 2.4 User Stories |
+| Componentes y decisiones de arquitectura (ADR) | 2.6 Domain Design |
+| **Las unidades de trabajo y su grafo de dependencias** | 2.7 Units Generation |
+| Contratos entre unidades y APIs | 2.8 Contract Design |
+| Plan de entrega, riesgos y secuenciación | 2.9 Delivery Planning |
+| **Las tareas numeradas de cada unidad** | 3.5 Code Generation, **Parte 1** |
+
+**Te detienes en la compuerta `Plan Approval` de la etapa 3.5, sin escribir una línea de
+código.** La codificación se hace en los módulos siguientes con un loop de tres agentes
+(orquestador, codificador y revisor), y ese loop necesita un plan de tareas aprobado para
+poder funcionar: sin tareas verificables no hay nada que orquestar ni nada que revisar.
+
+La regla del curso es la misma de siempre, aplicada a la especificación: **el agente
+propone, tú apruebas**. El registro de auditoría de AI-DLC queda como evidencia de qué
+leíste, qué cambios pediste y qué aprobaste.
+
+---
+
 ## Herramientas y conceptos del módulo
 
 `kubeadm`, `kubelet`, `kubectl`, `containerd`/CRI, `crictl`, LXD, `kind`, `etcdctl` y

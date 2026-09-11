@@ -22,7 +22,7 @@ Módulo 1  Linux            →  el suelo sobre el que corre todo
 Módulo 2  IA y agentes     →  la idea, fijada en un Product Vision Board
 Módulo 3  Contenedores     →  la unidad de despliegue + el PRD
 Módulo 4  K8s Fundamentals →  el loop de reconciliación
-Módulo 5  CKA              →  administrar y diagnosticar el clúster
+Módulo 5  CKA              →  administrar el clúster + las unidades y tareas (AI-DLC)
 Módulo 6  CKAD             →  desplegar aplicaciones en él
 Módulo 7  CKS              →  asegurarlo
 Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
@@ -61,18 +61,25 @@ Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
 | 5 | sáb 29 ago 2026 | **Examen 1** — módulos 1 a 4 | — |
 | 6 | sáb 5 sep 2026 | Módulo 5 — CKA (1/2) | — |
 | 7 | sáb 12 sep 2026 | Módulo 5 — CKA (2/2) | — |
-| 8 | sáb 19 sep 2026 | Módulo 6 — CKAD (1/2) | *Semana de receso* | 
-| 9 | sáb 26 sep 2026 | Módulo 6 — CKAD (2/2) | — |
-| 10 | sáb 3 oct 2026 | **Examen 2** — módulos 5 y 6 | — |
-| 11 | sáb 10 oct 2026 | Módulo 7 — CKS (1/2) | — |
-| 12 | sáb 17 oct 2026 | Módulo 7 — CKS (2/2) | — |
-| 13 | sáb 24 oct 2026 | Módulo 8 — CNCF, Agentes y GitOps (1/2) | — |
-| 14 | sáb 31 oct 2026 | Módulo 8 — CNCF, Agentes y GitOps (2/2) | — |
-| 15 | sáb 7 nov 2026 | **Examen 3** — módulos 7 y 8 | — |
-| 16 | sáb 14 nov 2026 | **Sustentación del proyecto final** | **Proyecto final** |
+| — | **14 – 19 sep 2026** | **Semana de descanso — no hay clase** | — |
+| 8 | sáb 26 sep 2026 | Módulo 6 — CKAD (1/2) | — |
+| 9 | sáb 3 oct 2026 | Módulo 6 — CKAD (2/2) | — |
+| 10 | sáb 10 oct 2026 | **Examen 2** — módulos 5 y 6 | — |
+| 11 | sáb 17 oct 2026 | Módulo 7 — CKS (1/2) | — |
+| 12 | sáb 24 oct 2026 | Módulo 7 — CKS (2/2) | — |
+| 13 | sáb 31 oct 2026 | Módulo 8 — CNCF, Agentes y GitOps (1/2) | — |
+| 14 | sáb 7 nov 2026 | Módulo 8 — CNCF, Agentes y GitOps (2/2) | — |
+| 15 | sáb 14 nov 2026 | **Examen 3** — módulos 7 y 8 | — |
+| 16 | sáb 21 nov 2026 | **Sustentación del proyecto final** | **Proyecto final** |
 
 Este cronograma es la fuente de verdad del curso. Si una fecha cambia, se cambia aquí
 primero.
+
+> **Tercer entregable del proyecto — unidades y tareas.** El módulo 5 lleva, además de los
+> dos laboratorios de CKA, el paso que convierte tu PVB y tu PRD en **unidades de trabajo
+> con sus tareas**, con el marco AI-DLC de AWS. La guía está en
+> [`modulo5/proyecto-final-de-prd-a-unidades-y-tareas.md`](./modulo5/proyecto-final-de-prd-a-unidades-y-tareas.md).
+> La fecha y el mecanismo de entrega se anuncian en clase.
 
 ---
 
