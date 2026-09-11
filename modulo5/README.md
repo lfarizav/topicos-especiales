@@ -125,18 +125,23 @@ ejecutable del producto, usando el marco **AI-DLC de AWS**.
 
 | Qué produces | Con qué etapa de AI-DLC |
 |---|---|
-| Requisitos trazables desde el PRD | 2.3 Requirements Analysis |
-| Historias y personas con criterios verificables | 2.4 User Stories |
-| Componentes y decisiones de arquitectura (ADR) | 2.6 Domain Design |
-| **Las unidades de trabajo y su grafo de dependencias** | 2.7 Units Generation |
-| Contratos entre unidades y APIs | 2.8 Contract Design |
-| Plan de entrega, riesgos y secuenciación | 2.9 Delivery Planning |
-| **Las tareas numeradas de cada unidad** | 3.5 Code Generation, **Parte 1** |
+| Requisitos trazables desde el PRD | Requirements Analysis |
+| Historias y personas con criterios verificables | User Stories |
+| Qué etapas se ejecutan y con qué profundidad | Workflow Planning |
+| Componentes, métodos, servicios y dependencias | Application Design |
+| **Las unidades de trabajo y sus dependencias** | Units Generation |
+| **Las tareas numeradas de cada unidad** | Code Generation, **Parte 1** |
 
-**Te detienes en la compuerta `Plan Approval` de la etapa 3.5, sin escribir una línea de
-código.** La codificación se hace en los módulos siguientes con un loop de tres agentes
-(orquestador, codificador y revisor), y ese loop necesita un plan de tareas aprobado para
-poder funcionar: sin tareas verificables no hay nada que orquestar ni nada que revisar.
+**No hace falta cuenta de AWS ni instalar nada, y sirve con el agente de código que ya
+uses.** Se usa la versión **v1.0.1** del marco, que son archivos Markdown que copias al
+proyecto: su README oficial dice que funciona con cualquier agente que lea reglas de
+proyecto. La línea nueva (v2.8.x) queda explicada en un apéndice de la guía, con sus
+ventajas y sus ataduras.
+
+**Te detienes en la aprobación del plan de tareas, sin escribir una línea de código.** La
+codificación se hace en los módulos siguientes con un loop de tres agentes (orquestador,
+codificador y revisor), y ese loop necesita un plan de tareas aprobado para poder funcionar:
+sin tareas verificables no hay nada que orquestar ni nada que revisar.
 
 La regla del curso es la misma de siempre, aplicada a la especificación: **el agente
 propone, tú apruebas**. El registro de auditoría de AI-DLC queda como evidencia de qué
