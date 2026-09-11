@@ -351,19 +351,77 @@ Revisa el nombre y la ubicación en la tabla de arriba antes de seguir. **No sig
 adelante con un agente que no cargó las reglas**: va a improvisar un proceso parecido y el
 resultado no va a tener ni artefactos ni compuertas.
 
-> [!CAUTION]
-> **Un aviso honesto sobre el tamaño.** `core-workflow.md` tiene 539 líneas y se carga en
-> **cada** interacción. Es la crítica más repetida de practicantes que han usado este marco
-> en producción: cuando la ventana de contexto se llena, el modelo empieza a saltarse
-> instrucciones que sí están escritas. Dos mitigaciones que funcionan:
->
-> 1. **Una sesión nueva por etapa.** No arrastres la conversación de seis etapas.
-> 2. **Cuando el agente se salte una compuerta, córtalo.** Dile «detente, no apruebes nada,
->    vuelve a la etapa anterior». No es un fallo tuyo ni del marco: es contexto saturado.
+---
+
+## 7. Paso 4 — Aplica el overlay optimizado (soluciona el contexto saturado)
+
+Hay un problema real con el marco tal como viene, y este curso trae la solución hecha.
+
+`core-workflow.md` son **539 líneas** que contienen las tres fases completas, y se cargan
+**en cada turno** de la conversación aunque estés en una sola etapa de una sola fase. Cuando
+la ventana de contexto se llena, el modelo empieza a saltarse instrucciones que sí están
+escritas: se salta compuertas, aprueba solo, o te hace las preguntas en el chat en vez de en
+un archivo. Es la crítica más repetida de quien ha usado este marco en serio.
+
+La solución es **despacho por fase**: el archivo siempre cargado deja de contener las fases y
+pasa a ser un despachador que indica qué archivo de orquestación cargar **para la fase activa,
+y solo para esa**.
+
+| | Líneas siempre cargadas | Bytes |
+|---|---:|---:|
+| `core-workflow.md` estándar | 539 | 25 031 |
+| Despachador optimizado | **134** | **8 235** |
+| Reducción | **-76%** | **-68%** |
+
+Aplícalo sobre la instalación que acabas de hacer:
+
+```bash
+cd ~/mi-producto
+
+# 1. el despachador reemplaza al flujo estándar, con el nombre de archivo de tu agente
+cp /ruta/a/topicos-especiales/modulo5/aidlc-optimizado/core-workflow-optimizado.md ./AGENTS.md
+
+# 2. los 5 archivos de reglas extra se suman a los 31 que ya tienes
+cp -R /ruta/a/topicos-especiales/modulo5/aidlc-optimizado/rule-details-extra/* .aidlc-rule-details/
+```
+
+Verifica:
+
+```bash
+find .aidlc-rule-details -name '*.md' | wc -l
+wc -l AGENTS.md
+```
+
+**Salida real de esta máquina:**
+
+```text
+36
+134 AGENTS.md
+```
+
+**Es puramente aditivo: los 31 archivos de reglas del ZIP oficial no se modifican.** El
+overlay añade 5 archivos (las tres orquestaciones de fase más la bitácora y la carga de
+extensiones) y cambia el archivo del flujo por el despachador. Ninguna regla del marco se
+pierde: las 7 etapas de Inception, las de Construction y todas las compuertas siguen ahí.
+
+> [!IMPORTANT]
+> **Rellena las tres líneas de `Project Context`** del despachador antes de arrancar: qué es
+> tu producto, por qué existe y en qué estado está. **Tres líneas, no tres párrafos.** Ese
+> archivo se carga en cada turno, así que cada línea que añades es contexto que le quitas al
+> trabajo. Resume y apunta a `entradas/prd.md`; no lo copies.
+
+El detalle completo del overlay, con su procedencia y su licencia, está en
+[`aidlc-optimizado/README.md`](./aidlc-optimizado/README.md).
+
+> [!TIP]
+> **Dos hábitos que siguen valiendo, incluso con el overlay.** Abre **una sesión nueva por
+> etapa** en vez de arrastrar la conversación de seis. Y cuando el agente se salte una
+> compuerta, córtalo: «detente, no apruebes nada, vuelve a la etapa anterior». No es un fallo
+> tuyo ni del marco, es contexto saturado.
 
 ---
 
-## 7. Paso 4 — Escribe tu regla de autonomía como una extensión
+## 8. Paso 5 — Escribe tu regla de autonomía como una extensión
 
 Este paso son diez minutos y es el que más nota te va a dar.
 
@@ -434,7 +492,7 @@ diapositiva: fue una regla bloqueante, con ID, citada en la bitácora de cada et
 
 ---
 
-## 8. Paso 5 — Arranca el flujo
+## 9. Paso 6 — Arranca el flujo
 
 Abre tu agente en la raíz del proyecto y escribe, **con esa frase exacta al principio**:
 
@@ -456,7 +514,7 @@ Vuelve al Paso 3.
 
 ---
 
-## 9. Paso 6 — El contrato de co-creación: preguntas en archivos
+## 10. Paso 7 — El contrato de co-creación: preguntas en archivos
 
 Esta es la parte que hace que el paso sea co-creación y no delegación, y es la razón por la
 que la v1.0.1 funciona con cualquier agente: **las preguntas no van en el chat, van en
@@ -508,7 +566,7 @@ estén llenas.
 
 ---
 
-## 10. Paso 7 — Las etapas de Inception, una por una
+## 11. Paso 8 — Las etapas de Inception, una por una
 
 ### Mapa rápido: tu PRD contra las etapas de AI-DLC
 
@@ -519,7 +577,7 @@ estén llenas.
 | 3. ICP detallado | User Stories (`personas.md`) |
 | 4. Propuesta de valor y diferenciadores | Requirements Analysis |
 | 5. Casos de uso (top 5) | User Stories |
-| 6. Principios no negociables y límite de autonomía | Tu extensión del Paso 4 |
+| 6. Principios no negociables y límite de autonomía | Tu extensión del Paso 5 |
 | 7. User journeys | User Stories |
 | 8. Alcance del MVP (MoSCoW) | Requirements Analysis + Workflow Planning |
 | 9. Módulos funcionales y arquitectura | Application Design |
@@ -591,7 +649,7 @@ la evaluación en `aidlc-docs/inception/plans/`.
 
 - Que cada historia tenga **criterios de aceptación verificables**. «El usuario ve
   resultados relevantes» no es verificable. «La respuesta incluye al menos una cita con
-  URL» sí lo es. Estos criterios son la materia prima de las tareas del Paso 8: una
+  URL» sí lo es. Estos criterios son la materia prima de las tareas del Paso 9: una
   historia vaga produce una tarea que nadie puede revisar.
 - Que estén los dos *edge cases* del Segmento 7: el flujo que se interrumpe y el flujo en
   que el sistema **no puede resolver la tarea y escala a un humano**. Ese segundo es el que
@@ -720,7 +778,7 @@ de poder avanzar.
 
 ---
 
-## 11. Paso 8 — Las tareas de cada unidad, y la parada
+## 12. Paso 9 — Las tareas de cada unidad, y la parada
 
 Ya tienes las unidades. Las tareas salen de la etapa **Code Generation**, que está partida
 en dos mitades con una compuerta en medio:
@@ -789,7 +847,7 @@ Cuando el agente te presente el plan de tareas:
   unitarias y su resumen. Si el plan no las incluye, pide cambios.
 - **Cada tarea tiene un criterio de aceptación que se comprueba con un comando.** Esto es
   lo que hace posible al agente revisor. Sin comando, el revisor opina; con comando,
-  verifica. Es tu regla `AUTONOMIA-02` del Paso 4.
+  verifica. Es tu regla `AUTONOMIA-02` del Paso 5.
 - **Ninguna tarea aplica cambios a infraestructura sin aprobación.** Si aparece una, tu
   regla `AUTONOMIA-01` no llegó hasta aquí, y eso es un hallazgo que vale la pena reportar.
 - **Las rutas de los archivos apuntan a la raíz del proyecto, nunca a `aidlc-docs/`.** El
@@ -828,7 +886,7 @@ la entrada de un programa.
 
 ---
 
-## 12. Qué entregas
+## 13. Qué entregas
 
 Un repositorio de proyecto con:
 
@@ -860,7 +918,7 @@ Y media página de tu puño y letra, en `DECISIONES.md`:
 
 ---
 
-## 13. Cómo se evalúa
+## 14. Cómo se evalúa
 
 | Criterio | Qué busco |
 |---|---|
@@ -882,7 +940,7 @@ Lo que baja la nota, en orden de gravedad:
 
 ---
 
-## 14. Lo que viene: el loop de agentes
+## 15. Lo que viene: el loop de agentes
 
 En los módulos siguientes, las tareas que acabas de aprobar las ejecuta un **loop de tres
 roles**:
@@ -929,9 +987,28 @@ necesita algo que se pueda ejecutar.** Si el criterio es una opinión, el reviso
 convierte en un segundo modelo que felicita al primero, y el loop no revisa nada. Ese es el
 punto donde la metodología deja de ser ceremonia y empieza a ser ingeniería.
 
+### El error que no vas a cometer: el loop no es una fase
+
+Esto es una lección de un proyecto real, no una precaución teórica.
+
+**El conjunto de fases de AI-DLC es cerrado: Inception, Construction y Operations. No se le
+añade nada.** El loop de agentes es una **técnica de ejecución**, no una fase del ciclo de
+vida. Si se usa, solo puede ser una **táctica dentro de la etapa de generación de código de
+Construction**, después de que las compuertas de diseño de esa unidad hayan pasado. Nunca
+define fases, ni compuertas, ni estado.
+
+Cómo se sabe que alguien cruzó esa línea: aparece un artefacto **nombrado por la técnica de
+ejecución** dentro de `aidlc-state.md`, en el nombre de un archivo de aprobaciones, o en un
+hito del plan. En un proyecto real esa confusión produjo una fase inventada, una compuerta
+falsa, cinco commits y veintisiete tareas mal formadas antes de que un humano lo detectara.
+
+La distinción en una línea: **una técnica de ejecución dice cómo se despachan los agentes;
+una fase del ciclo de vida dice qué es el trabajo.** Son cosas distintas y se documentan
+aparte.
+
 ---
 
-## 15. Problemas frecuentes
+## 16. Problemas frecuentes
 
 | Síntoma | Qué hacer |
 |---|---|
@@ -939,7 +1016,7 @@ punto donde la metodología deja de ser ceremonia y empieza a ser ingeniería.
 | El agente carga el flujo pero no las reglas de cada etapa | `.aidlc-rule-details/` no está en la raíz o quedó con otro nombre. Son las cuatro rutas del Paso 3, ninguna más |
 | Te hace las preguntas en el chat en vez de en un archivo | Va contra la regla del marco. Pídele que las escriba en un archivo de preguntas con etiquetas `[Answer]:` |
 | Se salta compuertas y produce tres etapas de una | Contexto saturado (539 líneas de reglas en cada turno). Corta, abre sesión nueva y retoma en la última etapa que sí revisaste |
-| No aparecen las unidades | Application Design o Units Generation quedaron fuera del `execution-plan.md`. Pide cambios: son condicionales (Paso 7, Etapa 5) |
+| No aparecen las unidades | Application Design o Units Generation quedaron fuera del `execution-plan.md`. Pide cambios: son condicionales (Paso 8, Etapa 5) |
 | Te hace muy pocas preguntas | Está adivinando. Cítale la regla de *overconfidence prevention* y pídele que la aplique |
 | `audit.md` aparece reescrito y más corto | El agente lo sobreescribió en vez de añadir al final. El marco lo prohíbe explícitamente. Recupéralo con `git` y recuérdale la regla |
 | Perdiste el hilo entre sesiones | Dile que lea `aidlc-docs/aidlc-state.md` y los artefactos de las etapas previas antes de continuar |
@@ -992,7 +1069,7 @@ Qué cuesta, y por eso no es el camino principal del curso:
 
 ---
 
-## 16. Bibliografía
+## 17. Bibliografía
 
 Todas consultadas el **10 de septiembre de 2026**.
 

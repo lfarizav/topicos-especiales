@@ -138,6 +138,12 @@ proyecto: su README oficial dice que funciona con cualquier agente que lea regla
 proyecto. La línea nueva (v2.8.x) queda explicada en un apéndice de la guía, con sus
 ventajas y sus ataduras.
 
+**El overlay optimizado viene incluido.** El marco estándar carga 539 líneas de reglas en
+cada turno y el modelo empieza a saltarse compuertas cuando el contexto se llena.
+[`aidlc-optimizado/`](./aidlc-optimizado/) lo resuelve con despacho por fase: el archivo
+siempre cargado baja a 134 líneas y cada fase carga su orquestación solo cuando le toca.
+Es puramente aditivo, no modifica ninguna regla del ZIP oficial.
+
 **Te detienes en la aprobación del plan de tareas, sin escribir una línea de código.** La
 codificación se hace en los módulos siguientes con un loop de tres agentes (orquestador,
 codificador y revisor), y ese loop necesita un plan de tareas aprobado para poder funcionar:
