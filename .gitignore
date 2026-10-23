@@ -85,3 +85,5 @@ crash.log
 tmp/
 .tmp/
 *.tmp
+# exports de sesion
+20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*.txt
