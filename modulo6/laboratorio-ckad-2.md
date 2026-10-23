@@ -206,6 +206,33 @@ Image: "pulso:1.0" with ID "sha256:ca2a57e04f95fa70e68d31379add6264fa0dd63b965f2
 Image: "pulso:1.0" with ID "sha256:ca2a57e04f95fa70e68d31379add6264fa0dd63b965f2ed1c352a1fd8cea2b5b" not yet present on node "ckad-red-control-plane", loading...
 ```
 
+**En un diagrama:** el clúster con el que vas a trabajar toda la sesión.
+
+```mermaid
+flowchart TB
+  subgraph HOST["Tu máquina"]
+    H8080["localhost:8080"]
+    H8081["localhost:8081"]
+  end
+  subgraph KIND["Clúster kind ckad-red: sin kindnet, Pods en 192.168.0.0/16"]
+    subgraph CP["ckad-red-control-plane, etiqueta ingress-ready=true"]
+      P80["puerto 80: ingress-nginx, Paso 7"]
+      P30080["NodePort 30080: Gateway, Paso 7"]
+    end
+    W1["ckad-red-worker"]
+    W2["ckad-red-worker2"]
+    subgraph CAL["Calico, instalado por tigera-operator"]
+      CN["calico-node en cada nodo<br/>red de Pods y NetworkPolicies"]
+      GM["Goldmane<br/>API de flujos"]
+      WH["Whisker<br/>consola de flujos"]
+    end
+  end
+  H8080 -->|"extraPortMappings"| P80
+  H8081 -->|"extraPortMappings"| P30080
+  CN -->|"flujos con su veredicto"| GM
+  GM --> WH
+```
+
 ---
 
 ## Paso 1: Un CRD propio y un controlador de juguete (25 min)
@@ -635,6 +662,18 @@ NAME         MENSAJE             REPLICAS   PUBLICADO   EDAD
 bienvenida   hola desde un CRD   1          true        39s
 ```
 
+**En un diagrama:** el RBAC final del controlador. Todo lo que no está escrito, está negado.
+
+```mermaid
+flowchart LR
+  RB["RoleBinding<br/>controlador-anuncios"] -->|"subjects"| SA["ServiceAccount<br/>controlador-anuncios"]
+  RB -->|"roleRef"| R["Role<br/>controlador-anuncios"]
+  R --> R1["anuncios<br/>get, list, watch"]
+  R --> R2["anuncios/status<br/>get, patch: subrecurso aparte"]
+  R --> R3["deployments<br/>get, create, patch"]
+  R -.-x|"sin regla = denegado"| R4["secrets, delete deployments, ..."]
+```
+
 ### 1.5 El bucle de reconciliación, en vivo
 
 🔮 **Predice:** cambias el anuncio a 3 réplicas y otro mensaje. ¿Qué pasa con el Deployment?
@@ -673,6 +712,22 @@ desapareció solo**. Eso último no lo hizo tu controlador: lo hizo el **recolec
 de Kubernetes, porque el Deployment llevaba un `ownerReferences` apuntando al anuncio. Es el
 patrón operador completo: **el CRD define el tipo, el controlador reconcilia, y los
 `ownerReferences` limpian**.
+
+**En un diagrama:** el patrón operador completo que acabas de construir.
+
+```mermaid
+flowchart LR
+  U["Tú: kubectl apply<br/>Anuncio bienvenida"] --> API["kube-apiserver"]
+  API -->|"1. valida el esquema:<br/>required, maximum, CEL"| ETCD[("etcd")]
+  subgraph CTRL["Pod controlador-anuncios, con su ServiceAccount"]
+    LOOP["bucle cada 5 s:<br/>observar, comparar, actuar"]
+  end
+  LOOP -->|"2. list anuncios"| API
+  LOOP -->|"3. apply Deployment anuncio-bienvenida<br/>con ownerReferences al Anuncio"| API
+  LOOP -->|"4. patch --subresource=status<br/>publicado=true"| API
+  API --> DEP["Deployment anuncio-bienvenida<br/>N Pods de pulso"]
+  GC["Recolector de basura"] -.->|"5. al borrar el Anuncio,<br/>borra lo que le pertenecía"| DEP
+```
 
 > Un controlador real (hecho con `controller-runtime` o Kubebuilder) usa `watch` en lugar de
 > un `sleep 5`, colas con reintentos y *finalizers*. La idea es la misma.
@@ -748,6 +803,15 @@ configmap/ajustes patched
   la documentación advierte que puede tardar hasta el periodo de sincronización del kubelet
   más la caché, cerca de un minuto.
 - **`subPath`:** congelado **para siempre**. No es lentitud: es el comportamiento documentado.
+
+**En un diagrama:** tres caminos desde el mismo ConfigMap.
+
+```mermaid
+flowchart LR
+  CM[("ConfigMap ajustes<br/>COLOR")] -->|"1. env: se lee una vez, al arrancar"| E["variable $COLOR<br/>congelada"]
+  CM -->|"2. volumen: el kubelet sincroniza"| V["/ajustes/COLOR<br/>se actualiza"]
+  CM -->|"3. subPath: se fija al montar"| S["/fijo/color.txt<br/>congelado para siempre"]
+```
 
 Y un Secret, para desmontar un mito:
 
@@ -899,6 +963,20 @@ La prueba del endurecimiento, **vista desde dentro**: `NoNewPrivs: 1`
 `/proc/1/root/`. **Seguridad y depurabilidad tiran en direcciones opuestas**; los perfiles de
 `kubectl debug` existen para negociar entre las dos.
 
+**En un diagrama:** los tres intentos de depurar, y dónde se detuvo cada uno.
+
+```mermaid
+flowchart LR
+  G["kubectl debug<br/>perfil general, por defecto"] --> A1{"Admisión:<br/>Pod Security restricted"}
+  A1 -->|"SYS_PTRACE, sin drop ALL"| F1["Forbidden"]
+  R["--profile=restricted"] --> A2{"Admisión:<br/>Pod Security restricted"}
+  A2 -->|"admite"| K2{"kubelet:<br/>runAsNonRoot"}
+  K2 -->|"busybox corre como root"| F2["CreateContainerConfigError"]
+  C["--profile=restricted<br/>--custom runAsUser 65532"] --> A3{"Admisión:<br/>Pod Security restricted"}
+  A3 -->|"admite"| K3{"kubelet:<br/>runAsNonRoot"}
+  K3 -->|"UID 65532"| OK["depurador corriendo<br/>NoNewPrivs 1, CapEff 0, Seccomp 2"]
+```
+
 ---
 
 ## Paso 4: LimitRange y ResourceQuota (8 min)
@@ -975,6 +1053,20 @@ El Pod suelto recibe el `403` **en tu cara**. El Deployment, en cambio, se crea 
 se queda en `0/2` **en silencio**: quien choca con la cuota es el ReplicaSet, al crear los
 Pods, y el mensaje solo aparece **en los eventos del ReplicaSet**. En el examen, un
 Deployment en `0/N` sin Pods se diagnostica bajando un nivel: `describe rs`.
+
+**En un diagrama:** el mismo 403, entregado en dos lugares distintos.
+
+```mermaid
+flowchart LR
+  U1["kubectl run d"] --> A1["LimitRange<br/>rellena requests y limits"]
+  A1 --> Q1{"ResourceQuota<br/>¿cabe un Pod más?"}
+  Q1 -->|"no: 403"| T1["el error sale<br/>en tu terminal"]
+  U2["kubectl create deployment rep"] --> DEP["Deployment rep<br/>creado sin error, 0/2"]
+  DEP --> RS["el ReplicaSet<br/>crea los Pods"]
+  RS --> A2["LimitRange<br/>rellena requests y limits"]
+  A2 --> Q2{"ResourceQuota<br/>¿cabe un Pod más?"}
+  Q2 -->|"no: 403"| T2["el error queda en los<br/>eventos del ReplicaSet"]
+```
 
 ---
 
@@ -1110,6 +1202,30 @@ entre 138 peticiones (en las corridas de preparación, 0). Y ojo con cómo mide 
 `-T 1`, una respuesta que tarda más de un segundo también cuenta como `FALLO`. Compara los
 tres números de tu máquina: `Recreate` siempre pierde una ventana entera; las otras dos, a lo
 sumo unas pocas peticiones sueltas.
+
+**En un diagrama:** la carrera que el `preStop` cubre. Sacar el Pod de los endpoints y matarlo ocurren **a la vez**.
+
+```mermaid
+sequenceDiagram
+  participant API as apiserver
+  participant K as kubelet
+  participant P as Pod viejo (pulso)
+  participant KP as kube-proxy
+  participant C as cliente
+  API->>K: borra el Pod viejo
+  API->>KP: EndpointSlice actualizado: el Pod sale
+  alt sin preStop
+    K->>P: SIGTERM: pulso muere al instante
+    C->>P: petición por una regla todavía vieja
+    P--xC: FALLO
+  else con preStop sleep 5
+    K->>P: preStop: esperar 5 s
+    C->>P: petición por una regla todavía vieja
+    P-->>C: responde
+    K->>P: SIGTERM al terminar la espera
+  end
+  KP->>KP: reglas actualizadas: ya no le llega tráfico
+```
 
 ### 5.2 El historial, y un orden que importa
 
@@ -1254,6 +1370,15 @@ Una columna de azules, una de verdes, y **cero** respuestas vacías (el último 
 cambio es un solo `patch`, y el rollback es el mismo `patch` al revés, porque el azul **sigue
 vivo**. Esa es toda la gracia de blue/green, y también su costo: pagas el doble de réplicas.
 
+**En un diagrama:** los dos Deployments viven; el Service decide a cuál mirar.
+
+```mermaid
+flowchart LR
+  C["cliente"] --> S["Service web-bg<br/>selector: app=web, version=..."]
+  S ==>|"antes: version=azul"| A["Deployment web-azul<br/>3 Pods"]
+  S -.->|"después del patch: version=verde"| V["Deployment web-verde<br/>3 Pods"]
+```
+
 ### 5.4 Canary: el porcentaje son las réplicas
 
 ```bash
@@ -1331,6 +1456,16 @@ peso**: el reparto sale de la proporción de endpoints y `kube-proxy` elige al a
 porcentaje es **aproximado** y solo se controla escalando. En el Paso 7 verás un canary con
 **pesos de verdad**.
 
+**En un diagrama:** el Service no sabe de pesos; solo ve endpoints.
+
+```mermaid
+flowchart LR
+  C["cliente"] --> S["Service tienda<br/>selector: app=tienda, sin pista"]
+  S -->|"4 de 5 endpoints"| E["web-estable<br/>4 Pods v1"]
+  S -->|"1 de 5 endpoints"| K["web-canary<br/>1 Pod v2"]
+```
+
+
 ```bash
 kubectl delete -f canary.yaml
 ```
@@ -1343,6 +1478,26 @@ kubectl delete -f canary.yaml
 
 `web` (dos réplicas de `pulso`) en el namespace `tienda`, y cuatro clientes: `frontend` e
 `intruso` en `tienda`, `prometheus` y `otro` en `monitoreo`.
+
+**En un diagrama:** el punto de partida, sin políticas: todos llegan a `web`.
+
+```mermaid
+flowchart LR
+  subgraph T["namespace tienda"]
+    WEB["Service web :80<br/>2 Pods app=web en :8080"]
+    F["frontend<br/>rol=frontend"]
+    I["intruso<br/>rol=intruso"]
+  end
+  subgraph M["namespace monitoreo, etiqueta equipo=observabilidad"]
+    P["prometheus<br/>rol=prometheus"]
+    O["otro<br/>rol=otro"]
+  end
+  F --> WEB
+  I --> WEB
+  P --> WEB
+  O --> WEB
+```
+
 
 ```bash
 kubectl create namespace tienda
@@ -1534,6 +1689,23 @@ networkpolicy.networking.k8s.io "permitir-prometheus-o" deleted from tienda name
 - **Dos elementos** (un `-` de más): «**cualquier** Pod de namespaces de observabilidad,
   **o** Pods `prometheus` de mi propio namespace». Entra `otro`, que no debía.
 
+**En un diagrama:** lo que lee el apiserver en cada versión.
+
+```mermaid
+flowchart TB
+  subgraph Y["Un elemento: namespaceSelector Y podSelector"]
+    direction LR
+    Y1["prometheus<br/>namespace y rol coinciden"] -->|"entra"| YW["web"]
+    Y2["otro<br/>solo el namespace coincide"] -.-x|"bloqueado"| YW
+  end
+  subgraph O["Dos elementos: namespaceSelector O podSelector"]
+    direction LR
+    O1["prometheus"] -->|"entra"| OW["web"]
+    O2["otro<br/>le basta el namespace"] -->|"entra"| OW
+  end
+  Y ~~~ O
+```
+
 Un carácter abrió un namespace entero, y `kubectl apply` no te avisó de nada.
 
 ### 6.4 Egress: la política que rompe el DNS
@@ -1609,6 +1781,15 @@ wget: download timed out
 
 `web` responde por nombre, e internet sigue cerrado. Las políticas **se suman**: dos
 políticas de egress sobre el mismo Pod permiten la unión de las dos.
+
+**En un diagrama:** las dos políticas de salida de `frontend`, sumadas.
+
+```mermaid
+flowchart LR
+  F["frontend"] -->|"1. DNS, UDP y TCP 53<br/>permitido por frontend-dns"| DNS["CoreDNS<br/>kube-system, k8s-app=kube-dns"]
+  F -->|"2. TCP 8080<br/>permitido por frontend-solo-a-web"| W["Pods web"]
+  F -.-x|"cualquier otro destino"| NET["internet"]
+```
 
 ### 6.5 La prueba definitiva: Whisker
 
@@ -1696,6 +1877,21 @@ recuerda. Es una herramienta de operación (aislar un Pod
 comprometido sin tocar las políticas de la aplicación), no algo que el CKAD evalúe: allí la
 NetworkPolicy estándar es todo el temario.
 
+**En un diagrama:** el orden en que Calico evalúa, y de dónde salen los veredictos que lees en Whisker.
+
+```mermaid
+flowchart LR
+  PKT["un paquete"] --> GNP{"GlobalNetworkPolicy cuarentena<br/>order 10: se evalúa primero"}
+  GNP -->|"Pod con cuarentena=si"| DROP["Deny explícito"]
+  GNP -->|"no coincide"| K8S{"NetworkPolicies de Kubernetes<br/>order 1000"}
+  K8S -->|"una regla lo permite"| OK["Allow"]
+  K8S -->|"ninguna regla lo permite"| EOT["EndOfTier: descartado"]
+  DROP --> LOG[("Goldmane<br/>flujo + política que decidió")]
+  OK --> LOG
+  EOT --> LOG
+  LOG --> WH["Whisker<br/>navegador y API JSON"]
+```
+
 Cierra el `port-forward` de Whisker con `Ctrl+C`.
 
 ---
@@ -1706,6 +1902,17 @@ Cierra el `port-forward` de Whisker con `Ctrl+C`.
 > para exponer aplicaciones»*. **Gateway API no aparece en el texto del currículo CKAD** (sí
 > en el CKA, y su documentación solo está permitida en el examen CKA). Los pasos 7.1 y 7.2
 > son temario; del 7.3 en adelante es **oficio**: lo que vas a hacer en tu trabajo.
+
+**En un diagrama:** la migración completa, en el orden en que la vas a hacer. Nunca hay un momento sin servicio.
+
+```mermaid
+flowchart LR
+  A["7.2 Legado<br/>Ingress + anotaciones"] --> B["7.3 Traducir<br/>ingress2gateway"]
+  B --> C["7.4 Instalar<br/>CRDs de Gateway API + NGF"]
+  C --> D["7.5 Paridad<br/>viejo y nuevo a la vez"]
+  D --> E["7.6 Pesos y corte<br/>borrar los Ingress"]
+  E --> F["7.7 Recuperar<br/>lo que se perdió"]
+```
 
 ### 7.1 Por qué migrar: ingress-nginx se retiró
 
@@ -2003,6 +2210,30 @@ pulso api desde api-7bd44fc74f-29pzt
 Mismas rutas, mismo reparto aproximado, los dos vivos. Y si algo falla, la `HTTPRoute` te lo
 dice en su `status`: `Accepted` (el Gateway la aceptó) y `ResolvedRefs` (los Services
 existen). Un Ingress no tenía nada parecido.
+
+**En un diagrama:** los dos caminos que acabas de comparar, uno al lado del otro.
+
+```mermaid
+flowchart LR
+  C["curl -H 'Host: tienda.local'"]
+  C -->|"localhost:8080"| CP80["control-plane :80"]
+  C -->|"localhost:8081"| NP["NodePort 30080"]
+  subgraph OLD["Viejo: ingress-nginx, repositorio archivado"]
+    ING["Ingress tienda + tienda-canary<br/>anotaciones de texto"] -.->|"configura"| IC["ingress-nginx-controller<br/>hostPort 80"]
+  end
+  subgraph NEW["Nuevo: Gateway API + NGINX Gateway Fabric"]
+    HR["HTTPRoute tienda-tienda-local<br/>weight 80 y 20, campos tipados"] -.->|"configura"| GW["Gateway nginx<br/>Pod de NGINX en migra"]
+  end
+  CP80 --> IC
+  NP --> GW
+  IC --> V1["Service tienda-v1"]
+  IC --> V2["Service tienda-v2"]
+  IC --> AP["Service api"]
+  GW --> V1
+  GW --> V2
+  GW --> AP
+  I2G["ingress2gateway"] -.->|"leyó los Ingress,<br/>escribió"| HR
+```
 
 > **Si ves `FALLO` o respuestas vacías justo después del `apply`**: el Gateway puede estar
 > `Programmed` antes de que su Pod de NGINX esté listo. Por eso está el segundo `wait`. Al

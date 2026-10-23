@@ -354,6 +354,24 @@ ENTRYPOINT ["/pulso"]
 EOF
 ```
 
+**En un diagrama:** las dos recetas. En la multi-stage, la etapa de compilación se descarta y solo el binario llega a la imagen final.
+
+```mermaid
+flowchart LR
+  subgraph MS["Dockerfile: multi-stage"]
+    direction TB
+    B1["Etapa 1: golang:1.25-alpine<br/>compilador, apk, sh"] -->|"go build, CGO_ENABLED=0"| BIN["binario estático /pulso"]
+    BIN -->|"COPY --from=build"| D["Etapa 2: distroless<br/>static-debian13:nonroot"]
+    B1 -.->|"se descarta"| X["no viaja en la imagen"]
+  end
+  subgraph GO["Dockerfile.gordo"]
+    direction TB
+    G1["golang:1.25-alpine"] -->|"go build"| G2["binario + compilador<br/>+ Alpine completo"]
+  end
+  D --> I1[("pulso:1.0")]
+  G2 --> I2[("pulso:gordo")]
+```
+
 Tres decisiones del primero, y las tres se ven en este laboratorio:
 
 - **`CGO_ENABLED=0`** produce un binario estático: no necesita la `libc` del sistema. Por eso
@@ -527,6 +545,24 @@ con `:latest` el valor por defecto de `imagePullPolicy` es **`Always`**: el kube
 la copia local** y va a Docker Hub a resolver `docker.io/library/pulso:latest`, que no
 existe. Con una etiqueta explícita el defecto es `IfNotPresent`, y usa la copia local.
 
+**En un diagrama:** la imagen está en el nodo en los dos casos. Lo que cambia es si el kubelet la usa o va al registro.
+
+```mermaid
+flowchart LR
+  subgraph HOST["Tu máquina: Docker"]
+    IMG["pulso:1.0 y pulso:latest"]
+  end
+  subgraph NODO["Nodo kind ckad-worker: un contenedor Docker"]
+    CT[("containerd del nodo<br/>pulso:1.0 y pulso:latest")]
+    KL["kubelet"]
+  end
+  HUB[("docker.io<br/>library/pulso:latest no existe")]
+  IMG -->|"kind load docker-image<br/>importa sin registro"| CT
+  KL -->|"con-tag, pulso:1.0<br/>IfNotPresent: usa la copia local"| CT
+  KL -->|"sin-tag, pulso = pulso:latest<br/>Always: siempre va al registro"| HUB
+  HUB -.->|"pull access denied: ErrImagePull"| KL
+```
+
 Dos lecciones, una de examen y otra de oficio:
 
 - `imagePullPolicy` **se fija al crear el objeto** y se deriva de la etiqueta. Léelo con
@@ -575,6 +611,31 @@ deja entrar con `exec`. Tienes tres herramientas, una para cada situación:
 | El Pod está corriendo y quieres mirar **dentro** | contenedor efímero (`kubectl debug <pod> --target`) | un contenedor nuevo **dentro del mismo Pod** |
 | El Pod se cae y no te da tiempo de mirar | copia (`kubectl debug <pod> --copy-to`) | un Pod **nuevo**, copia del original, con cambios |
 | Sospechas del **nodo** | `kubectl debug node/<nodo>` | un Pod en el nodo con el sistema de archivos del host en `/host` |
+
+**En un diagrama:** dónde queda el depurador en cada caso.
+
+```mermaid
+flowchart TB
+  subgraph E["1. Contenedor efímero: kubectl debug POD --target"]
+    direction LR
+    subgraph P1["El mismo Pod"]
+      A1["contenedor de la app<br/>imagen distroless"]
+      DBG["depurador busybox<br/>con shell"]
+    end
+    DBG -.-|"red compartida siempre,<br/>procesos, solo con --target"| A1
+  end
+  subgraph C["2. Copia: kubectl debug POD --copy-to"]
+    direction LR
+    R["Pod original<br/>muere en bucle"] -->|"copia con otro comando"| RC["Pod nuevo<br/>mismos volúmenes, shell viva"]
+  end
+  subgraph N["3. Nodo: kubectl debug node/NODO"]
+    direction LR
+    ND["Pod privilegiado en ese nodo"] -->|"chroot /host"| FS["sistema de archivos del nodo<br/>crictl del runtime"]
+  end
+  E ~~~ C
+  C ~~~ N
+```
+
 
 ### 3.2 Un contenedor efímero
 
@@ -808,6 +869,21 @@ kubectl get pods -o name | grep node-debugger | xargs kubectl delete --now
 | `startupProbe` | ¿Ya terminaste de arrancar? | Reinicia el contenedor. **Mientras no pase, las otras dos no se ejecutan** |
 | `livenessProbe` | ¿Sigues vivo? | Reinicia el contenedor. `RESTARTS` sube |
 | `readinessProbe` | ¿Puedes atender tráfico ahora? | **No reinicia nada.** Te saca del tráfico del Service |
+
+**En un diagrama:** quién decide qué, y qué pasa cuando una probe falla.
+
+```mermaid
+flowchart LR
+  S(["El contenedor arranca"]) --> SP{"startupProbe<br/>¿terminaste de arrancar?"}
+  SP -->|"falla failureThreshold veces"| RS["El kubelet reinicia el contenedor<br/>RESTARTS +1"]
+  SP -->|"pasa una vez"| BOTH["Empiezan liveness y readiness,<br/>en paralelo"]
+  BOTH --> LP{"livenessProbe<br/>¿sigues vivo?"}
+  BOTH --> RP{"readinessProbe<br/>¿puedes atender?"}
+  LP -->|"falla failureThreshold veces"| RS
+  RP -->|"falla"| NR["Fuera del tráfico del Service<br/>sin reinicio"]
+  RP -->|"pasa"| OK["Recibe tráfico"]
+  RS --> S
+```
 
 ### 4.1 Fallo productivo: una app lenta con solo `livenessProbe`
 
@@ -1066,6 +1142,18 @@ cambió es su condición: **`ready=false`**. `kube-proxy` solo manda tráfico a 
 `ready=true`. Si diagnosticas un Service mirando solo la columna `ENDPOINTS`, vas a creer que
 los tres Pods reciben tráfico. Mira las condiciones.
 
+**En un diagrama:** la víctima sigue en el EndpointSlice; `kube-proxy` la salta por su condición.
+
+```mermaid
+flowchart LR
+  CL["Pod cliente"] -->|"http://pulso"| SVC["Service pulso<br/>ClusterIP :80"]
+  SVC --> KP["kube-proxy<br/>reglas en cada nodo"]
+  ES[("EndpointSlice<br/>10.244.1.8 ready=true<br/>10.244.1.10 ready=false<br/>10.244.1.9 ready=true")] -.->|"lee"| KP
+  KP -->|":8080"| P1["pulso-...-gpmqz"]
+  KP -->|":8080"| P3["pulso-...-rc2cn"]
+  KP -.-x|"sin tráfico"| P2["pulso-...-2dswt<br/>/readyz responde 503"]
+```
+
 Devuélvela al tráfico:
 
 ```bash
@@ -1203,6 +1291,27 @@ arranco con esquema v2 listo
 que escribió `migracion` en el `emptyDir` lo leyó `app`: los init containers preparan el
 terreno.
 
+**En un diagrama:** la secuencia que acabas de ver, en orden estricto.
+
+```mermaid
+sequenceDiagram
+  participant K as kubelet
+  participant I1 as init 1: espera-base-datos
+  participant I2 as init 2: migracion
+  participant V as emptyDir /trabajo
+  participant A as app
+  K->>I1: arranca (Init:0/2)
+  loop cada 2 s, hasta que el Service exista
+    I1->>I1: nslookup basedatos.lab1.svc.cluster.local
+  end
+  I1-->>K: termina con código 0
+  K->>I2: arranca (Init:1/2)
+  I2->>V: escribe "esquema v2 listo"
+  I2-->>K: termina con código 0
+  K->>A: arranca (Running)
+  A->>V: lee /trabajo/esquema
+```
+
 Dos detalles del manifiesto que valen oro:
 
 - **`fieldRef: metadata.namespace`** es la **Downward API**: el Pod se entera de su propio
@@ -1321,6 +1430,25 @@ linea 3
   `restartPolicy: Always` es un sidecar: no espera a que termine, y lo apaga cuando el
   contenedor principal sale. Estable desde Kubernetes v1.33.
 
+**En un diagrama:** por qué un Job termina y el otro no.
+
+```mermaid
+flowchart LR
+  subgraph CL["Sidecar clásico: dos contenedores en containers"]
+    direction TB
+    R1["reporte: termina"] --> W1{"¿Terminaron TODOS<br/>los containers?"}
+    T1["enviador-logs: tail -F<br/>no termina nunca"] --> W1
+    W1 -->|"no"| Z["Job Running para siempre<br/>Pod 1/2 NotReady"]
+  end
+  subgraph NA["Sidecar nativo: initContainer con restartPolicy Always"]
+    direction TB
+    T2["enviador-logs arranca primero<br/>y sigue corriendo"] --> R2["reporte: termina"]
+    R2 --> K2["El kubelet apaga el sidecar"]
+    K2 --> C2["Job Complete"]
+  end
+  CL ~~~ NA
+```
+
 ### 6.2 El misterio de los 30 segundos
 
 Mira otra vez la columna `DURATION` de `reporte-nativo`. El trabajo duraba 6 segundos.
@@ -1370,6 +1498,24 @@ reporte-nativo-v2   Complete   1/1           10s        10s
 listo: al llegar `SIGTERM`, sale con código 0. En tu propio código (Go, Python, Java) el
 equivalente es **capturar `SIGTERM` y cerrar ordenadamente**. Un sidecar que ignora
 `SIGTERM` retrasa **cada** apagado de **cada** Pod que lo lleva.
+
+**En un diagrama:** el apagado del sidecar, sin y con manejador de señal.
+
+```mermaid
+sequenceDiagram
+  participant K as kubelet
+  participant S as sidecar: sh como PID 1
+  Note over K,S: reporte terminó, toca apagar el sidecar
+  K->>S: SIGTERM
+  alt sin trap: sh no instaló manejador
+    Note over S: el kernel no entrega la señal a un PID 1 sin manejador
+    Note over K: espera terminationGracePeriodSeconds (30 s)
+    K->>S: SIGKILL
+  else con trap 'exit 0' TERM
+    S-->>K: sale con código 0 al instante
+  end
+```
+
 
 ```bash
 kubectl delete job reporte-clasico reporte-nativo reporte-nativo-v2
@@ -1428,6 +1574,24 @@ app arranco 2026-09-26T04:36:52Z
 `startupProbe` del sidecar pasó. Si `proxy` hubiera estado en `containers:`, los dos habrían
 arrancado a la vez (la posición en esa lista **no ordena nada**) y la primera petición de
 `app` habría fallado.
+
+**En un diagrama:** el kubelet retiene a `app` hasta que la `startupProbe` del sidecar pasa.
+
+```mermaid
+sequenceDiagram
+  participant K as kubelet
+  participant P as proxy: sidecar nativo
+  participant A as app
+  K->>P: arranca el sidecar
+  loop cada 2 s
+    K->>P: startupProbe GET /startupz
+    P-->>K: 503, todavía arrancando
+  end
+  P-->>K: 200, unos 15 s después
+  K->>A: ahora sí arranca app
+  A->>P: GET localhost:8080
+  P-->>A: pulso v1 desde orden
+```
 
 > Un init container **normal** no admite probes. Un **sidecar** sí admite `startupProbe`,
 > `readinessProbe` y `livenessProbe`. Compruébalo con `kubectl explain
@@ -1499,6 +1663,20 @@ glotona   1/1     Running   1 (4s ago)   4s
 el kubelet con cortesía, la mandó **el kernel** al pasar el límite del cgroup. Compara con
 el Paso 4.4: el código 2 era un apagado pedido; el 137 es una ejecución sumaria. La CPU, en
 cambio, **nunca mata**: por encima del límite, se estrangula.
+
+**En un diagrama:** dos maneras de morir, dos códigos de salida.
+
+```mermaid
+flowchart LR
+  subgraph CG["cgroup del contenedor: limits.memory 64Mi"]
+    APP["pulso"]
+  end
+  APP -->|"comer 20 MiB: cabe"| APP
+  APP -->|"comer 100 MiB más: pasa el límite"| OOM["Kernel: OOM killer<br/>SIGKILL"]
+  OOM --> E137["OOMKilled, exit 137"]
+  LV["kubelet: la liveness falló, Paso 4.4"] -->|"SIGTERM, apagado pedido"| E2["exit 2 en pulso"]
+```
+
 
 ```bash
 kubectl delete pod glotona --now
