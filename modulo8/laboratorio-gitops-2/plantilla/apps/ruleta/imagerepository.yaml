@@ -1,0 +1,9 @@
+apiVersion: image.toolkit.fluxcd.io/v1
+kind: ImageRepository
+metadata:
+  name: ruleta
+  namespace: flux-system
+spec:
+  image: gitops2-registry:5000/ruleta
+  interval: 30s
+  insecure: true   # el registro local habla HTTP

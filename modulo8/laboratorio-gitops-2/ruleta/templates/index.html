@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Ruleta {{ version }}</title>
+  <link rel="stylesheet" href="/static/tema.css">
+  <link rel="stylesheet" href="/static/estilo.css">
+</head>
+<body>
+  <header>
+    <h1>Ruleta</h1>
+    <span class="version" id="version">v{{ version }}</span>
+  </header>
+  <main>
+    <canvas id="rueda" width="620" height="620"></canvas>
+    <form id="form">
+      <label for="valores">Valores (de 2 a 10, uno por línea)</label>
+      <textarea id="valores">Ana
+Luis
+Marta
+Pedro
+Sofia
+Diego</textarea>
+      <div id="error"></div>
+      <button type="submit" id="girar">Girar</button>
+      <div id="resultado"></div>
+    </form>
+  </main>
+  <script src="/static/ruleta.js"></script>
+</body>
+</html>

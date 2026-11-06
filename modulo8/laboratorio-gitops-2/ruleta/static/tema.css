@@ -1,0 +1,5 @@
+/* El único sitio donde vive el color. v1.0.0 = fondo negro; v1.1.0 = fondo blanco (#ffffff y texto #111111). */
+:root {
+  --fondo: #000000;
+  --texto: #ffffff;
+}
