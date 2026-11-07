@@ -40,6 +40,8 @@ c_flux() (
 
 # ---------- 2. La aplicación entró por Git, no por kubectl ----------
 c_app() (
+  # Con wait: true la Kustomization pasa a Ready=Unknown mientras espera que los Pods se sanen (p. ej. justo despues de corregir una deriva): se le da hasta 90 s
+  for i in $(seq 1 30); do K -n flux-system get kustomization apps >/dev/null || break; test "$(K -n flux-system get kustomization apps -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')" = True && break; sleep 3; done
   test "$(K -n flux-system get kustomization apps -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')" = True || { echo "la Kustomization apps no existe o no está Ready"; exit 1; }
   test "$(K -n flux-system get kustomization apps -o jsonpath='{.spec.sourceRef.name}/{.spec.path}/{.spec.prune}')" = "flux-system/./apps/saludo/true" || { echo "apps debe leer flux-system, ./apps/saludo, con prune: true"; exit 1; }
   test "$(K -n flux-system get kustomization apps -o jsonpath='{.spec.suspend}')" != true || { echo "apps está suspendida"; exit 1; }
@@ -97,7 +99,7 @@ c_compuerta() (
   T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
   cp -a "$W/fleet" "$T/r" && cd "$T/r" || exit 1
   git config user.name t; git config user.email t@example.com
-  F=$(grep -rl '^kind: Deployment' apps | head -1); test -n "$F" || { echo "no hay Deployment bajo apps/"; exit 1; }
+  F=$(grep -rl '^kind: Deployment' apps 2>/dev/null | head -1); test -n "$F" || { echo "no hay Deployment bajo apps/"; exit 1; }
   sed -i -E 's/^( *replicas:).*/\1 "dos"/' "$F"
   if git commit -qam "cambio invalido 1" >/dev/null 2>&1; then echo "se aceptó un Deployment con replicas de tipo texto"; exit 1; fi
   git checkout -q -- "$F"
