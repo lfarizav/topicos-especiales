@@ -2509,4 +2509,6 @@ kind get clusters
 
 ---
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio 2 (Módulo 5) – Operar el clúster: scheduling, almacenamiento, exposición, RBAC y diagnóstico», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

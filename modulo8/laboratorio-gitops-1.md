@@ -1464,4 +1464,6 @@ Reto 1 (módulo 8, GitOps) en el clúster m08-gitops1
 Resultado: 7/7
 ```
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio 1 (Módulo 8) – GitOps desde cero: de Git al clúster, de la firma a la infraestructura», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

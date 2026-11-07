@@ -2,6 +2,13 @@
 
 > Baja el contenedor de la metáfora al mecanismo, y convierte tu Product Vision Board en un PRD.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-3-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-3-claro.svg" alt="Mapa del curso con el Módulo 3 resaltado: contenedores" width="760">
+  </picture>
+</p>
+
 Doble propósito. En lo técnico, este módulo baja el contenedor de la metáfora al
 mecanismo: namespaces, cgroups y union filesystem. En lo de producto, aquí conviertes
 el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Document).

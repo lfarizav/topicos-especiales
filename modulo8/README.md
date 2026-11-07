@@ -2,6 +2,13 @@
 
 > El módulo donde todo cierra: primero los cimientos (GitOps, CI/CD, infraestructura como código), al final la IA. Tu producto llega a producción y se queda ahí, operado con ayuda de agentes.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-8-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-8-claro.svg" alt="Mapa del curso con el Módulo 8 resaltado: GitOps, CI/CD, IaC y agentes de IA" width="760">
+  </picture>
+</p>
+
 El producto que fijaste en el módulo 2, especificaste en el 3 y aprendiste a construir
 en los módulos 4 a 7, aquí llega a producción y se queda ahí. El módulo avanza de los
 cimientos a la IA: primero GitOps, el ciclo de vida CI/CD y la infraestructura como código,

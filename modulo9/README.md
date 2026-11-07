@@ -5,6 +5,13 @@
 > evaluado. Existe para quien ya cursó el módulo 4 y quiere profundizar en una herramienta
 > que el módulo 8 solo menciona de paso.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-9-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-9-claro.svg" alt="Mapa del curso con el Módulo 9 resaltado: Helm (opcional)" width="760">
+  </picture>
+</p>
+
 ## De un vistazo
 
 | | |

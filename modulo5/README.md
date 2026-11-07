@@ -2,6 +2,13 @@
 
 > El pivote técnico del semestre: dejas de usar Kubernetes y empiezas a administrarlo. El clúster es tuyo, y cuando se rompe, lo arreglas tú.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-5-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-5-claro.svg" alt="Mapa del curso con el Módulo 5 resaltado: CKA, administrar el clúster" width="760">
+  </picture>
+</p>
+
 El CKA es un examen **práctico y cronometrado**: no hay preguntas de opción múltiple,
 hay una terminal y problemas que resolver. Se estudia con las manos.
 

@@ -1939,4 +1939,6 @@ contrato, no callar la alarma.**
 
 ---
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio 1 (Módulo 6) – Construir, arrancar, observar y depurar una aplicación», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

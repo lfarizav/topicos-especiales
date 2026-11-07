@@ -2,6 +2,13 @@
 
 > El módulo más exigente del curso: un clúster de Kubernetes por defecto no es seguro, y endurecerlo es trabajo explícito.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-7-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-7-claro.svg" alt="Mapa del curso con el Módulo 7 resaltado: seguridad (CKS)" width="760">
+  </picture>
+</p>
+
 Requiere tener CKA vigente para presentar el examen, y con razón: no se puede
 asegurar lo que no se sabe administrar.
 

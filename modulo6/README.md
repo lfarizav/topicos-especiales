@@ -2,6 +2,13 @@
 
 > Cambio de silla: el clúster es de otro y tú despliegas una aplicación en él, sin permisos de administrador y sin romper a los vecinos.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-6-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-6-claro.svg" alt="Mapa del curso con el Módulo 6 resaltado: CKAD, desplegar aplicaciones" width="760">
+  </picture>
+</p>
+
 Cambio de silla. En el módulo 5 el clúster era tuyo; aquí el clúster es de otro y tú
 tienes que desplegar una aplicación en él, sin permisos de administrador y sin romper
 a los vecinos.

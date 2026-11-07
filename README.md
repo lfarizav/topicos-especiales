@@ -106,4 +106,32 @@ entregables. Empieza siempre por ahí.
 
 `research/` contiene paquetes de investigación profunda listos para ejecutar.
 
+## Licencia y reconocimiento
+
+El material de este repositorio (textos, laboratorios, exámenes, verificadores y figuras) se publica bajo la licencia [Creative Commons Atribución-NoComercial-CompartirIgual 4.0 Internacional (CC BY-NC-SA 4.0)](https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es). El texto legal completo está en [LICENSE](./LICENSE).
+
+**Qué permite:** usar, copiar y adaptar el material en clases y talleres, sin fines comerciales.
+
+**Qué exige:**
+
+- Reconocer la procedencia (autor, curso y enlace al repositorio).
+- Indicar si hiciste cambios.
+- Compartir tus derivados con la misma licencia.
+
+**Bloque de atribución listo para copiar:**
+
+> «<título del laboratorio o examen>», de Luis Felipe Ariza Vesga, curso Tópicos Especiales en Informática, https://github.com/lfarizav/topicos-especiales, licencia CC BY-NC-SA 4.0. <Si lo modificaste: "Adaptado por ...">
+
+**Uso comercial:** requiere permiso previo; contacta al autor por su perfil de GitHub: https://github.com/lfarizav.
+
+### Material de terceros
+
+Estos archivos no son obra del autor y conservan su propia licencia; la licencia CC BY-NC-SA 4.0 no los cubre.
+
+| Archivo | Origen | Licencia |
+|---|---|---|
+| `assets/fuente-mapa/iso-kit.mjs` | núcleo isométrico de la skill `anatomy` (ver [LICENSE-iso-kit](./assets/fuente-mapa/LICENSE-iso-kit)) | MIT |
+| `modulo5/aidlc-optimizado/rule-details-extra/` y el despachador derivado | AI-DLC v1.0.1, [awslabs/aidlc-workflows](https://github.com/awslabs/aidlc-workflows) | MIT-0 |
+| `modulo8/laboratorio-gitops-2/observabilidad/monitoring/configs/dashboards/cluster.json` y `control-plane.json` | [fluxcd/flux2-monitoring-example](https://github.com/fluxcd/flux2-monitoring-example) (idénticos al original) | Apache-2.0 |
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

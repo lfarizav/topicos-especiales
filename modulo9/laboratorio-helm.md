@@ -796,4 +796,6 @@ entrega evaluada). Lo que demuestra que hiciste el laboratorio, si alguien te lo
 - Dónde encaja Helm en el paisaje CNCF de producción: [`../modulo8/README.md`](../modulo8/README.md).
 - El chart `podinfo` usado en el Paso 2: [github.com/stefanprodan/podinfo](https://github.com/stefanprodan/podinfo).
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio – Helm: charts, releases y el ciclo instalar / actualizar / revertir», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

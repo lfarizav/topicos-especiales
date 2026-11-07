@@ -1047,4 +1047,6 @@ application through a pre-built image... popularized by the likes of Docker and
 Kubernetes."* (Fuente: linuxcontainers.org/incus/docs/main/explanation/instances/;
 verificado palabra por palabra contra la página en vivo.)
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio: Runtimes de contenedores y virtualización ligera», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

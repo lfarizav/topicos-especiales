@@ -1,13 +1,22 @@
 // Mapa del curso: figura isométrica estática para el README principal.
 // Uso: node build.mjs            -> escribe ../mapa-del-curso-claro.svg y ../mapa-del-curso-oscuro.svg
+//      node build.mjs --modulo N -> variante "estás aquí" del módulo N (1..9) en ../modulos/mapa-modulo-N-{claro,oscuro}.svg
 //      node build.mjs --html     -> además escribe vista-claro.html y vista-oscuro.html (para revisar líneas)
-import { writeFileSync } from "node:fs";
+import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import * as k from "./iso-kit.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const OUT = join(HERE, "..");
+
+// ---------- variante "estás aquí" (--modulo N) ----------
+const argM = process.argv.indexOf("--modulo");
+const MOD = argM > -1 ? Number(process.argv[argM + 1]) : null;
+if (MOD !== null && !(Number.isInteger(MOD) && MOD >= 1 && MOD <= 9)) throw new Error("--modulo espera un entero de 1 a 9");
+const MOD_NAMES = { 1: "Linux", 2: "IA y especificaciones", 3: "Contenedores", 4: "Kubernetes", 5: "CKA", 6: "CKAD", 7: "Seguridad", 8: "GitOps, IaC y agentes", 9: "Helm" };
+// sin --modulo devuelve el SVG intacto (mapa principal idéntico byte a byte)
+const grp = (mods, svg, txt = false) => (MOD === null ? svg : `<g class="${mods.includes(MOD) ? "m-hi" : "m-lo" + (txt ? " m-txt" : "")}">${svg}</g>`);
 
 const W = 1000;
 const H = 720;
@@ -461,8 +470,8 @@ function flag([x, y, z]) {
 
 // ---------- etiquetas ----------
 const labels = [];
-function label(side, y, title, sub, anchor, { muted = false, minY = 0 } = {}) {
-  labels.push({ side, y, title, sub, anchor: at(anchor), muted, minY });
+function label(side, y, title, sub, anchor, { muted = false, minY = 0, mods = [] } = {}) {
+  labels.push({ side, y, title, sub, anchor: at(anchor), muted, minY, mods });
 }
 
 function placeLabels() {
@@ -492,16 +501,18 @@ function labelsSvg() {
     const ly = l.y - 5;
     // ancla muy por encima de la etiqueta: baja en vertical y luego gira hacia el texto
     const route = ly - ay > 30 ? `M${wEnd.toFixed(1)} ${ly.toFixed(1)}H${ax.toFixed(1)}V${ay.toFixed(1)}` : `M${wEnd.toFixed(1)} ${ly.toFixed(1)}H${elbow.toFixed(1)}L${ax.toFixed(1)} ${ay.toFixed(1)}`;
-    out.push(`<g class="map-wire${l.muted ? " is-muted" : ""}"><path d="${route}"/><circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="2.6"/><circle class="map-wire-start" cx="${wEnd.toFixed(1)}" cy="${(l.y - 5).toFixed(1)}" r="1.6"/></g>`);
-    out.push(`<text class="map-label${l.muted ? " is-muted" : ""}" x="${tx}" y="${l.y}" text-anchor="${anchor}">${l.title}</text>`);
-    out.push(`<text class="map-sub" x="${tx}" y="${l.y + 18}" text-anchor="${anchor}">${l.sub}</text>`);
+    const one = [];
+    one.push(`<g class="map-wire${l.muted ? " is-muted" : ""}"><path d="${route}"/><circle cx="${ax.toFixed(1)}" cy="${ay.toFixed(1)}" r="2.6"/><circle class="map-wire-start" cx="${wEnd.toFixed(1)}" cy="${(l.y - 5).toFixed(1)}" r="1.6"/></g>`);
+    one.push(`<text class="map-label${l.muted ? " is-muted" : ""}" x="${tx}" y="${l.y}" text-anchor="${anchor}">${l.title}</text>`);
+    one.push(`<text class="map-sub" x="${tx}" y="${l.y + 18}" text-anchor="${anchor}">${l.sub}</text>`);
+    out.push(grp(l.mods, one.join(""), true));
   }
   return out.join("");
 }
 
-function milestone(text, anchor, dx, dy, anchorSide = "start") {
+function milestone(text, anchor, dx, dy, anchorSide = "start", mods = []) {
   const [x, y] = at(anchor);
-  return `<text class="map-milestone" x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" text-anchor="${anchorSide}">${text}</text>`;
+  return grp(mods, `<text class="map-milestone" x="${(x + dx).toFixed(1)}" y="${(y + dy).toFixed(1)}" text-anchor="${anchorSide}">${text}</text>`, true);
 }
 
 // ---------- composición ----------
@@ -529,66 +540,83 @@ const containersT2 = [
 ].sort((a, b) => depth([a.plan.x + a.plan.w, a.plan.y + a.plan.d, 0]) - depth([b.plan.x + b.plan.w, b.plan.y + b.plan.d, 0]));
 
 const nodes = [
-  { at: CP, svg: () => node(CP, CP_H, { etcd: true }) },
-  { at: W1, svg: () => node(W1, NODE_H) },
-  { at: W2, svg: () => node(W2, NODE_H) },
-  { at: AGENT, svg: agent },
-  { at: W3, svg: () => node(W3, NODE_H, { litPod: 3 }) },
+  { at: CP, mods: [5], svg: () => node(CP, CP_H, { etcd: true }) },
+  { at: W1, mods: [6], svg: () => node(W1, NODE_H) },
+  { at: W2, mods: [6], svg: () => node(W2, NODE_H) },
+  { at: AGENT, mods: [8], svg: agent },
+  { at: W3, mods: [6], svg: () => node(W3, NODE_H, { litPod: 3 }) },
 ].sort((a, b) => depth([a.at.x + a.at.w, a.at.y + a.at.d, 0]) - depth([b.at.x + b.at.w, b.at.y + b.at.d, 0]));
 
+// cada pieza se asocia a su módulo (solo importa con --modulo)
 const art = [
-  terrace1(),
-  terrace2(),
-  terrace3(),
-  fence(fenceLines.back, false),
-  ...nodes.map((n) => n.svg()),
-  pathLine(pathT3),
-  flag(PIN_UNITS),
-  flag(PIN_DEPLOY),
-  fence(fenceLines.front, true),
-  receiver(),
-  conveyorLegs(),
-  gitCabinet(),
-  conveyor(),
-  stairs(10, T2_TOP, (T3_TOP - T2_TOP) / 3),
-  pathLine(pathT2),
-  flag(PIN_PRD),
-  ...containersT2.map((c) => container(c.plan, T2_TOP, c.alongX)),
-  stairs(90, T1_TOP, (T2_TOP - T1_TOP) / 3),
-  pathLine(pathT1),
-  ruler(),
-  terminal(),
-  crate(),
-  stairs(170, G, (T1_TOP - G) / 3),
-  deskParts.svg,
-  bulbGlass(deskParts.bulb),
-  pathLine(pathGround),
-  flag(PIN_IDEA),
-  flag(PIN_PVB),
+  grp([1], terrace1()),
+  grp([3], terrace2()),
+  grp([4], terrace3()),
+  grp([7], fence(fenceLines.back, false)),
+  ...nodes.map((n) => grp(n.mods, n.svg())),
+  grp([4], pathLine(pathT3)),
+  grp([4], flag(PIN_UNITS)),
+  grp([8], flag(PIN_DEPLOY)),
+  grp([7], fence(fenceLines.front, true)),
+  grp([8], receiver()),
+  grp([8], conveyorLegs()),
+  grp([8], gitCabinet()),
+  grp([8], conveyor()),
+  grp([4], stairs(10, T2_TOP, (T3_TOP - T2_TOP) / 3)),
+  grp([2], pathLine(pathT2)),
+  grp([2], flag(PIN_PRD)),
+  ...containersT2.map((c) => grp([3], container(c.plan, T2_TOP, c.alongX))),
+  grp([3], stairs(90, T1_TOP, (T2_TOP - T1_TOP) / 3)),
+  grp([1], pathLine(pathT1)),
+  grp([1], ruler()),
+  grp([1], terminal()),
+  grp([9], crate()),
+  grp([1], stairs(170, G, (T1_TOP - G) / 3)),
+  grp([2], deskParts.svg),
+  grp([2], bulbGlass(deskParts.bulb)),
+  grp([2], pathLine(pathGround)),
+  grp([2], flag(PIN_IDEA)),
+  grp([2], flag(PIN_PVB)),
   // puntos terminales del camino en cada bandera
-  D([PIN_IDEA, PIN_PVB, PIN_PRD, PIN_UNITS, PIN_DEPLOY].map(at), { size: 2.6, tone: "hi" }),
+  ...(MOD === null
+    ? [D([PIN_IDEA, PIN_PVB, PIN_PRD, PIN_UNITS, PIN_DEPLOY].map(at), { size: 2.6, tone: "hi" })]
+    : [[2, [PIN_IDEA, PIN_PVB, PIN_PRD]], [4, [PIN_UNITS]], [8, [PIN_DEPLOY]]].map(([m, pts]) => grp([m], D(pts.map(at), { size: 2.6, tone: "hi" })))),
 ];
 
 const milestones = [
-  milestone("Idea", PIN_IDEA, 16, 4),
-  milestone("PVB", PIN_PVB, -10, 4, "end"),
-  milestone("PRD", PIN_PRD, -10, -2, "end"),
-  milestone("Unidades y tareas", PIN_UNITS, -10, -4, "end"),
-  milestone("Producción", PIN_DEPLOY, -8, -k.screenRise(20, P), "end"),
+  milestone("Idea", PIN_IDEA, 16, 4, "start", [2]),
+  milestone("PVB", PIN_PVB, -10, 4, "end", [2]),
+  milestone("PRD", PIN_PRD, -10, -2, "end", [2]),
+  milestone("Unidades y tareas", PIN_UNITS, -10, -4, "end", [4]),
+  milestone("Producción", PIN_DEPLOY, -8, -k.screenRise(20, P), "end", [8]),
 ];
 
 // etiquetas de módulos (columna izquierda: lado +y; derecha: lado +x)
-label("left", 0, "Módulo 5 · CKA", "administrar el clúster", [CP.x, CP.y + CP.d - 10, T3_TOP + CP_H]);
-label("left", 0, "Módulo 6 · CKAD", "desplegar aplicaciones", [W2.x + 8, W2.y + W2.d, T3_TOP + 10]);
-label("left", 0, "Módulo 4 · Kubernetes", "KCNA: el loop de reconciliación", [T3.x, T3.y + T3.d - 40, T3_TOP - 8]);
-label("left", 0, "Módulo 3 · Contenedores", "Docker, Compose, runtimes", [T2.x, T2.y + T2.d - 30, T2_TOP - 6]);
-label("left", 0, "Módulo 1 · Linux (LFCS)", "el suelo donde corre todo", [T1.x, T1.y + T1.d - 60, -8]);
-label("left", 0, "Módulo 2 · IA y especificaciones", "la idea, fijada en PVB y PRD", [DESK.x + 8, DESK.y + DESK.d, G + DESK_H - 1.5], { minY: 590 });
-label("right", 0, "Módulo 8 · Agentes de IA", "proponen un PR; tú apruebas", [AGENT.x + AGENT.w, AGENT.y + 8, T3_TOP + 12]);
-label("right", 0, "Módulo 7 · Seguridad (CKS)", "asegurar el clúster", [6, -60, T3_TOP + 11]);
-label("right", 0, "Módulo 8 · GitOps y CI/CD", "del código a producción", [150, (BELT.y0 + BELT.y1) / 2, beltZ(150)]);
-label("right", 0, "Módulo 8 · IaC", "infraestructura como código", [GIT.x + GIT.w, GIT.y + 12, G + GIT_H - 10], { minY: 560 });
-label("right", 0, "Módulo 9 · Helm", "opcional: charts y releases", [CRATE.x + CRATE.w, CRATE.y + CRATE.d / 2, G + 12], { muted: true, minY: 600 });
+label("left", 0, "Módulo 5 · CKA", "administrar el clúster", [CP.x, CP.y + CP.d - 10, T3_TOP + CP_H], { mods: [5] });
+label("left", 0, "Módulo 6 · CKAD", "desplegar aplicaciones", [W2.x + 8, W2.y + W2.d, T3_TOP + 10], { mods: [6] });
+label("left", 0, "Módulo 4 · Kubernetes", "KCNA: el loop de reconciliación", [T3.x, T3.y + T3.d - 40, T3_TOP - 8], { mods: [4] });
+label("left", 0, "Módulo 3 · Contenedores", "Docker, Compose, runtimes", [T2.x, T2.y + T2.d - 30, T2_TOP - 6], { mods: [3] });
+label("left", 0, "Módulo 1 · Linux (LFCS)", "el suelo donde corre todo", [T1.x, T1.y + T1.d - 60, -8], { mods: [1] });
+label("left", 0, "Módulo 2 · IA y especificaciones", "la idea, fijada en PVB y PRD", [DESK.x + 8, DESK.y + DESK.d, G + DESK_H - 1.5], { minY: 590, mods: [2] });
+label("right", 0, "Módulo 8 · Agentes de IA", "proponen un PR; tú apruebas", [AGENT.x + AGENT.w, AGENT.y + 8, T3_TOP + 12], { mods: [8] });
+label("right", 0, "Módulo 7 · Seguridad (CKS)", "asegurar el clúster", [6, -60, T3_TOP + 11], { mods: [7] });
+label("right", 0, "Módulo 8 · GitOps y CI/CD", "del código a producción", [150, (BELT.y0 + BELT.y1) / 2, beltZ(150)], { mods: [8] });
+label("right", 0, "Módulo 8 · IaC", "infraestructura como código", [GIT.x + GIT.w, GIT.y + 12, G + GIT_H - 10], { minY: 560, mods: [8] });
+label("right", 0, "Módulo 9 · Helm", "opcional: charts y releases", [CRATE.x + CRATE.w, CRATE.y + CRATE.d / 2, G + 12], { muted: true, minY: 600, mods: [9] });
+
+const MOD_CSS = `
+.m-lo{opacity:.4}
+.m-lo.m-txt{opacity:.62}
+.m-hi .iso-top{fill:color-mix(in srgb,#2f6fe8 16%,var(--anatomy-top))}
+.m-hi .iso-solid[data-lit]>.iso-top{fill:color-mix(in srgb,#2f6fe8 16%,var(--anatomy-lit-top))}
+.m-hi .iso-shade[data-shade="0"]{fill:color-mix(in srgb,#2f6fe8 12%,var(--anatomy-shade-0))}
+.m-hi .iso-shade[data-shade="1"]{fill:color-mix(in srgb,#2f6fe8 12%,var(--anatomy-shade-1))}
+.m-hi .iso-shade[data-shade="2"]{fill:color-mix(in srgb,#2f6fe8 12%,var(--anatomy-shade-2))}
+.m-hi .iso-shade[data-shade="3"]{fill:color-mix(in srgb,#2f6fe8 12%,var(--anatomy-shade-3))}
+.m-hi{--anatomy-hi:#2f6fe8;--anatomy-mid:#2f6fe8;--anatomy-lo:#7aa2f0}
+.m-hi .map-label{fill:#2f6fe8}
+.m-hi .map-milestone{fill:#2f6fe8}
+`;
 
 const EXTRA_CSS = `
 .map-bg{fill:var(--anatomy-card)}
@@ -615,7 +643,7 @@ function frame() {
   return [
     `<rect class="map-bg" x="0" y="0" width="${W}" height="${H}"/>`,
     `<rect class="map-frame" x="0.5" y="0.5" width="${W - 1}" height="${H - 1}"/>`,
-    `<text class="map-title" x="32" y="58">Mapa del curso</text>`,
+    `<text class="map-title" x="32" y="58">${MOD === null ? "Mapa del curso" : `Estás aquí: Módulo ${MOD} · ${MOD_NAMES[MOD]}`}</text>`,
     `<text class="map-subtitle" x="32" y="84">Un solo proyecto tuyo sube capa por capa, de Linux a producción.</text>`,
     `<text class="map-corner" x="${W - 32}" y="40" text-anchor="end">TÓPICOS ESPECIALES · 9 MÓDULOS</text>`,
     `<g class="map-key"><path d="M32 ${H - 34}h40" style="stroke:var(--anatomy-lit);stroke-dasharray:.01 5.5"/><text x="82" y="${H - 29}">Tu proyecto: idea, PVB, PRD, unidades y tareas, producción</text></g>`,
@@ -628,14 +656,16 @@ const LABEL =
 
 for (const theme of ["light", "dark"]) {
   const svg = k
-    .figureSvg({ width: W, height: H, label: LABEL, standalone: theme, body: [frame(), ...art, ...milestones, labelsSvg()] })
-    .replace("</style>", `${EXTRA_CSS}</style>`)
+    .figureSvg({ width: W, height: H, label: MOD === null ? LABEL : `Módulo ${MOD} resaltado (${MOD_NAMES[MOD]}), el resto en segundo plano. ` + LABEL, standalone: theme, body: [frame(), ...art, ...milestones, labelsSvg()] })
+    .replace("</style>", `${EXTRA_CSS}${MOD === null ? "" : MOD_CSS}</style>`)
     // en un <img> no hay animación ni scripts: quitamos las reglas que animan
     .replace(/@keyframes[^{]*\{(?:[^{}]*\{[^{}]*\})*[^{}]*\}/g, "")
     .replace(/[^{}]*\{[^{}]*animation[^{}]*\}/g, "");
-  const name = theme === "light" ? "mapa-del-curso-claro.svg" : "mapa-del-curso-oscuro.svg";
+  const tn = theme === "light" ? "claro" : "oscuro";
+  const name = MOD === null ? `mapa-del-curso-${tn}.svg` : `modulos/mapa-modulo-${MOD}-${tn}.svg`;
+  if (MOD !== null) mkdirSync(join(OUT, "modulos"), { recursive: true });
   writeFileSync(join(OUT, name), svg);
-  if (process.argv.includes("--html")) {
+  if (MOD === null && process.argv.includes("--html")) {
     writeFileSync(join(HERE, `vista-${theme === "light" ? "claro" : "oscuro"}.html`), `<!doctype html><meta charset="utf-8"><body style="margin:0;background:#888"><div class="iso-plate" style="width:${W}px">${svg}</div></body>`);
   }
   console.log("escrito", name, (svg.length / 1024).toFixed(1), "KB");

@@ -1874,4 +1874,6 @@ cambiando después de que un webhook *mutating* lo vio. (Fuente:
 central de todo webhook de política de seguridad: con `Ignore`, tumbar el webhook basta para
 saltarse la política. Ahí ya no es un detalle de laboratorio.
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio – Kubernetes: primeras cargas de trabajo y el loop de reconciliación», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -2,6 +2,13 @@
 
 > Todo lo que viene después corre sobre Linux: un contenedor es un proceso con namespaces y cgroups, y un nodo de Kubernetes es una máquina Linux.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-1-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-1-claro.svg" alt="Mapa del curso con el Módulo 1 resaltado: Linux (LFCS)" width="760">
+  </picture>
+</p>
+
 Si este módulo queda flojo, los módulos 3 a 8 se vuelven magia negra.
 
 ## De un vistazo

@@ -1702,4 +1702,6 @@ static pod: mover su manifiesto fuera y devolverlo, o reiniciar el kubelet. Comp
 
 ---
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Laboratorio 1 (Módulo 5) – El clúster es tuyo: construir, operar y rescatar Kubernetes con kubeadm», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

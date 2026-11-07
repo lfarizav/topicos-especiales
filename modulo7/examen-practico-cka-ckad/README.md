@@ -158,4 +158,6 @@ se lee lo que el clúster ya está diciendo.
 
 ---
 
+**Licencia:** CC BY-NC-SA 4.0 · Si usas o adaptas este material, reconoce la procedencia: «Examen práctico CKA/CKAD (estilo examen, calificado por script)», Luis Felipe Ariza Vesga, https://github.com/lfarizav/topicos-especiales. Ver [Licencia y reconocimiento](../../README.md#licencia-y-reconocimiento).
+
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

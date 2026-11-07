@@ -2,6 +2,13 @@
 
 > Aquí arranca el hilo del semestre: eliges un producto y lo construyes módulo a módulo hasta llevarlo a producción.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-2-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-2-claro.svg" alt="Mapa del curso con el Módulo 2 resaltado: IA y especificaciones (PVB y PRD)" width="760">
+  </picture>
+</p>
+
 Este módulo arranca el hilo que atraviesa todo el semestre. A partir de hoy no
 estudias Kubernetes en abstracto: eliges **un producto** y lo construyes módulo a
 módulo hasta llevarlo a producción en la sesión 14.

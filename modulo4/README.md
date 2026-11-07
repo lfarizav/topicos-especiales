@@ -2,6 +2,13 @@
 
 > Kubernetes no ejecuta tu aplicación, **reconcilia** un estado deseado con el estado real, una y otra vez, para siempre.
 
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="../assets/modulos/mapa-modulo-4-oscuro.svg">
+    <img src="../assets/modulos/mapa-modulo-4-claro.svg" alt="Mapa del curso con el Módulo 4 resaltado: Kubernetes (KCNA)" width="760">
+  </picture>
+</p>
+
 El primer contacto serio con Kubernetes. Todo lo demás es consecuencia de esa idea
 central.
 
