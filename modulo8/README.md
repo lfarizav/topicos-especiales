@@ -24,7 +24,7 @@ Es también el módulo que da forma a la **sustentación final** de la sesión 1
 | **Sesiones** | Sesiones 13 y 14 · sábados 31 de octubre y 7 de noviembre de 2026 · 9:00–12:00 |
 | **Enfoque** | GitOps, CI/CD, IaC y agentes de IA (sin certificación) |
 | **Laboratorios** | [Laboratorio 1: GitOps desde cero](./laboratorio-gitops-1.md) (sesión 13) · [Laboratorio 2: la ruleta de extremo a extremo](./laboratorio-gitops-2.md) (sesión 14) |
-| **Entregable** | Sustentación del proyecto final, sesión 16 (sábado 21 de noviembre de 2026) · [guía de entrega](./guia-entrega-proyecto-final.md) |
+| **Entregables** | Evidencia de los laboratorios GitOps 1 y 2, sesión 15 (sábado 14 de noviembre de 2026) · [guía de entrega de los laboratorios](./guia-entrega-laboratorios-gitops.md)<br>Sustentación del proyecto final, sesión 16 (sábado 21 de noviembre de 2026) · [guía de entrega](./guia-entrega-proyecto-final.md) |
 
 ---
 
@@ -86,13 +86,16 @@ viven en `laboratorio-gitops-1/`.
 8. OpenTofu: `plan`, `apply` y deriva con `tofu plan -detailed-exitcode`
 9. Reto estilo examen de 7 chequeos, calificado por `verificador-reto1.sh`
 
+Se entrega en la sesión 15, ver la [guía de entrega](./guia-entrega-laboratorios-gitops.md).
+
 ### Laboratorio 2
 
 **[Laboratorio 2: la ruleta de extremo a extremo](./laboratorio-gitops-2.md)** (sesión 14). La
 ruleta de extremo a extremo con CI, firma, automatización de imágenes de Flux, observabilidad y
 reversa, y la IA sobre los cimientos con K8sGPT y un agente que propone cambios. Construye sobre lo
 que dejó el laboratorio 1: el agente tiene un destino fijo, un pull request con evidencia, nunca un
-`kubectl apply`.
+`kubectl apply`. El reto final (Paso 9, 13 chequeos) lo califica `verificar-reto.sh` y se entrega
+en la sesión 15, ver la [guía de entrega](./guia-entrega-laboratorios-gitops.md).
 
 **Herramientas:** kagent, K8sGPT, HolmesGPT, Flux v2 (source-controller,
 kustomize-controller, helm-controller, notification-controller), Argo CD, SOPS + Age,
@@ -101,6 +104,14 @@ Helm, Crossplane, Trivy, Cosign, Cilium, Prometheus, OpenTelemetry, Grafana, Kyv
 ---
 
 ## Entregables y evaluación
+
+### Entrega de los laboratorios GitOps (sesión 15)
+
+En la **sesión 15 (sábado 14 de noviembre de 2026)** entregas la evidencia de los dos
+laboratorios: la salida completa del verificador final de cada uno (`Resultado: X/Y`), con
+fecha, usuario y contexto de `kubectl`, guardada en un archivo por laboratorio. No hay examen.
+Comandos, criterios y qué hacer si un chequeo falla:
+**[Guía de entrega de los laboratorios GitOps](./guia-entrega-laboratorios-gitops.md)**.
 
 ### Proyecto final
 

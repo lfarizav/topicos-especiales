@@ -59,7 +59,7 @@ laboratorios y entregables.
 | 12 | sáb 24 oct 2026 | Módulo 7: CKS (2/2) | - |
 | 13 | sáb 31 oct 2026 | Módulo 8: GitOps, CI/CD, IaC y Agentes de IA (1/2) | - |
 | 14 | sáb 7 nov 2026 | Módulo 8: GitOps, CI/CD, IaC y Agentes de IA (2/2) | - |
-| 15 | sáb 14 nov 2026 | **Examen 3**: módulos 7 y 8 | - |
+| 15 | sáb 14 nov 2026 | **Entrega: laboratorios GitOps 1 y 2** (módulo 8) | **Evidencia de los laboratorios GitOps 1 y 2** |
 | 16 | sáb 21 nov 2026 | **Sustentación del proyecto final** | **Proyecto final** |
 
 Este cronograma es la fuente de verdad del curso. Si una fecha cambia, se cambia aquí
