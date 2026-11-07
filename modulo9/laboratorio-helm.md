@@ -795,3 +795,5 @@ entrega evaluada). Lo que demuestra que hiciste el laboratorio, si alguien te lo
   agenda: [`../modulo4/README.md`](../modulo4/README.md).
 - Dónde encaja Helm en el paisaje CNCF de producción: [`../modulo8/README.md`](../modulo8/README.md).
 - El chart `podinfo` usado en el Paso 2: [github.com/stefanprodan/podinfo](https://github.com/stefanprodan/podinfo).
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

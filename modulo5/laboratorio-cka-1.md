@@ -1442,7 +1442,7 @@ etcdutl version: 3.7.0
 API version: 3.7
 ```
 
-**Paso 1 — apagar el control plane.** Recuerda el Paso 5.2: un static pod no se para con
+**Paso 1: apagar el control plane.** Recuerda el Paso 5.2: un static pod no se para con
 `kubectl`. Se para moviendo su archivo.
 
 ```bash
@@ -1461,7 +1461,7 @@ ls -A /etc/kubernetes/manifests/
 Directorio vacío (el `.kubelet-keep` es un marcador del kubelet). En unos segundos el
 kubelet apaga etcd, el API server, el scheduler y el controller manager.
 
-**Paso 2 — restaurar a un directorio NUEVO.** Nunca encima del que está en uso.
+**Paso 2: restaurar a un directorio NUEVO.** Nunca encima del que está en uso.
 
 ```bash
 # DENTRO DE cka-cp
@@ -1476,7 +1476,7 @@ ls -ld /var/lib/etcd-restore/member
 drwx------ 4 root root 4096 Aug 31 14:43 /var/lib/etcd-restore/member
 ```
 
-**Paso 3 — apuntar el manifiesto de etcd al directorio nuevo.** Este es el paso que se
+**Paso 3: apuntar el manifiesto de etcd al directorio nuevo.** Este es el paso que se
 olvida y por el que la restauración «no funciona»: restauraste los datos, pero etcd sigue
 leyendo los viejos.
 
@@ -1496,7 +1496,7 @@ grep -B2 -A2 '/var/lib/etcd-restore' /etc/kubernetes/manifests-off/etcd.yaml
 93-    name: etcd-data
 ```
 
-**Paso 4 — devolver los manifiestos.**
+**Paso 4: devolver los manifiestos.**
 
 ```bash
 # DENTRO DE cka-cp
@@ -1650,14 +1650,14 @@ Nada. Tu portátil quedó como estaba.
 
 ## Para profundizar
 
-- Instalar kubeadm — <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/>
-- Container runtimes (cgroup driver, `SystemdCgroup`) — <https://kubernetes.io/docs/setup/production-environment/container-runtimes/>
-- Actualizar clústeres kubeadm — <https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/>
-- Política de version skew — <https://kubernetes.io/docs/setup/release/version-skew-policy/>
-- Operar clústeres etcd (respaldo y restauración) — <https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/>
-- Static Pods — <https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/>
-- Mantenimiento de nodos: `cordon`, `drain` — <https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/>
-- Documentación de LXD (instancias de tipo VM) — <https://documentation.ubuntu.com/lxd/>
+- Instalar kubeadm: <https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/>
+- Container runtimes (cgroup driver, `SystemdCgroup`): <https://kubernetes.io/docs/setup/production-environment/container-runtimes/>
+- Actualizar clústeres kubeadm: <https://kubernetes.io/docs/tasks/administer-cluster/kubeadm/kubeadm-upgrade/>
+- Política de version skew: <https://kubernetes.io/docs/setup/release/version-skew-policy/>
+- Operar clústeres etcd (respaldo y restauración): <https://kubernetes.io/docs/tasks/administer-cluster/configure-upgrade-etcd/>
+- Static Pods: <https://kubernetes.io/docs/tasks/configure-pod-container/static-pod/>
+- Mantenimiento de nodos: `cordon`, `drain`: <https://kubernetes.io/docs/tasks/administer-cluster/safely-drain-node/>
+- Documentación de LXD (instancias de tipo VM): <https://documentation.ubuntu.com/lxd/>
 
 ---
 

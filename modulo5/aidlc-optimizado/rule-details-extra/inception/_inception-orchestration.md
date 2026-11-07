@@ -1,4 +1,4 @@
-# INCEPTION PHASE — Orchestration
+# INCEPTION PHASE: Orchestration
 
 **Loaded by CLAUDE.md when the active phase is INCEPTION. Do NOT load construction/operations orchestration during this phase.**
 
@@ -211,3 +211,5 @@
 ---
 
 **Next phase**: When all required Inception stages are approved, proceed to CONSTRUCTION and load `construction/_construction-orchestration.md`.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

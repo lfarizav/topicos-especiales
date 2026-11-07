@@ -115,7 +115,7 @@ El detalle de los nombres de modelo válidos y la instalación están en
 
 ---
 
-## 5. Paso 1 — Convierte cada tarea en un archivo de tarea
+## 5. Paso 1: Convierte cada tarea en un archivo de tarea
 
 Tu `unidades-y-tareas.md` tiene filas de tabla. El codificador necesita **un archivo por
 tarea**, porque ese archivo va a ser su mundo entero.
@@ -150,7 +150,7 @@ vuelta con la herramienta real**, no el código de salida del programa.
 
 ---
 
-## 6. Paso 2 — Instala los tres agentes
+## 6. Paso 2: Instala los tres agentes
 
 ```bash
 cd ~/mi-producto
@@ -172,7 +172,7 @@ revisa que estén en `.claude/agents/` y que su frontmatter tenga `name` y `desc
 
 ---
 
-## 7. Paso 3 — Un worktree por tarea
+## 7. Paso 3: Un worktree por tarea
 
 Es el mecanismo que permite que dos codificadores trabajen a la vez sin pisarse. Un worktree es
 una copia de trabajo del mismo repositorio, en otra carpeta y en otra rama.
@@ -222,7 +222,7 @@ git worktree remove ../wt-U01-T01
 
 ---
 
-## 8. Paso 4 — La primera tarea, una ronda a la vez
+## 8. Paso 4: La primera tarea, una ronda a la vez
 
 **No arranques con una ola de tres.** Corre **una** tarea, mirando cada paso, hasta que veas el
 loop completo. Vas a aprender más de una tarea observada que de nueve despachadas a ciegas.
@@ -263,7 +263,7 @@ Un hallazgo sin respuesta es un hallazgo en pie, y la ronda vuelve a salir NO-VE
 
 ---
 
-## 9. Paso 5 — La primera ola en paralelo
+## 9. Paso 5: La primera ola en paralelo
 
 Cuando ya viste una tarea completa, despachas una **ola**: tareas de unidades que **no dependen
 entre sí**, según tu grafo.
@@ -288,7 +288,7 @@ Tres reglas que no se negocian:
 
 ---
 
-## 10. Paso 6 — Arbitrar
+## 10. Paso 6: Arbitrar
 
 Arbitrar es lo único que el orquestador no delega, y es donde de verdad se ve si entendiste el
 loop. Tres situaciones y su resolución correcta:
@@ -308,7 +308,7 @@ que crece solo es la forma más común de que un proyecto de semestre no se term
 
 ---
 
-## 11. Paso 7 — El techo: revisión humana
+## 11. Paso 7: El techo: revisión humana
 
 Cuando el veredicto es VERDE, el orquestador abre el pull request con la evidencia y **ahí
 termina**. Nadie del loop fusiona.
@@ -412,20 +412,20 @@ Lo que baja la nota, en orden de gravedad:
 
 Consultadas el **10 de septiembre de 2026**.
 
-1. **Claude Code — Subagents** (formato del frontmatter, valores válidos de `model`,
+1. **Claude Code: Subagents** (formato del frontmatter, valores válidos de `model`,
    comportamiento de `tools`, `disallowedTools` y `isolation: worktree`).
    <https://code.claude.com/docs/en/sub-agents>
-2. **Git — `git worktree`** (el mecanismo de aislamiento del despacho en paralelo).
+2. **Git: `git worktree`** (el mecanismo de aislamiento del despacho en paralelo).
    <https://git-scm.com/docs/git-worktree>
-3. **Andrew Ng — «Agentic Design Patterns Part 2, Reflection»**, The Batch, 27 de marzo de 2024.
+3. **Andrew Ng, «Agentic Design Patterns Part 2, Reflection»**, The Batch, 27 de marzo de 2024.
    El patrón de la pareja que genera y critica: *«I've found it convenient to create two
    different agents, one prompted to generate good outputs and the other prompted to give
    constructive criticism of the first agent's output»*.
    <https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-2-reflection/>
-4. **Andrew Ng — «Agentic Design Patterns Part 5, Multi-Agent Collaboration»**, The Batch,
+4. **Andrew Ng, «Agentic Design Patterns Part 5, Multi-Agent Collaboration»**, The Batch,
    17 de abril de 2024. El reparto por papeles.
    <https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-5-multi-agent-collaboration/>
-5. **Andrew Ng — «What's next for AI agentic workflows»**, Sequoia Capital AI Ascent,
+5. **Andrew Ng, «What's next for AI agentic workflows»**, Sequoia Capital AI Ascent,
    26 de marzo de 2024 (video, ~14 min).
    <https://www.youtube.com/watch?v=sal78ACtGTc>
 

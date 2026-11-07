@@ -117,3 +117,5 @@ quirúrgico en lo que de verdad no puede pasar.
 - **Módulo 3:** la cadena de suministro empieza en el `Dockerfile` y la imagen base.
 - **Módulo 8:** el RBAC restrictivo del agente de IA en el clúster es una aplicación
   directa de este módulo. Un agente con permisos de escritura es un hallazgo de CKS.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

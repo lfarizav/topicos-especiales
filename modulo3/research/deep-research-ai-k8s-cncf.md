@@ -218,3 +218,5 @@ La delegación de operaciones autónomas sobre clústeres de producción en Kube
 > 45. CONTEXT-ALL.md  
 > 46. Is a Pod the right deployment unit for an AI agent? | CNCF, [https://www.cncf.io/blog/2026/07/14/is-a-pod-the-right-deployment-unit-for-an-ai-agent/](https://www.cncf.io/blog/2026/07/14/is-a-pod-the-right-deployment-unit-for-an-ai-agent/)  
 > 47. Why sandboxing your agent is not enough | CNCF, [https://www.cncf.io/blog/2026/07/07/why-sandboxing-your-agent-is-not-enough/](https://www.cncf.io/blog/2026/07/07/why-sandboxing-your-agent-is-not-enough/)
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

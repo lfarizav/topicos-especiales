@@ -10,7 +10,7 @@
 | [`orquestador.md`](./orquestador.md) | Despacha, arbitra, entrega | `fable` | la sesión principal |
 | [`revisor.md`](./revisor.md) | Juzga. Corre los comandos él mismo | `opus` | `Bash, Read, Grep, Glob` |
 | [`codificador.md`](./codificador.md) | Implementa una tarea en su worktree | `sonnet` | `Bash, Read, Edit, Write, Grep, Glob` |
-| [`plantilla-tarea.md`](./plantilla-tarea.md) | El contrato de entrada del codificador | — | — |
+| [`plantilla-tarea.md`](./plantilla-tarea.md) | El contrato de entrada del codificador | n/a | n/a |
 
 ---
 

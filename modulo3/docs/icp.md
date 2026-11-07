@@ -1,4 +1,4 @@
-# Ideal Customer Profile — Timonel
+# Ideal Customer Profile: Timonel
 
 > Perfil de cliente ideal del caso de estudio. Derivado del PVB y de la investigación
 > auditada en [`research/`](../research/).
@@ -9,7 +9,7 @@
 
 ---
 
-## ICP — segmento beachhead
+## ICP: segmento beachhead
 
 **Empresas:** organizaciones que **ya operan Kubernetes en producción** (no en
 evaluación ni en piloto), con equipos de plataforma o SRE de **3 a 15 ingenieros**, que
@@ -44,7 +44,7 @@ Una empresa está en el beachhead si cumple las tres. Si falla una, no es el cli
 
 ## Buyer personas
 
-### Persona 1 — SRE Lead / Head of Platform (decisor y veto)
+### Persona 1: SRE Lead / Head of Platform (decisor y veto)
 
 **Quién es:** ingeniero senior, 8-15 años de experiencia, responsable de la
 disponibilidad del sistema. Es quien recibe la llamada a las 3 a.m.
@@ -62,7 +62,7 @@ disponibilidad del sistema. Es quien recibe la llamada a las 3 a.m.
 diagnóstico llega sin la evidencia que lo sustenta; la herramienta exige reemplazar Argo
 CD o Flux; o descubre un caso en que el agente afirmó con seguridad algo falso.
 
-### Persona 2 — CISO / Seguridad (veto en sectores regulados)
+### Persona 2: CISO / Seguridad (veto en sectores regulados)
 
 **Quién es:** responsable de riesgo tecnológico. En fintech, tiene poder de veto absoluto.
 
@@ -77,7 +77,7 @@ CD o Flux; o descubre un caso en que el agente afirmó con seguridad algo falso.
 **Mata la adopción si:** no hay redacción de datos sensibles antes de enviarlos al
 modelo; no hay respuesta clara sobre inyección indirecta de prompts; no hay auditoría.
 
-### Persona 3 — Ingeniero de plataforma (usuario, no comprador)
+### Persona 3: Ingeniero de plataforma (usuario, no comprador)
 
 **Quién es:** quien convive con la herramienta a diario. No firma el contrato, pero lo
 cancela si la herramienta le estorba.
@@ -96,7 +96,7 @@ ruido, no de error.
 **Operativos**
 
 - **El diagnóstico consume más tiempo que la corrección.** Ante un incidente, el trabajo
-  se va en correlacionar eventos del clúster, logs y métricas — no en aplicar el arreglo,
+  se va en correlacionar eventos del clúster, logs y métricas, no en aplicar el arreglo,
   que suele ser corto.
 - **El conocimiento operativo no está escrito.** El "por qué está configurado así" vive
   en dos personas y se va cuando rotan.
@@ -142,7 +142,7 @@ ruido, no de error.
 
 | Objeción | Respuesta |
 |---|---|
-| "K8sGPT y HolmesGPT son gratis y hacen esto." | Hacen el diagnóstico, y lo hacen bien — de hecho Timonel se apoya en ellos. Lo que no hacen es cerrar el bucle hasta un cambio aprobado y reconciliado, ni acumular historial de aciertos. Si el diagnóstico les basta, no somos su producto. |
+| "K8sGPT y HolmesGPT son gratis y hacen esto." | Hacen el diagnóstico, y lo hacen bien; de hecho Timonel se apoya en ellos. Lo que no hacen es cerrar el bucle hasta un cambio aprobado y reconciliado, ni acumular historial de aciertos. Si el diagnóstico les basta, no somos su producto. |
 | "Podemos construirlo nosotros en un trimestre." | Probablemente sí. La pregunta es si mantenerlo es su negocio: cada versión de Kubernetes, cada cambio de modelo y cada tipo de incidente nuevo exige recalibrar. |
 | "No dejo que una IA toque mi producción." | Correcto, y por eso no la toca. El ServiceAccount es de solo lectura y se puede verificar. La única vía al clúster es un PR que **usted** aprueba. |
 | "¿Y si el agente me convence de aprobar algo equivocado?" | Es el riesgo real y no lo negamos. Por eso cada propuesta lleva nivel de confianza, el agente puede responder "no sé", y medimos públicamente la tasa de propuestas revertidas. |
@@ -153,4 +153,6 @@ ruido, no de error.
 
 ---
 
-*Material de referencia — Tópicos Especiales en Informática*
+*Material de referencia, Tópicos Especiales en Informática*
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

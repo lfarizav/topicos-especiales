@@ -1,4 +1,4 @@
-# Laboratorio — Runtimes de contenedores y virtualización ligera
+# Laboratorio: Runtimes de contenedores y virtualización ligera
 
 **Módulo 3 · en clase · 100–120 minutos.** Es más de lo que cabe cómodo en una sola
 sesión, así que está pensado por bloques:
@@ -16,7 +16,7 @@ sacrifica antes el 8 y el 9 que el 7.
 > Este laboratorio es distinto del laboratorio de `README.md` (Dockerfile multi-stage +
 > Compose de producción, para la entrega de PVB/PRD). Este se hace **en vivo, en clase**,
 > antes o junto con ese trabajo: el objetivo aquí no es producir un artefacto, es que
-> las palabras que más se confunden en contenedores — **OCI, LXC, LXD, Docker, Podman** —
+> las palabras que más se confunden en contenedores (**OCI, LXC, LXD, Docker, Podman**)
 > dejen de ser sinónimos vagos y se conviertan en cosas que viste con tus propios ojos
 > en una terminal.
 
@@ -28,17 +28,17 @@ Al terminar, vas a poder responder estas preguntas señalando la evidencia en tu
 propia terminal, no repitiendo una definición de memoria:
 
 1. ¿Qué es, concretamente, lo que hace que un proceso normal de Linux se convierta en
-   "un contenedor"? (namespaces + cgroups — el módulo 1 lo vio en teoría, aquí lo ves
+   "un contenedor"? (namespaces + cgroups, el módulo 1 lo vio en teoría, aquí lo ves
    correr)
 2. ¿Por qué un **contenedor de sistema** (LXC/LXD) y un **contenedor de aplicación**
    (Docker) son dos formas distintas de usar el mismo mecanismo del kernel, no dos
    mecanismos distintos?
-3. ¿Qué es LXD que Docker no es, y qué es Docker que LXD no es — usando la misma
+3. ¿Qué es LXD que Docker no es, y qué es Docker que LXD no es: usando la misma
    herramienta (`lxc`) para lanzar tanto un contenedor como una máquina virtual ligera?
 4. ¿Qué significa "imagen oficial" en Docker Hub, y por qué el tamaño de una imagen es
    una decisión de seguridad, no solo de espacio en disco?
 5. ¿Qué te da LXD automáticamente (red, DNS entre instancias, almacenamiento) que en
-   Docker tienes que declarar tú mismo — a mano, o dejando que Compose lo declare?
+   Docker tienes que declarar tú mismo, a mano, o dejando que Compose lo declare?
 6. ¿Qué diferencia real, medible a nivel de kernel, hay entre un proceso root y un
    proceso sin privilegios dentro del mismo contenedor?
 7. Si Docker y Podman corren las mismas imágenes con casi los mismos comandos, ¿en qué
@@ -56,7 +56,7 @@ LXD inicializado, el Paso 0 lo resuelve.
 
 ---
 
-## Paso 0 — Verificar el entorno (3 min)
+## Paso 0: Verificar el entorno (3 min)
 
 ```bash
 systemctl is-active docker
@@ -75,12 +75,12 @@ lxc list   # ahora debe mostrar una tabla vacía, sin error
 > **Nota de seguridad, no de trámite:** pertenecer al grupo `docker` (o `lxd`) equivale
 > a tener acceso root efectivo sobre el host. No es una casualidad de configuración: es
 > el mismo hecho que el laboratorio de Compose de este módulo te hace comprobar en su
-> paso 7. Tenlo presente en cada comando `sudo` que evites usar en este laboratorio —
+> paso 7. Tenlo presente en cada comando `sudo` que evites usar en este laboratorio:
 > muchos de ellos son innecesarios *porque* tu usuario ya tiene ese poder por otra vía.
 
 ---
 
-## Paso 1 — Namespaces y cgroups: el sustrato compartido (10 min)
+## Paso 1: Namespaces y cgroups, el sustrato compartido (10 min)
 
 Módulo 1 los vio en teoría. Aquí los vas a ver correr.
 
@@ -97,14 +97,14 @@ for ns in pid net mnt uts ipc user; do echo -n "$ns: "; readlink /proc/self/ns/$
 ```
 
 **Lo que deberías ver:** todos los namespaces (`pid`, `net`, `mnt`, `uts`, `ipc`) tienen
-un número distinto adentro que afuera — esa es la aislación. Pero fíjate bien en `user`:
+un número distinto adentro que afuera, esa es la aislación. Pero fíjate bien en `user`:
 en una instalación de Docker sin *user namespace remapping* configurado (el default en
 la mayoría de instalaciones), el namespace `user` **es el mismo número** adentro y
 afuera. Eso es exactamente lo que el laboratorio de Compose te hace comprobar de otra
 forma en su paso 7: sin remapping, "root dentro del contenedor" y "root en el host" son,
 a nivel de kernel, la misma identidad.
 
-**Salida real de esta máquina** (los números de inodo van a ser distintos en la tuya —
+**Salida real de esta máquina** (los números de inodo van a ser distintos en la tuya;
 lo que importa es el patrón: cinco valores diferentes, uno igual):
 
 ```
@@ -124,7 +124,7 @@ ipc: ipc:[4026531839]
 user: user:[4026531837]
 ```
 
-Fíjate: `user` es `4026531837` en ambas — idéntico. Los otros cinco no coinciden en
+Fíjate: `user` es `4026531837` en ambas, idéntico. Los otros cinco no coinciden en
 ningún caso.
 
 Ahora el cgroup:
@@ -134,7 +134,7 @@ docker exec ns-demo cat /proc/self/cgroup
 cat /proc/self/cgroup
 ```
 
-El contenedor ve `0::/` — su propia raíz de cgroup, aislada por el namespace de cgroup.
+El contenedor ve `0::/`, su propia raíz de cgroup, aislada por el namespace de cgroup.
 Tu shell ve una ruta larga anidada bajo tu sesión de usuario. Es la misma jerarquía de
 cgroups v2 del kernel, dos vistas distintas de ella.
 
@@ -147,7 +147,7 @@ cgroups v2 del kernel, dos vistas distintas de ella.
 0::/user.slice/user-1000.slice/user@1000.service/app.slice/app-org.gnome.Terminal.slice/vte-spawn-<uuid>.scope
 ```
 
-(la ruta exacta de tu shell va a depender de tu sesión gráfica/terminal — lo que importa
+(la ruta exacta de tu shell va a depender de tu sesión gráfica/terminal, lo que importa
 es que el contenedor ve `0::/` y tú ves algo largo y anidado).
 
 ```bash
@@ -158,7 +158,7 @@ uname -r
 Estas dos líneas deben imprimir **exactamente lo mismo**. Guárdalo en la cabeza: un
 contenedor Docker no tiene su propio kernel. Corre sobre el kernel del host, aislado por
 namespaces y limitado por cgroups. Esto es cierto para Docker y, como vas a comprobar en
-el Paso 4, también para un contenedor de LXC/LXD — y **deja de ser cierto** en el Paso 5.
+el Paso 4, también para un contenedor de LXC/LXD, y **deja de ser cierto** en el Paso 5.
 
 ```bash
 docker rm -f ns-demo
@@ -166,9 +166,9 @@ docker rm -f ns-demo
 
 ---
 
-## Paso 2 — Dos daemons, un solo systemd (7 min)
+## Paso 2: Dos daemons, un solo systemd (7 min)
 
-Docker y LXD no son mecanismos distintos a nivel de kernel — son dos programas de
+Docker y LXD no son mecanismos distintos a nivel de kernel: son dos programas de
 espacio de usuario (*daemons*) que hablan con el mismo kernel de formas distintas. Ambos
 corren gestionados por `systemd`, exactamente como cualquier otro servicio que viste en
 el módulo 1.
@@ -179,12 +179,12 @@ systemctl status snap.lxd.daemon --no-pager -l | head -12
 ```
 
 Fíjate en tres cosas que los dos tienen en común (y que el módulo 1 ya te enseñó a leer):
-- **`TriggeredBy:`** — ambos son *socket-activated*: no arrancan hasta que algo toca su
+- **`TriggeredBy:`** ambos son *socket-activated*: no arrancan hasta que algo toca su
   socket Unix. Esto es un patrón estándar de systemd, no algo específico de contenedores.
-- **`CGroup:`** — el propio daemon vive dentro de un cgroup (`docker.service`,
+- **`CGroup:`** el propio daemon vive dentro de un cgroup (`docker.service`,
   `snap.lxd.daemon.service`), controlado por el mismo mecanismo que aísla los contenedores
   que ese daemon crea.
-- **`Memory:`** — compara el consumo en reposo de los dos daemons en tu máquina. No hay
+- **`Memory:`** compara el consumo en reposo de los dos daemons en tu máquina. No hay
   un ganador universal (cambia según versión y carga); lo que importa es que ambos son
   procesos de Linux corrientes, visibles y medibles con las mismas herramientas.
 
@@ -195,11 +195,11 @@ journalctl -u snap.lxd.daemon --no-pager | tail -15
 
 Mismo comando, mismo formato de log, dos daemons distintos. Si `docker logs` o `lxc
 info` alguna vez no te dan suficiente contexto sobre por qué algo falló, `journalctl -u
-<servicio>` es tu primer paso — otra vez, módulo 1.
+<servicio>` es tu primer paso, otra vez, módulo 1.
 
 ---
 
-## Paso 3 — Docker vs Podman: el mismo estándar, dos arquitecturas (12 min)
+## Paso 3: Docker vs Podman, el mismo estándar, dos arquitecturas (12 min)
 
 Docker no es "los contenedores". Es *una* implementación. Podman es otra, y corre las
 mismas imágenes OCI con casi los mismos comandos. Lo interesante no es el cambio de
@@ -317,15 +317,15 @@ podman rm -f t-podman
 
 ---
 
-## Paso 4 — LXC/LXD: un contenedor **de sistema** (12 min)
+## Paso 4: LXC/LXD, un contenedor **de sistema** (12 min)
 
 Hasta aquí, "contenedor" significó un solo proceso (`sleep 300`). Eso es un
-**contenedor de aplicación** — el modelo por defecto de Docker: una imagen empaqueta un
+**contenedor de aplicación**, el modelo por defecto de Docker: una imagen empaqueta un
 proceso (o unos pocos, vía sidecar), y cuando ese proceso muere, el contenedor muere.
 
 LXC/LXD parte de una idea distinta: **contenedor de sistema**. En vez de un proceso,
-empaqueta y arranca un sistema Linux completo — con su propio `init`, sus propios
-servicios systemd, su propio `cron`, su propio `dbus` — todo compartiendo el kernel del
+empaqueta y arranca un sistema Linux completo, con su propio `init`, sus propios
+servicios systemd, su propio `cron`, su propio `dbus`, todo compartiendo el kernel del
 host, igual que Docker.
 
 ```bash
@@ -349,7 +349,7 @@ lxc exec c1 -- systemctl is-system-running
 ```
 
 Vas a ver `/sbin/init` como PID 1, y detrás de él `systemd-journald`,
-`systemd-udevd`, `systemd-resolved`, `systemd-networkd`, `cron`, `dbus` — un sistema
+`systemd-udevd`, `systemd-resolved`, `systemd-networkd`, `cron`, `dbus`, un sistema
 completo arrancando adentro.
 
 **Salida real de esta máquina** (`ps aux` dentro de `c1`, primeras líneas):
@@ -385,7 +385,7 @@ lxc delete c1 --force
 
 ---
 
-## Paso 5 — LXC/LXD: la misma herramienta, ahora una VM real (10 min)
+## Paso 5: LXC/LXD, la misma herramienta, ahora una VM real (10 min)
 
 La misma CLI (`lxc`) que acabas de usar para lanzar un contenedor de sistema también
 sabe lanzar una **máquina virtual ligera**, con un solo flag:
@@ -405,7 +405,7 @@ uname -r
 ```
 
 **Estas dos líneas deben ser DIFERENTES.** `v1` corre su propio kernel de invitado,
-separado del kernel de tu host — al revés de todo lo que viste en los pasos 1 y 3.
+separado del kernel de tu host, al revés de todo lo que viste en los pasos 1 y 3.
 
 **Salida real de esta máquina:**
 
@@ -447,14 +447,14 @@ lxc delete v1 --force
 
 ---
 
-## Paso 6 — OCI, Docker Hub y por qué el tamaño de una imagen importa (10 min)
+## Paso 6: OCI, Docker Hub y por qué el tamaño de una imagen importa (10 min)
 
 **OCI** (Open Container Initiative) es la especificación que define el formato de una
-imagen de contenedor y el formato de un runtime que la ejecuta — es lo que hace que una
+imagen de contenedor y el formato de un runtime que la ejecuta, es lo que hace que una
 imagen construida con `docker build` pueda correr con `containerd`, `podman` o cualquier
 otro runtime compatible, sin depender de Docker específicamente. Las imágenes que jalas
 con `docker pull` son imágenes OCI. Las imágenes de LXC/LXD (los `ubuntu:24.04` que
-lanzaste en los pasos 3 y 4) **no son imágenes OCI** — vienen del servidor de imágenes
+lanzaste en los pasos 3 y 4) **no son imágenes OCI**, vienen del servidor de imágenes
 propio de Linux Containers (`images:` / `ubuntu:`), con su propio formato de rootfs.
 Son dos ecosistemas de imágenes distintos, aunque ambos empaquetan un sistema de
 archivos Linux.
@@ -466,7 +466,7 @@ docker pull -q alpine:3.20
 docker images --format "table {{.Repository}}\t{{.Tag}}\t{{.Size}}" | grep -E "python|alpine|REPOSITORY"
 ```
 
-Mira la diferencia de tamaño entre `python:3.13` y `python:3.13-slim` — no es un
+Mira la diferencia de tamaño entre `python:3.13` y `python:3.13-slim`, no es un
 detalle cosmético: cada paquete de más en una imagen es superficie de ataque de más
 (más CVEs potenciales, más cosas que un atacante puede usar si logra ejecutar código
 adentro). El laboratorio de Compose de este módulo lo lleva al extremo con imágenes
@@ -484,9 +484,9 @@ El segmento `library/` es la
 señal: son las **imágenes oficiales** de Docker Hub, mantenidas con revisión de
 seguridad y actualizadas activamente por Docker o por el proyecto upstream. Una imagen
 de un usuario o de una organización cualquiera (ej. `docker.io/algun-usuario/su-imagen`)
-no pasa por esa curación — puede ser perfectamente confiable, o puede no serlo. La buena
+no pasa por esa curación, puede ser perfectamente confiable, o puede no serlo. La buena
 práctica no es "nunca uses una imagen que no sea `library/`", es: **antes de poner una
-imagen en producción, mira explícitamente en qué namespace vive y quién la mantiene** —
+imagen en producción, mira explícitamente en qué namespace vive y quién la mantiene**:
 no lo asumas por el nombre bonito del repositorio.
 
 ```bash
@@ -498,7 +498,7 @@ docker rmi python:3.13 alpine:3.20
 
 ---
 
-## Paso 7 — Construir tu propia imagen con un Dockerfile (15 min)
+## Paso 7: Construir tu propia imagen con un Dockerfile (15 min)
 
 Hasta aquí solo has *consumido* imágenes que hizo otra persona. Ahora vas a producir una,
 y a ver por qué el **orden de las instrucciones** es una decisión de ingeniería, no un
@@ -705,10 +705,10 @@ cd ~ && rm -rf ~/lab-dockerfile
 
 ---
 
-## Paso 8 — Red y almacenamiento: qué te da LXD gratis y qué te da Compose (12 min)
+## Paso 8: Red y almacenamiento, qué te da LXD gratis y qué te da Compose (12 min)
 
 Módulo aparte: el laboratorio de Compose de este módulo ya te hace escribir una red y
-un volumen con nombre explícito (sus prácticas #3 y #4). Aquí no repetimos eso — aquí
+un volumen con nombre explícito (sus prácticas #3 y #4). Aquí no repetimos eso, aquí
 comparamos **qué tan automático es** en cada modelo.
 
 **LXD gestiona red y almacenamiento a nivel de instalación, no por proyecto:**
@@ -741,7 +741,7 @@ used_by:
 ```
 
 Cada instancia que lanzas se conecta a `lxdbr0` y usa el pool `default` sin que tengas
-que declarar nada — lo viste ya en los pasos 3 y 4 sin darte cuenta.
+que declarar nada, lo viste ya en los pasos 3 y 4 sin darte cuenta.
 
 **Y la resolución de nombres entre instancias también viene incluida:**
 
@@ -766,7 +766,7 @@ PING c2 (fd42:62a9:e9db:6dda:216:3eff:fe22:e38e) 56 data bytes
 2 packets transmitted, 2 received, 0% packet loss, time 1061ms
 ```
 
-Fíjate en `c2.lxd` — LXD resolvió el nombre solo, sin ningún paso de configuración de tu
+Fíjate en `c2.lxd`: LXD resolvió el nombre solo, sin ningún paso de configuración de tu
 parte.
 
 Ahora el contraste con Docker. Un `docker run` normal, sin Compose, **no** te da eso:
@@ -779,7 +779,7 @@ docker exec client ping -c2 web
 
 Vas a ver `ping: bad address 'web'` (confirmado en esta máquina: exactamente ese
 mensaje). La red *default* de Docker (el bridge `docker0`) no
-tiene DNS embebido entre contenedores — es una limitación real y conocida, no un error
+tiene DNS embebido entre contenedores: es una limitación real y conocida, no un error
 tuyo. Ahora compara con un `compose.yaml` mínimo:
 
 ```bash
@@ -814,7 +814,7 @@ La diferencia no es que Compose "sepa hacer algo mágico": Compose
 crea automáticamente una red *bridge* con nombre propio para tu proyecto (revisa
 `docker network ls` y busca `lab-compose_default`), y esa red sí tiene DNS embebido. Es
 la misma primitiva de Docker (una red *user-defined*) que tú mismo declaras a mano en
-el laboratorio de Compose de este módulo — aquí ves qué pasa cuando esa declaración
+el laboratorio de Compose de este módulo, aquí ves qué pasa cuando esa declaración
 falta.
 
 ```bash
@@ -828,17 +828,17 @@ lxc delete c2 --force
 **La comparación en una frase:** LXD te da red y DNS entre instancias por defecto, a
 nivel de todo el host; Docker te da aislamiento por contenedor por defecto, y **tú**
 declaras la red (a mano, o dejando que Compose la declare por ti) cuando quieres que
-varios contenedores se hablen por nombre. Ninguno de los dos modelos es "mejor" — son
+varios contenedores se hablen por nombre. Ninguno de los dos modelos es "mejor", son
 default distintos para casos de uso distintos.
 
 ---
 
-## Paso 9 — Por qué el tamaño de la imagen y el usuario del proceso son decisiones de seguridad (15 min)
+## Paso 9: Por qué el tamaño de la imagen y el usuario del proceso son decisiones de seguridad (15 min)
 
 Ya viste en el Paso 6 que `python:3.13` pesa 9× más que `python:3.13-slim`. Ahora vas a
 medir **qué compra ese peso extra**, no solo en disco.
 
-### 7.1 — Vulnerabilidades: escanea las tres imágenes con Trivy
+### 7.1: Vulnerabilidades, escanea las tres imágenes con Trivy
 
 ```bash
 docker pull -q python:3.13
@@ -853,12 +853,12 @@ trivy image --scanners vuln --severity HIGH,CRITICAL -q alpine:3.20        # est
 > Trivy imprime **dos** líneas `Total:` para las imágenes de Python: la primera (la que
 > capturamos con `head -1`) cuenta las vulnerabilidades del sistema operativo base
 > (paquetes Debian); una segunda, más abajo, cuenta solo las bibliotecas de Python
-> instaladas con `pip`. Si corres el comando sin el `grep`, vas a ver ambas — la tabla
+> instaladas con `pip`. Si corres el comando sin el `grep`, vas a ver ambas, la tabla
 > de abajo usa la primera, que es la que cambia drásticamente entre `python:3.13` y
 > `python:3.13-slim`.
 
 En la corrida de referencia de este laboratorio (re-confirmada en esta máquina el
-2026-08-14 con la base de datos de vulnerabilidades de Trivy actualizada ese mismo día —
+2026-08-14 con la base de datos de vulnerabilidades de Trivy actualizada ese mismo día;
 **tu número exacto va a ser distinto** porque la base de datos de CVEs cambia todos los
 días; lo que no cambia es el patrón):
 
@@ -880,7 +880,7 @@ módulo lleva esta misma idea un paso más allá con `distroless`.
 docker rmi python:3.13 python:3.13-slim alpine:3.20
 ```
 
-### 7.2 — Root dentro del contenedor: qué puede hacer y qué no
+### 7.2: Root dentro del contenedor, qué puede hacer y qué no
 
 ```bash
 docker run --rm alpine sh -c \
@@ -891,7 +891,7 @@ docker run --rm --user 1000:1000 alpine sh -c \
 ```
 
 Como root (el *default* si no pones `--user`), instalar un paquete funciona. Con
-`--user 1000:1000`, falla — el UID 1000 no tiene permiso de escritura en `/etc` ni en
+`--user 1000:1000`, falla: el UID 1000 no tiene permiso de escritura en `/etc` ni en
 `/lib/apk`, exactamente como le pasaría a un usuario sin privilegios en cualquier Linux.
 
 **Salida real de esta máquina:**
@@ -929,9 +929,9 @@ cap_audit_write, cap_setfcap`.
 La máscara de capacidades de Linux (`CapEff`) del proceso root **no es cero**: trae
 capacidades reales como `cap_net_bind_service` (abrir puertos <1024),
 `cap_sys_chroot`, `cap_setuid`/`cap_setgid` (cambiar de identidad), `cap_dac_override`
-(saltarse permisos de archivo) — las cuatro confirmadas arriba, entre las catorce que
+(saltarse permisos de archivo), las cuatro confirmadas arriba, entre las catorce que
 Docker concede por defecto. La del proceso no-root es literalmente
-`0000000000000000` — cero capacidades especiales, aunque el contenedor haya sido
+`0000000000000000`, cero capacidades especiales, aunque el contenedor haya sido
 comprometido, un atacante que ejecute código ahí adentro no tiene ninguna de esas
 palancas.
 
@@ -939,20 +939,20 @@ palancas.
 > de este módulo (`cap_drop: [ALL]` + añadir solo lo estrictamente necesario) y detrás
 > del hallazgo del Paso 1 de este laboratorio (namespace `user` compartido = root del
 > contenedor puede ser root del host). Un `Dockerfile` con una línea `USER 1000` al
-> final, o un `compose.yaml` con `user: "1000:1000"`, no es una formalidad — es la
+> final, o un `compose.yaml` con `user: "1000:1000"`, no es una formalidad: es la
 > diferencia entre estas dos máscaras de capacidades.
 
 ---
 
-## Síntesis — las cinco piezas, una tabla
+## Síntesis: las cinco piezas, una tabla
 
 | Término | Qué es | Qué NO es |
 |---|---|---|
 | **OCI** | especificación de formato de imagen y de runtime de contenedores | un programa que se instala; es un estándar |
 | **Docker** | motor + CLI que construye y corre imágenes OCI como contenedores de **aplicación**, vía un daemon central que corre como root | un mecanismo de aislamiento nuevo (usa namespaces/cgroups del kernel, igual que todo lo demás) |
-| **Podman** | otra implementación de lo mismo, sin daemon privilegiado: el contenedor cuelga de tu propia sesión y su "root" se mapea a tu UID | un formato ni un estándar distinto — corre las mismas imágenes OCI con casi la misma CLI |
+| **Podman** | otra implementación de lo mismo, sin daemon privilegiado: el contenedor cuelga de tu propia sesión y su "root" se mapea a tu UID | un formato ni un estándar distinto, corre las mismas imágenes OCI con casi la misma CLI |
 | **LXC** | interfaz de espacio de usuario a namespaces/cgroups del kernel, orientada a contenedores de **sistema** | un formato de imagen OCI |
-| **LXD** | daemon y CLI (`lxc`) que gestiona LXC **y además** máquinas virtuales ligeras vía KVM, con la misma interfaz | solo un envoltorio de LXC — desde el Paso 5 sabes que también virtualiza de verdad |
+| **LXD** | daemon y CLI (`lxc`) que gestiona LXC **y además** máquinas virtuales ligeras vía KVM, con la misma interfaz | solo un envoltorio de LXC, desde el Paso 5 sabes que también virtualiza de verdad |
 
 ---
 
@@ -970,7 +970,7 @@ palancas.
   que acabas de inspeccionar aquí.
 - **Módulo 7 (CKS):** el `CapEff` en cero del Paso 9 es el mismo principio detrás de
   `securityContext.runAsNonRoot` y `capabilities.drop` en un `PodSecurityContext` de
-  Kubernetes — CKS dedica un dominio completo a exactamente esta decisión, ahora ya la
+  Kubernetes, CKS dedica un dominio completo a exactamente esta decisión, ahora ya la
   viste funcionar a nivel de un solo contenedor Docker.
 
 ---
@@ -978,13 +978,13 @@ palancas.
 ## Para profundizar
 
 Este laboratorio se apoya solo en lo que pudiste observar directamente en tu propia
-terminal. Lo que sigue es material de enriquecimiento conceptual — gobernanza, historia
-de proyecto, estudios publicados — que un comando de terminal no puede darte. Viene del
+terminal. Lo que sigue es material de enriquecimiento conceptual, gobernanza, historia
+de proyecto, estudios publicados, que un comando de terminal no puede darte. Viene del
 research de Gemini en
 [`research/deep-research-oci-lxc-lxd.md`](./research/deep-research-oci-lxc-lxd.md),
 auditado claim por claim contra sus fuentes primarias antes de entrar aquí (ver
 [`research/deep-research-oci-lxc-lxd.AUDIT.md`](./research/deep-research-oci-lxc-lxd.AUDIT.md)
-para el detalle de qué se descartó y por qué — incluye una cadencia de parches de Docker
+para el detalle de qué se descartó y por qué, incluye una cadencia de parches de Docker
 Hub que el reporte presentó como política oficial y resultó ser un hilo de queja de un
 usuario, no una política).
 
@@ -997,7 +997,7 @@ estándares de contenedores competidores. Hoy mantiene tres especificaciones: la
 2021). Su gobernanza separa el **Trademark Board** (marcas, membresía) del **Technical
 Oversight Board** (arbitraje técnico entre proyectos), delegando el trabajo diario a una
 comunidad abierta de desarrolladores (la TDC). (Fuente:
-opencontainers.org/posts/announcements/ — buscar el post de junio 2015 y el
+opencontainers.org/posts/announcements/, buscar el post de junio 2015 y el
 `CHARTER.md` de github.com/opencontainers/tob.)
 
 **LXC.** El proyecto nació en 2008 para darle una interfaz de espacio de usuario
@@ -1008,7 +1008,7 @@ junio 2027), LXC 6.0 (abril 2024, hasta junio 2029) y LXC 7.0 (abril 2026, hasta
 2031). (Fuente: linuxcontainers.org/lxc/news/.)
 
 **LXD → Incus: la bifurcación real.** Esta es la historia que este laboratorio te pidió
-investigar con más cuidado, sin suavizar si resultaba incómoda — y resultó ser cierta.
+investigar con más cuidado, sin suavizar si resultaba incómoda, y resultó ser cierta.
 LXD nació en Canonical (anunciado noviembre 2014) y vivió más de ocho años como
 subproyecto de la comunidad linuxcontainers.org. El 4 de julio de 2023, Canonical
 decidió unilateralmente sacar LXD de esa infraestructura comunitaria hacia sus propios
@@ -1021,18 +1021,18 @@ partir de LXD 5.16 y adoptado por linuxcontainers.org el 7 de agosto de 2023, ma
 por el equipo histórico completo de LXD (Graber, Christian Brauner, Serge Hallyn, Tycho
 Andersen, más Sarai), bajo Apache 2.0 sin CLA (usa el estándar DCO en su lugar). Incus
 0.1 salió el 7 de octubre de 2023. (Fuente: linuxcontainers.org/lxd/ y
-linuxcontainers.org/incus/announcement/ — nota: el relato de la relicencia viene de un
+linuxcontainers.org/incus/announcement/, nota: el relato de la relicencia viene de un
 post del propio equipo de Linux Containers describiendo la decisión de Canonical, no de
 un comunicado oficial de Canonical.)
 
-**Docker Hub — "imágenes oficiales".** El programa opera bajo el namespace `library/`
+**Docker Hub, "imágenes oficiales".** El programa opera bajo el namespace `library/`
 (ej. `library/python`), gestionado públicamente en
 `github.com/docker-library/official-images`. Los criterios: solo software libre y de
 código abierto, compromiso de mantenimiento upstream, versiones fijadas, y ninguna
 imagen oficial puede construirse (`FROM`) sobre una imagen no oficial (salvo `scratch` u
-otra imagen oficial) — todo construido con la herramienta `bashbrew` para soporte
+otra imagen oficial), todo construido con la herramienta `bashbrew` para soporte
 multi-arquitectura. (Fuente: README de `github.com/docker-library/official-images/`. No
-existe una cadencia de reconstrucción declarada públicamente — ver el AUDIT para el
+existe una cadencia de reconstrucción declarada públicamente, ver el AUDIT para el
 detalle de por qué esa cifra específica se descartó.)
 
 **NIST SP 800-190.** La guía "Application Container Security Guide" (Souppaya, Morello,
@@ -1044,5 +1044,7 @@ Incus (linuxcontainers.org) usa exactamente estos términos: *"System containers
 Linux distributions using a shared kernel... very similar to a virtual machine but
 sharing kernel with the host system."* vs *"Application containers run a single
 application through a pre-built image... popularized by the likes of Docker and
-Kubernetes."* (Fuente: linuxcontainers.org/incus/docs/main/explanation/instances/ —
+Kubernetes."* (Fuente: linuxcontainers.org/incus/docs/main/explanation/instances/;
 verificado palabra por palabra contra la página en vivo.)
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

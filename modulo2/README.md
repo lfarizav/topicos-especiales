@@ -1,4 +1,4 @@
-# Módulo 2 — AI & Agentic Engineering
+# Módulo 2: AI & Agentic Engineering
 
 **Sesión 2 · sábado 8 de agosto de 2026 · 9:00–12:00**
 
@@ -23,13 +23,13 @@ evidencia verificable en cada paso.
 
 ---
 
-## Ruta de entrega — resumen
+## Ruta de entrega: resumen
 
 Dos entregables, una semana, cinco pasos. El detalle de cada paso está más abajo.
 
 | # | Paso | Resultado |
 |---|---|---|
-| 1 | Elegir el producto — corre sobre Kubernetes **y** usa IA de forma defendible | Idea fijada |
+| 1 | Elegir el producto, corre sobre Kubernetes **y** usa IA de forma defendible | Idea fijada |
 | 2 | Dos investigaciones con IA: **validación** y **crítica adversarial** | Research documentado |
 | 3 | Documentar todo en Markdown, con fuentes | Insumos del PRD |
 | 4 | Completar la plantilla del Product Vision Board | **`modulo2/pvb.md`** |
@@ -84,7 +84,7 @@ Llegas con **dos entregables**: `pvb.md` y `prd.md`, más tu investigación docu
 
 > **Es una sola semana para ambos.** El PRD no se escribe desde cero: sale del PVB y de
 > tu investigación, co-creado con IA segmento por segmento. Si el PVB queda flojo, el PRD
-> hereda el problema — por eso el orden importa y no conviene dejarlo para el viernes.
+> hereda el problema, por eso el orden importa y no conviene dejarlo para el viernes.
 
 ### 1. Elige tu producto
 
@@ -98,7 +98,7 @@ Una idea propia que cumpla **dos condiciones no negociables**:
 Si tu idea no pasa esas dos condiciones, no vas a poder construirla en los módulos
 siguientes ni sustentarla en la sesión 16.
 
-### 2. Investiga con IA — dos investigaciones, no una
+### 2. Investiga con IA: dos investigaciones, no una
 
 **Deep research de validación.** ¿El problema existe de verdad? ¿Quién más lo ha
 resuelto y cómo? ¿Qué herramientas del ecosistema CNCF ya cubren parte de esto?
@@ -134,8 +134,8 @@ Con el PVB listo, conviertes la visión en requisitos.
 4. Guarda el resultado consolidado en `modulo3/specs/prd.md`.
 
 > **La regla del curso, aplicada aquí:** *el agente propone, tú apruebas*. Si dejas que
-> la IA escupa el PRD completo y lo apruebas en bloque, perdiste el control del alcance
-> — y eso se nota en la sustentación. Es la misma frontera que en el módulo 8 separa a un
+> la IA escupa el PRD completo y lo apruebas en bloque, perdiste el control del alcance,
+> y eso se nota en la sustentación. Es la misma frontera que en el módulo 8 separa a un
 > agente que sugiere de uno que rompe producción.
 
 ---
@@ -145,7 +145,7 @@ Con el PVB listo, conviertes la visión en requisitos.
 - **Sé específico.** "Empresas" no es un segmento. "Equipos de plataforma de 3 a 15
   ingenieros que ya operan Kubernetes en producción" sí lo es.
 - **No escribas "queremos usar IA para X".** Escribe el dolor concreto que resuelves.
-- **Si no puedes responder una sección con confianza, no la rellenes con humo** —
+- **Si no puedes responder una sección con confianza, no la rellenes con humo**:
   esa es exactamente la señal de que te falta investigación.
 - Trae tus dudas a clase.
 
@@ -157,7 +157,7 @@ Con el PVB listo, conviertes la visión en requisitos.
 - [ ] Deep research de **validación** completado y estudiado
 - [ ] Deep research de **crítica** completado y estudiado
 - [ ] Investigación documentada en archivos Markdown, con fuentes
-- [ ] Ejemplo de referencia (final de `pvb.md`) leído — ese es el nivel esperado
+- [ ] Ejemplo de referencia (final de `pvb.md`) leído: ese es el nivel esperado
 - [ ] **Entregable 1:** `pvb.md` completado
 - [ ] Documentos copiados a `modulo3/docs/`
 - [ ] Análisis de conflictos (Paso 0 del Prompt 1) resuelto por ti, no por la IA
@@ -177,3 +177,5 @@ Con el PVB listo, conviertes la visión en requisitos.
 
 La sección más valiosa de tu PVB es la de **riesgos críticos**. Un PVB sin riesgos
 reales es un PVB que no se investigó.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

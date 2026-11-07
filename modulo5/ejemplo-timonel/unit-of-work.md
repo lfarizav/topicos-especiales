@@ -1,4 +1,4 @@
-# Timonel — Unidades de trabajo
+# Timonel: Unidades de trabajo
 
 > **Artefacto de ejemplo.** Esto es lo que produce la etapa **Units Generation** de AI-DLC.
 > Timonel es el caso de estudio ficticio del curso (ver [`../../modulo3/docs/pvb.md`](../../modulo3/docs/pvb.md)).
@@ -43,13 +43,13 @@ probar sola.
 - **Historias**: US-1.1, US-1.2, US-9.4
 - **Depende de**: ninguna. Es la fundación.
 - **Archivos**:
-  - `internal/catalog/schema.go` — esquema del `timonel.yaml`
-  - `internal/catalog/validate.go` — validador del esquema
-  - `internal/catalog/types.go` — tipos de dominio compartidos
-  - `internal/catalog/parse.go` — deserialización segura de YAML
-  - `config/crd/` — CustomResourceDefinitions de `Aplicacion` e `Incidente`
-  - `schemas/timonel.schema.json` — esquema de referencia publicable
-  - `test/catalog/` — pruebas unitarias
+  - `internal/catalog/schema.go`: esquema del `timonel.yaml`
+  - `internal/catalog/validate.go`: validador del esquema
+  - `internal/catalog/types.go`: tipos de dominio compartidos
+  - `internal/catalog/parse.go`: deserialización segura de YAML
+  - `config/crd/`: CustomResourceDefinitions de `Aplicacion` e `Incidente`
+  - `schemas/timonel.schema.json`: esquema de referencia publicable
+  - `test/catalog/`: pruebas unitarias
 
 ### U2: Saneamiento y registro estructurado *(transversal)*
 - **Ruta del módulo**: `internal/safety/`
@@ -61,11 +61,11 @@ probar sola.
 - **Historias**: US-8.1, US-8.2, US-8.3
 - **Depende de**: ninguna. Transversal.
 - **Archivos**:
-  - `internal/safety/sanitize.go` — saneamiento de texto no confiable
-  - `internal/safety/redact.go` — redacción de secretos y datos personales
-  - `internal/safety/logger.go` — registro estructurado + correlación
-  - `internal/safety/errors.go` — manejador global de errores
-  - `test/safety/` — pruebas unitarias, incluidas las de inyección indirecta
+  - `internal/safety/sanitize.go`: saneamiento de texto no confiable
+  - `internal/safety/redact.go`: redacción de secretos y datos personales
+  - `internal/safety/logger.go`: registro estructurado + correlación
+  - `internal/safety/errors.go`: manejador global de errores
+  - `test/safety/`: pruebas unitarias, incluidas las de inyección indirecta
 
 ### U3: Resiliencia y presupuesto de inferencia *(transversal)*
 - **Ruta del módulo**: `internal/budget/`
@@ -76,10 +76,10 @@ probar sola.
 - **Historias**: US-10.1, US-10.2, US-10.3
 - **Depende de**: ninguna. Transversal.
 - **Archivos**:
-  - `internal/budget/timeout.go` — envoltura de tiempo de espera
-  - `internal/budget/degrade.go` — degradación elegante por fuente ausente
-  - `internal/budget/tokens.go` — contabilidad y corte de presupuesto
-  - `test/budget/` — pruebas unitarias
+  - `internal/budget/timeout.go`: envoltura de tiempo de espera
+  - `internal/budget/degrade.go`: degradación elegante por fuente ausente
+  - `internal/budget/tokens.go`: contabilidad y corte de presupuesto
+  - `test/budget/`: pruebas unitarias
 
 ### U4: Ingesta de telemetría
 - **Ruta del módulo**: `internal/ingest/`
@@ -89,11 +89,11 @@ probar sola.
 - **Historias**: US-2.1, US-2.2, US-2.3
 - **Depende de**: U1 (tipos), U2 (saneamiento del texto de logs)
 - **Archivos**:
-  - `internal/ingest/prometheus.go` — adaptador de métricas
-  - `internal/ingest/loki.go` — adaptador de logs
-  - `internal/ingest/events.go` — adaptador de eventos de Kubernetes
-  - `internal/ingest/normalize.go` — normalización a `Senal`
-  - `test/ingest/` — pruebas unitarias con respuestas grabadas
+  - `internal/ingest/prometheus.go`: adaptador de métricas
+  - `internal/ingest/loki.go`: adaptador de logs
+  - `internal/ingest/events.go`: adaptador de eventos de Kubernetes
+  - `internal/ingest/normalize.go`: normalización a `Senal`
+  - `test/ingest/`: pruebas unitarias con respuestas grabadas
 
 ### U5: Correlación de señales e incidentes
 - **Ruta del módulo**: `internal/correlate/`
@@ -103,10 +103,10 @@ probar sola.
 - **Historias**: US-3.1, US-3.2, US-3.3, US-7.2
 - **Depende de**: U1 (tipos), U4 (señales normalizadas)
 - **Archivos**:
-  - `internal/correlate/group.go` — agrupación temporal y topológica
-  - `internal/correlate/dedupe.go` — deduplicación de incidentes
-  - `internal/correlate/noise.go` — filtro de ruido de alertas
-  - `test/correlate/` — pruebas unitarias + propiedades de idempotencia
+  - `internal/correlate/group.go`: agrupación temporal y topológica
+  - `internal/correlate/dedupe.go`: deduplicación de incidentes
+  - `internal/correlate/noise.go`: filtro de ruido de alertas
+  - `test/correlate/`: pruebas unitarias + propiedades de idempotencia
 
 ### U6: Puerta de autonomía y RBAC
 - **Ruta del módulo**: `internal/gate/`
@@ -119,12 +119,12 @@ probar sola.
 - **Historias**: US-6.1, US-6.2, US-6.3, US-6.4
 - **Depende de**: U1 (tipos), U2 (registro de cada decisión)
 - **Archivos**:
-  - `internal/gate/allowlist.go` — lista blanca de herramientas
-  - `internal/gate/rbac.go` — comprobación de permisos con `SelfSubjectAccessReview`
-  - `internal/gate/refuse.go` — rechazo duro de verbos de escritura
-  - `internal/gate/audit.go` — registro inmutable de cada decisión de la puerta
-  - `config/rbac/` — `ServiceAccount`, `ClusterRole` y `ClusterRoleBinding` de solo lectura
-  - `test/gate/` — pruebas unitarias + pruebas negativas de escalada de privilegios
+  - `internal/gate/allowlist.go`: lista blanca de herramientas
+  - `internal/gate/rbac.go`: comprobación de permisos con `SelfSubjectAccessReview`
+  - `internal/gate/refuse.go`: rechazo duro de verbos de escritura
+  - `internal/gate/audit.go`: registro inmutable de cada decisión de la puerta
+  - `config/rbac/`: `ServiceAccount`, `ClusterRole` y `ClusterRoleBinding` de solo lectura
+  - `test/gate/`: pruebas unitarias + pruebas negativas de escalada de privilegios
 
 ### U7: Motor de diagnóstico con IA
 - **Ruta del módulo**: `internal/diagnose/`
@@ -136,12 +136,12 @@ probar sola.
 - **Depende de**: U1 (tipos), U5 (incidentes), U6 (toda lectura del clúster pasa por la
   puerta), U3 (presupuesto y tiempos de espera)
 - **Archivos**:
-  - `internal/diagnose/loop.go` — bucle de razonamiento acotado
-  - `internal/diagnose/evidence.go` — recolección y encadenamiento de evidencia
-  - `internal/diagnose/confidence.go` — cálculo y umbral de confianza
-  - `internal/diagnose/escalate.go` — escalamiento a humano cuando no alcanza el umbral
-  - `internal/diagnose/prompts/` — plantillas de instrucción versionadas
-  - `test/diagnose/` — pruebas con incidentes grabados + conjunto de evaluación
+  - `internal/diagnose/loop.go`: bucle de razonamiento acotado
+  - `internal/diagnose/evidence.go`: recolección y encadenamiento de evidencia
+  - `internal/diagnose/confidence.go`: cálculo y umbral de confianza
+  - `internal/diagnose/escalate.go`: escalamiento a humano cuando no alcanza el umbral
+  - `internal/diagnose/prompts/`: plantillas de instrucción versionadas
+  - `test/diagnose/`: pruebas con incidentes grabados + conjunto de evaluación
 
 ### U8: Redactor de corrección y evidencia
 - **Ruta del módulo**: `internal/remediate/`
@@ -151,10 +151,10 @@ probar sola.
 - **Historias**: US-5.1, US-5.2, US-5.3
 - **Depende de**: U1 (tipos), U7 (diagnóstico)
 - **Archivos**:
-  - `internal/remediate/patch.go` — generación del diff de manifiestos
-  - `internal/remediate/bundle.go` — empaquetado de la evidencia
-  - `internal/remediate/render.go` — redacción del cuerpo del pull request
-  - `test/remediate/` — pruebas de diff + snapshots del cuerpo del PR
+  - `internal/remediate/patch.go`: generación del diff de manifiestos
+  - `internal/remediate/bundle.go`: empaquetado de la evidencia
+  - `internal/remediate/render.go`: redacción del cuerpo del pull request
+  - `test/remediate/`: pruebas de diff + snapshots del cuerpo del PR
 
 ### U9: Integración GitOps y pull request
 - **Ruta del módulo**: `internal/gitops/`
@@ -165,10 +165,10 @@ probar sola.
 - **Historias**: US-5.4, US-6.5, US-9.1, US-9.2
 - **Depende de**: U8 (la corrección), U6 (la puerta confirma que no hay escritura directa)
 - **Archivos**:
-  - `internal/gitops/branch.go` — creación de la rama
-  - `internal/gitops/pullrequest.go` — apertura del PR y adjuntos
-  - `internal/gitops/status.go` — seguimiento de estado y reconciliación
-  - `test/gitops/` — pruebas contra un servidor Git local
+  - `internal/gitops/branch.go`: creación de la rama
+  - `internal/gitops/pullrequest.go`: apertura del PR y adjuntos
+  - `internal/gitops/status.go`: seguimiento de estado y reconciliación
+  - `test/gitops/`: pruebas contra un servidor Git local
 
 ### U10: Portal de operación y CLI
 - **Ruta del módulo**: `internal/portal/` y `cmd/timonel/`
@@ -179,12 +179,12 @@ probar sola.
 - **Historias**: US-1.3, US-9.3, US-11.1, US-11.2
 - **Depende de**: U5 (incidentes), U7 (diagnósticos), U9 (estado del PR)
 - **Archivos**:
-  - `internal/portal/server.go` — servidor HTTP
-  - `internal/portal/handlers.go` — manejadores de incidente y evidencia
-  - `internal/portal/templates/` — vistas
-  - `cmd/timonel/main.go` — punto de entrada de la CLI
-  - `cmd/timonel/commands/` — subcomandos
-  - `test/portal/` — pruebas de integración
+  - `internal/portal/server.go`: servidor HTTP
+  - `internal/portal/handlers.go`: manejadores de incidente y evidencia
+  - `internal/portal/templates/`: vistas
+  - `cmd/timonel/main.go`: punto de entrada de la CLI
+  - `cmd/timonel/commands/`: subcomandos
+  - `test/portal/`: pruebas de integración
 
 ---
 

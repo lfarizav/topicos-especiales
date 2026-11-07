@@ -3,7 +3,7 @@
 
 This file is the AI-DLC dispatcher. It is loaded into every session, so it stays
 small (<300 lines). Detailed, phase-specific instructions live in the rule-details
-directory and are loaded **just-in-time** — only for the phase you are currently in.
+directory and are loaded **just-in-time**, only for the phase you are currently in.
 Do not inline phase detail here; add it to the relevant rule-details file instead.
 
 ## Project Context (WHAT / WHY / HOW)
@@ -23,7 +23,7 @@ The AI model intelligently assesses what stages are needed based on:
 3. Complexity and scope of change
 4. Risk and impact assessment
 
-## MANDATORY: Rule Details Loading (bootstrap — do this first)
+## MANDATORY: Rule Details Loading (bootstrap: do this first)
 **CRITICAL**: When performing any phase, you MUST read and use relevant content from rule detail files. Check these paths in order and use the first one that exists, regardless of which IDE or setup method was used:
 - `.aidlc/aidlc-rules/aws-aidlc-rule-details/` (typical with AI-assisted setup)
 - `.aidlc-rule-details/` (typical with Cursor, Cline, Claude Code, GitHub Copilot, OpenAI Codex)
@@ -33,11 +33,11 @@ The AI model intelligently assesses what stages are needed based on:
 All rule-detail references below (e.g. `common/process-overview.md`, `inception/_inception-orchestration.md`) are relative to whichever rule-details directory was resolved above.
 
 **ALWAYS load these common rules at workflow start** (small, universally applicable):
-- `common/process-overview.md` — three-phase workflow overview + Mermaid diagram
-- `common/session-continuity.md` — session resumption / resume-from-aidlc-state.md guidance
-- `common/content-validation.md` — content validation requirements (see also below)
-- `common/question-format-guide.md` — question formatting rules
-- `common/audit-and-logging.md` — audit trail, prompts logging, checkbox enforcement (see below)
+- `common/process-overview.md`: three-phase workflow overview + Mermaid diagram
+- `common/session-continuity.md`: session resumption / resume-from-aidlc-state.md guidance
+- `common/content-validation.md`: content validation requirements (see also below)
+- `common/question-format-guide.md`: question formatting rules
+- `common/audit-and-logging.md`: audit trail, prompts logging, checkbox enforcement (see below)
 
 ## Phase Dispatch (load only the ACTIVE phase's orchestration)
 **CRITICAL context-control rule**: Do NOT load all three phases at once. Determine the
@@ -48,9 +48,9 @@ are approved.
 
 | Active phase | Load this orchestration file | Then it sequences stages via |
 |---|---|---|
-| 🔵 INCEPTION — *what & why* | `inception/_inception-orchestration.md` | `inception/*.md` |
-| 🟢 CONSTRUCTION — *how + build/test* | `construction/_construction-orchestration.md` | `construction/*.md` |
-| 🟡 OPERATIONS — *deploy/run (placeholder)* | `operations/_operations-orchestration.md` | `operations/*.md` |
+| 🔵 INCEPTION: *what & why* | `inception/_inception-orchestration.md` | `inception/*.md` |
+| 🟢 CONSTRUCTION: *how + build/test* | `construction/_construction-orchestration.md` | `construction/*.md` |
+| 🟡 OPERATIONS: *deploy/run (placeholder)* | `operations/_operations-orchestration.md` | `operations/*.md` |
 
 Each orchestration file lists its phase's stages, which are ALWAYS vs CONDITIONAL, the
 "Execute IF / Skip IF" criteria, and the per-stage approval gates. Follow it exactly; it
@@ -64,10 +64,10 @@ points to the individual stage rule files to load when each stage runs.
 When starting ANY software development request, display the welcome message ONCE:
 1. Load `common/welcome-message.md`
 2. Display the complete message to the user
-3. Only once at the start of a new workflow — do NOT reload it in later interactions (saves context)
+3. Only once at the start of a new workflow; do NOT reload it in later interactions (saves context)
 
 ## MANDATORY: Extensions Loading (Context-Optimized)
-At workflow start, scan `extensions/` recursively and load ONLY the lightweight `*.opt-in.md` files — never the full rule files. Present opt-in prompts during Requirements Analysis; load an extension's full rule file ONLY when the user opts in. Extensions with no `*.opt-in.md` are always enforced (load at start). Enabled extension rules are hard constraints and a non-compliance is a blocking finding.
+At workflow start, scan `extensions/` recursively and load ONLY the lightweight `*.opt-in.md` files, never the full rule files. Present opt-in prompts during Requirements Analysis; load an extension's full rule file ONLY when the user opts in. Extensions with no `*.opt-in.md` are always enforced (load at start). Enabled extension rules are hard constraints and a non-compliance is a blocking finding.
 **Full mechanics (deferred loading, enforcement, conditional enable/disable): see `common/extensions-loading.md`.**
 
 ## MANDATORY: Content Validation
@@ -88,7 +88,7 @@ When asking questions at any phase, follow `common/question-format-guide.md`:
 ## MANDATORY: Audit Trail & Checkbox Enforcement
 Full rules in `common/audit-and-logging.md`. The non-negotiable essence:
 - Log EVERY user input (complete raw input, never summarized) with an ISO 8601 timestamp in `aidlc-docs/audit.md`, plus every approval prompt and response.
-- ALWAYS **append/Edit** audit.md — NEVER overwrite its full contents (causes duplication).
+- ALWAYS **append/Edit** audit.md. NEVER overwrite its full contents (causes duplication).
 - After completing ANY plan step, mark it `[x]` in the SAME interaction (plan-level); track overall progress in `aidlc-docs/aidlc-state.md` (stage-level).
 
 ## Key Principles
@@ -132,3 +132,5 @@ Full rules in `common/audit-and-logging.md`. The non-negotiable essence:
 - Application code: Workspace root (NEVER in aidlc-docs/)
 - Documentation: aidlc-docs/ only
 - Project structure: See code-generation.md for patterns by project type
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

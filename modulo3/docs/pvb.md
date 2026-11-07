@@ -1,4 +1,4 @@
-# Product Vision Board — Timonel
+# Product Vision Board: Timonel
 
 > **Caso de estudio de referencia.** Versión extendida del ejemplo que aparece en
 > [`../modulo2/pvb.md`](../../modulo2/pvb.md), ampliada con la investigación auditada en
@@ -16,7 +16,7 @@
 **Nombre del producto:** Timonel
 
 **Descripción en una línea:** Plataforma que lleva una aplicación de cero a producción
-en Kubernetes —infraestructura, despliegue, políticas y observabilidad— y luego la
+en Kubernetes (infraestructura, despliegue, políticas y observabilidad) y luego la
 mantiene ahí con agentes de IA que diagnostican incidentes y **proponen la corrección
 como pull request con evidencia**, nunca aplicándola por su cuenta.
 
@@ -48,14 +48,14 @@ y ningún SRE serio lo autoriza.
 
 **Evidencia de que la tensión es real, no inventada:** los dos actores más serios de la
 categoría tomaron esta misma decisión de diseño de forma independiente. **HolmesGPT**
-—co-mantenido por Robusta y **Microsoft**— opera de solo lectura *por diseño*, respetando
+(co-mantenido por Robusta y **Microsoft**) opera de solo lectura *por diseño*, respetando
 el RBAC existente. **Humanitec** evita explícitamente ejecutar modelos estocásticos sobre
 infraestructura de producción. Cuando dos actores independientes se autolimitan igual,
 el límite no es cobardía: es el estado del arte.
 
 ### ¿Sobrevive al próximo salto de modelos?
 
-**[X] Sí — es un problema de WORKFLOW/INTEGRACIÓN, no de OUTPUT.**
+**[X] Sí, es un problema de WORKFLOW/INTEGRACIÓN, no de OUTPUT.**
 
 Un modelo mejor diagnostica mejor, pero no decide quién aprueba el cambio, cómo queda
 auditado, con qué permisos actúa el agente ni cómo se revierte. Eso es gobernanza y
@@ -110,7 +110,7 @@ y la tasa de acierto medida**, más la confianza ya concedida por el SRE lead.
 
 ## 4. ARENA COMPETITIVA
 
-**[X] Disruptor (AI-Disrupted)** — operar Kubernetes es un workflow de una década; lo
+**[X] Disruptor (AI-Disrupted)**: operar Kubernetes es un workflow de una década; lo
 reimaginamos, no lo inventamos.
 
 Análisis completo en [`mercado.md`](./mercado.md). Lo esencial:
@@ -122,7 +122,7 @@ Análisis completo en [`mercado.md`](./mercado.md). Lo esencial:
 - **Contra los hyperscalers** (Bedrock+EKS, Gemini Cloud Assist en GKE, Azure SRE Agent):
   todos atan el valor a su nube. Timonel es agnóstico y funciona on-premise.
 - **Contra las plataformas comerciales** (Port.io con su Serie C de $100M, Humanitec,
-  Kubiya): resuelven catálogo, portal y autoservicio del desarrollador — no la
+  Kubiya): resuelven catálogo, portal y autoservicio del desarrollador, no la
   **operación** del clúster. Son adyacentes: candidatos a integración.
 
 **Riesgo honesto de la arena:** si un proyecto CNCF gratuito añade el bucle GitOps
@@ -133,7 +133,7 @@ sección 9 y es el riesgo número uno.
 
 ## 5. UX PARADIGM
 
-**[X] Agent** — ejecuta autónomamente **dentro de límites duros**.
+**[X] Agent**: ejecuta autónomamente **dentro de límites duros**.
 
 **Por qué no Autonomous:** porque la autonomía total es exactamente lo que el comprador
 no firma. En operación de infraestructura, "la IA corre sin supervisión" no es una
@@ -145,7 +145,7 @@ el PR con su evidencia.
 **Nunca:** aplicar cambios, aprobar su propio PR, tocar secretos, ampliar sus permisos.
 
 Ese reparto también es la defensa contra manipulación: si un atacante logra influir en lo
-que el agente concluye —vía logs, que son texto que un atacante puede escribir— el peor
+que el agente concluye (vía logs, que son texto que un atacante puede escribir) el peor
 resultado posible sigue siendo **un PR malo que un humano debe aprobar**.
 
 ---
@@ -161,7 +161,7 @@ resultado posible sigue siendo **un PR malo que un humano debe aprobar**.
 - **Sacrifico cobertura inicial.** Prefiero acertar en 6 tipos de incidente que opinar
   mal sobre 60.
 
-**Razón de fondo:** el costo de un diagnóstico equivocado no es el token desperdiciado —
+**Razón de fondo:** el costo de un diagnóstico equivocado no es el token desperdiciado:
 es la confianza del SRE lead, y esa se pierde una sola vez.
 
 ---
@@ -170,7 +170,7 @@ es la confianza del SRE lead, y esa se pierde una sola vez.
 
 **Todas las cifras de esta sección son [INTERNO].**
 
-**Modelo:** Hybrid Tiered — suscripción por clúster conectado, con límites crecientes de
+**Modelo:** Hybrid Tiered: suscripción por clúster conectado, con límites crecientes de
 incidentes analizados al mes.
 
 - **Team:** $400/mes, hasta 3 clústeres y 150 incidentes analizados/mes.
@@ -194,7 +194,7 @@ con **incidentes**, no con usuarios. Un cliente con un clúster inestable puede 
 
 El margen depende del filtrado de ruido. Si el 60% de las alertas que llegan al agente
 son basura, el costo de inferencia se dispara. Por eso clasificar barato antes de
-diagnosticar caro es una decisión **económica**, no técnica — y responde directamente a
+diagnosticar caro es una decisión **económica**, no técnica, y responde directamente a
 una de las tres razones de cancelación que identifica Gartner.
 
 ---
@@ -233,7 +233,7 @@ costoso. Sostiene el margen.
 
 ### 1. Comoditización por el ecosistema CNCF
 
-**Riesgo alto — es el riesgo principal.** El diagnóstico asistido por IA ya es gratis,
+**Riesgo alto: es el riesgo principal.** El diagnóstico asistido por IA ya es gratis,
 open source y respaldado por Microsoft. Si esos proyectos incorporan el bucle GitOps
 completo con evidencia auditable, el diferenciador central desaparece.
 
@@ -247,7 +247,7 @@ ellos: si mejoran, Timonel mejora.
 serán cancelados para finales de 2027**, por ROI no demostrable, costos de inferencia y
 complejidad de gobernanza.
 
-*Mitigación:* atacar las tres razones por diseño — una métrica de ROI medible desde el
+*Mitigación:* atacar las tres razones por diseño, una métrica de ROI medible desde el
 mes 1, filtrado previo del ruido para contener inferencia, y gobernanza que reutiliza el
 RBAC y el flujo de PR que el cliente ya tiene.
 
@@ -276,10 +276,12 @@ un SRE lead que ya te dejó entrar a producción.
    *Mitigación:* redacción automática antes de adjuntar y modalidad self-hosted.
 
 **Verdad incómoda:** este producto vive o muere por la confianza de una sola persona por
-cuenta —el SRE lead— y esa confianza se pierde con un solo incidente atribuible al
+cuenta (el SRE lead) y esa confianza se pierde con un solo incidente atribuible al
 agente. Por eso el límite de permisos no se relaja nunca, ni siquiera cuando el cliente
 lo pida.
 
 ---
 
-*Material de referencia — Tópicos Especiales en Informática*
+*Material de referencia, Tópicos Especiales en Informática*
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -1,4 +1,4 @@
-# Análisis de mercado — plataformas y agentes de IA sobre Kubernetes
+# Análisis de mercado: plataformas y agentes de IA sobre Kubernetes
 
 > Documento de contexto para el caso de estudio **Timonel**.
 > Cada cifra de aquí está confirmada contra fuente primaria en
@@ -54,14 +54,14 @@ que el diseño del producto debe atacar de frente:
 
 Proyectos CNCF, sin costo de licencia, que ya cubren buena parte del valor:
 
-- **K8sGPT** (Sandbox) — diagnóstico e interpretación de recursos en fallo.
-- **HolmesGPT** (Sandbox, co-mantenido por Robusta y **Microsoft**) — investigación de
+- **K8sGPT** (Sandbox): diagnóstico e interpretación de recursos en fallo.
+- **HolmesGPT** (Sandbox, co-mantenido por Robusta y **Microsoft**): investigación de
   incidentes contra herramientas de observabilidad, **de solo lectura por diseño**.
-- **kagent** (Sandbox, creado por gente de Solo.io de la órbita de Istio) — framework
+- **kagent** (Sandbox, creado por gente de Solo.io de la órbita de Istio): framework
   para correr agentes como cargas de trabajo del clúster.
-- **Argo CD** y **Flux** (Graduated) — la reconciliación GitOps.
-- **Kyverno** (Graduated, marzo de 2026) — políticas de admisión.
-- **Crossplane** (Graduated, octubre de 2025) — infraestructura como API de Kubernetes.
+- **Argo CD** y **Flux** (Graduated): la reconciliación GitOps.
+- **Kyverno** (Graduated, marzo de 2026): políticas de admisión.
+- **Crossplane** (Graduated, octubre de 2025): infraestructura como API de Kubernetes.
 
 > **Este es el hecho competitivo más importante del análisis.** Cualquier producto
 > comercial de la categoría tiene que justificar por qué alguien pagaría por algo cuyo
@@ -86,7 +86,7 @@ sirve bien a un entorno multinube o con presencia on-premise.
 | **Humanitec** | Orquestación declarativa con la especificación *Score* | Evita deliberadamente ejecutar modelos estocásticos sobre producción |
 | **Facets.cloud** | Automatización de infraestructura | ₹11,4 Cr de ingresos (FY mar 2025); citada en Gartner |
 
-**Lectura del capital:** los $100M de Port.io no fueron a un agente de remediación —
+**Lectura del capital:** los $100M de Port.io no fueron a un agente de remediación;
 fueron a un **portal y catálogo** que luego se reposicionó como agéntico. El dinero
 grande está comprando *contexto y catálogo*, no *autonomía*.
 
@@ -101,10 +101,10 @@ con la de HolmesGPT y con la de Timonel.
 
 Cruzando las tres capas, el hueco defendible es estrecho y concreto:
 
-1. **Multinube y on-premise** — donde los hyperscalers no llegan por diseño de negocio.
-2. **El puente entre diagnóstico y ejecución** — donde los proyectos gratuitos se
+1. **Multinube y on-premise**: donde los hyperscalers no llegan por diseño de negocio.
+2. **El puente entre diagnóstico y ejecución**: donde los proyectos gratuitos se
    detienen deliberadamente (HolmesGPT es de solo lectura *a propósito*).
-3. **El registro auditable de decisiones** — que no es un algoritmo replicable sino un
+3. **El registro auditable de decisiones**: que no es un algoritmo replicable sino un
    activo que se acumula operando.
 
 **Lo que NO es espacio defendible:** el diagnóstico. Está resuelto, es gratis y lo
@@ -142,8 +142,8 @@ Sirve como indicio, no como medida.
 > **La adopción de IA se asocia con peor estabilidad de las entregas.**
 >
 > DORA 2024 estima una **reducción del 7,2% en estabilidad** (y del 1,5% en throughput)
-> asociada a la adopción de IA. DORA 2025 reformula el hallazgo —la IA ya correlaciona
-> positivamente con throughput— pero **la correlación negativa con la estabilidad
+> asociada a la adopción de IA. DORA 2025 reformula el hallazgo (la IA ya correlaciona
+> positivamente con throughput), pero **la correlación negativa con la estabilidad
 > persiste**.
 
 Faros AI apunta en la misma dirección: comparando equipos de baja contra alta adopción de
@@ -156,7 +156,7 @@ entrega tienen.
 **Por qué esto importa para Timonel más que cualquier cifra de mercado:**
 
 La IA está generando más código, más rápido, con **más fallas de cambio**. Eso significa
-que el mercado no necesita otra herramienta que produzca cambios más rápido — necesita
+que el mercado no necesita otra herramienta que produzca cambios más rápido; necesita
 algo que sostenga la estabilidad mientras el volumen crece. Un producto cuya tesis es
 *"el agente propone, el humano aprueba, GitOps reconcilia"* está posicionado exactamente
 contra este dato.
@@ -191,10 +191,12 @@ Descartado del análisis por no resistir la auditoría:
 - **Reducción del 30% en costos operativos de TI** por automatización con IA: el propio
   Gartner apunta después en dirección contraria para el costo por resolución con GenAI.
 - **Backstage con 89% del mercado de portales internos**: la única fuente es el blog de
-  una empresa que vende Backstage gestionado — conflicto de interés directo sobre esa
+  una empresa que vende Backstage gestionado: conflicto de interés directo sobre esa
   cifra.
 - **3.000 millones de descargas de Kyverno**: no aparece en la fuente primaria de la CNCF.
 
 ---
 
-*Material de referencia — Tópicos Especiales en Informática*
+*Material de referencia, Tópicos Especiales en Informática*
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

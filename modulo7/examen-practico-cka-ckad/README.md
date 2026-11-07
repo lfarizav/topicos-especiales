@@ -158,4 +158,4 @@ se lee lo que el clúster ya está diciendo.
 
 ---
 
-_Hecho con ❤️ por Luis Felipe Ariza Vesga._
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

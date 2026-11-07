@@ -1,4 +1,4 @@
-# Ejemplo de referencia — las unidades y tareas de Timonel
+# Ejemplo de referencia: las unidades y tareas de Timonel
 
 **Módulo 5 · Caso de estudio del curso**
 

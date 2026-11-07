@@ -1,4 +1,4 @@
-# U0X-T0N — <título corto de la tarea>
+# U0X-T0N: <título corto de la tarea>
 
 > **Plantilla.** Copia este archivo a `tareas/U0X-T0N-<slug>.md` y llénalo. Cada tarea de tu
 > `unidades-y-tareas.md` se convierte en uno de estos antes de poder despacharse.
@@ -6,7 +6,7 @@
 > **Este archivo es el mundo entero del codificador.** No va a leer tu PRD. Si algo no está
 > aquí, para él no existe.
 
-**Unidad:** U0X — `<nombre de la unidad>`
+**Unidad:** U0X: `<nombre de la unidad>`
 **Historias que implementa:** US-X.Y
 **Depende de:** `<U0X-T0M, o ninguna>`
 
@@ -44,13 +44,13 @@ Rutas, no contenido pegado:
 
 Cada uno con **su comando**. El revisor los va a correr él mismo, uno por uno.
 
-- [ ] **CA-1** — <qué debe ser cierto>
+- [ ] **CA-1**: <qué debe ser cierto>
   ```bash
   <comando exacto>
   ```
   Esperado: <qué salida demuestra que pasa>
 
-- [ ] **CA-2** — <qué debe ser cierto>
+- [ ] **CA-2**: <qué debe ser cierto>
   ```bash
   <comando exacto>
   ```

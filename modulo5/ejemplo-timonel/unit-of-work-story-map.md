@@ -1,4 +1,4 @@
-# Timonel — Mapa de historias a unidades
+# Timonel: Mapa de historias a unidades
 
 > **Artefacto de ejemplo.** Tercer archivo que produce la etapa **Units Generation** de
 > AI-DLC. Su función es demostrar que **ninguna historia quedó huérfana**.
@@ -18,7 +18,7 @@ puede revisar.
 
 ---
 
-## Épica 1 — Catálogo e instalación
+## Épica 1: Catálogo e instalación
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -26,7 +26,7 @@ puede revisar.
 | US-1.2 | Rechazar un catálogo inválido con el campo señalado | U1 | un YAML sin `slo:` falla nombrando ese campo, no genéricamente | Must |
 | US-1.3 | Instalar la CLI y comprobar conexión al clúster | U10 | `timonel doctor` lista el contexto y el `ServiceAccount` en uso | Must |
 
-## Épica 2 — Ingesta de telemetría
+## Épica 2: Ingesta de telemetría
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -34,7 +34,7 @@ puede revisar.
 | US-2.2 | Leer logs y tratarlos como texto no confiable | U4 | un log con marcado de instrucción llega saneado y marcado | Must |
 | US-2.3 | Leer eventos de Kubernetes del namespace declarado | U4 | solo aparecen eventos de los namespaces del catálogo | Must |
 
-## Épica 3 — Correlación de incidentes
+## Épica 3: Correlación de incidentes
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -42,7 +42,7 @@ puede revisar.
 | US-3.2 | Deduplicar el mismo incidente repetido | U5 | correr la correlación dos veces no crea un segundo incidente | Must |
 | US-3.3 | Filtrar ruido de alertas que no merece diagnóstico | U5 | una alerta que se autorresuelve en 30 s no abre incidente | Must |
 
-## Épica 4 — Diagnóstico con IA
+## Épica 4: Diagnóstico con IA
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -50,7 +50,7 @@ puede revisar.
 | US-4.2 | Adjuntar la cadena de evidencia de cada afirmación | U7 | cada afirmación del diagnóstico enlaza a al menos una `Senal` | Must |
 | US-4.3 | Escalar a humano cuando la confianza no alcanza | U7 | con confianza por debajo del umbral, el estado es `escalado`, no `diagnosticado` | Must |
 
-## Épica 5 — Corrección y pull request
+## Épica 5: Corrección y pull request
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -59,7 +59,7 @@ puede revisar.
 | US-5.3 | Redactar el cuerpo del pull request en lenguaje claro | U8 | el cuerpo nombra síntoma, causa, corrección y riesgo de aplicarla | Should |
 | US-5.4 | Abrir el pull request con la evidencia adjunta | U9 | el PR existe en el repositorio y su cuerpo enlaza la evidencia | Must |
 
-## Épica 6 — Límite de autonomía
+## Épica 6: Límite de autonomía
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -69,7 +69,7 @@ puede revisar.
 | US-6.4 | No poder ampliar sus propios permisos | U6 | `can-i create clusterrolebindings` responde `no` | Must |
 | US-6.5 | No aprobar ni fusionar su propio pull request | U9 | el token del agente no tiene permiso de merge; el intento queda registrado | Must |
 
-## Épica 7 — Calidad del diagnóstico
+## Épica 7: Calidad del diagnóstico
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -77,7 +77,7 @@ puede revisar.
 | US-7.2 | Detectar el fallo por ruido antes de que el usuario se canse | U5 | si más del umbral de incidentes de una semana se cierran sin acción, la métrica lo marca | Should |
 | US-7.3 | Resistir un intento de manipulación desde los logs | U7 | los casos adversariales del conjunto no cambian la conclusión del diagnóstico | Must |
 
-## Épica 8 — Seguridad
+## Épica 8: Seguridad
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -85,7 +85,7 @@ puede revisar.
 | US-8.2 | Redactar secretos en cualquier salida | U2 | ninguna salida contiene los patrones de secreto del conjunto de prueba | Must |
 | US-8.3 | Registro estructurado con identificador de correlación | U2 | toda entrada de registro trae el identificador del incidente | Must |
 
-## Épica 9 — Evidencia y trazabilidad
+## Épica 9: Evidencia y trazabilidad
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -94,7 +94,7 @@ puede revisar.
 | US-9.3 | Consultar la evidencia de un incidente cerrado | U10 | `timonel show <incidente>` devuelve diagnóstico, evidencia y enlace al PR | Must |
 | US-9.4 | Versionar el esquema del catálogo | U1 | un catálogo de versión anterior se rechaza indicando cómo migrarlo | Should |
 
-## Épica 10 — Resiliencia
+## Épica 10: Resiliencia
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|
@@ -102,7 +102,7 @@ puede revisar.
 | US-10.2 | Degradar en vez de fallar cuando falta una fuente | U3 | sin Loki, el diagnóstico sigue y declara qué evidencia le faltó | Must |
 | US-10.3 | Cortar por presupuesto de inferencia | U3 | al superar el presupuesto del incidente, el estado es `escalado` y el corte queda registrado | Must |
 
-## Épica 11 — Operación
+## Épica 11: Operación
 
 | Historia | Título | Unidad | Criterio verificable | MoSCoW |
 |---|---|---|---|---|

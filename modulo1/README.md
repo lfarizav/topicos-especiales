@@ -1,4 +1,4 @@
-# Módulo 1 — Fundamentos de Linux (LFCS)
+# Módulo 1: Fundamentos de Linux (LFCS)
 
 **Sesión 1 · sábado 1 de agosto de 2026 · 9:00–12:00**
 
@@ -50,7 +50,7 @@ Certificación de referencia: **LFCS** (Linux Foundation Certified System Admini
 
 ## Laboratorio
 
-**Hardening de host, almacenamiento y red** — 90 minutos, 9 pasos:
+**Hardening de host, almacenamiento y red**: 90 minutos, 9 pasos:
 
 1. Flujo Git completo: `init`, `commit`, `branch`, `merge`
 2. Verificación de integridad con `sha256sum`
@@ -73,3 +73,5 @@ SSSD/LDAP, Git, `gpg`, `sha256sum`, `losetup`, OpenSSH.
 - **Módulo 5 (CKA):** el 30% del examen es troubleshooting, y buena parte se
   diagnostica desde el nodo con `systemd`, `journalctl` y herramientas de red.
 - **Módulo 7 (CKS):** el hardening del sistema operativo del nodo es un dominio propio.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

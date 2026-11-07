@@ -1873,3 +1873,5 @@ cambiando después de que un webhook *mutating* lo vio. (Fuente:
 **Cómo conecta el anexo con el módulo 7 (CKS).** El `failurePolicy` de A1.2.3 es la decisión
 central de todo webhook de política de seguridad: con `Ignore`, tumbar el webhook basta para
 saltarse la política. Ahí ya no es un detalle de laboratorio.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

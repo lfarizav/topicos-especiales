@@ -1,4 +1,4 @@
-# Módulo 4 — Kubernetes Fundamentals (KCNA)
+# Módulo 4: Kubernetes Fundamentals (KCNA)
 
 **Sesión 4 · sábado 22 de agosto de 2026 · 9:00–12:00**
 
@@ -82,3 +82,5 @@ aplicaciones cloud native, arquitectura cloud native y observabilidad.
 - **Módulo 5 (CKA):** aquí ves el loop de reconciliación; allá lo depuras cuando falla.
 - **Módulo 8:** el bucle GitOps es exactamente este loop de reconciliación, extendido
   hasta el repositorio Git.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

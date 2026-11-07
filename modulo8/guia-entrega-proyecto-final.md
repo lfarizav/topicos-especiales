@@ -132,4 +132,4 @@ Se evalúa el arco completo y la honestidad del análisis, no solo que la demo f
 
 ---
 
-_Hecho con ❤️ por Luis Felipe Ariza Vesga._
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

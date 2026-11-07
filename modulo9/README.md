@@ -85,3 +85,5 @@ Deployments, Services, `kubectl`). Este módulo no repite esos fundamentos.
 Este módulo no tiene entrega evaluada (es opcional y no aparece en el cronograma). El
 laboratorio detalla, en su propia sección de entregable, qué evidencia produce quien lo
 completa por su cuenta.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

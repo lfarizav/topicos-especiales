@@ -47,3 +47,5 @@
 
 1. Read the audit.md file
 2. Completely overwrite the audit.md with the contents of what you read, plus the new changes you want to add to it
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

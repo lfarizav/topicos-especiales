@@ -1,4 +1,4 @@
-# Instrucciones de entrega — `pvb.md` y `prd.md`
+# Instrucciones de entrega: `pvb.md` y `prd.md`
 
 **Tópicos Especiales en Informática · Módulo 2**
 **Fecha de entrega: sábado 15 de agosto de 2026 (sesión 3)**
@@ -45,7 +45,7 @@ reproducirla con tu propio producto.
 
 ---
 
-## Paso 1 — Elige tu producto
+## Paso 1: Elige tu producto
 
 Dos condiciones **no negociables**:
 
@@ -59,7 +59,7 @@ sustentarla en la sesión 16. Cámbiala ahora, no en octubre.
 
 ---
 
-## Paso 2 — Haz dos investigaciones, no una
+## Paso 2: Haz dos investigaciones, no una
 
 **Investigación de validación.** ¿El problema existe de verdad? ¿Quién más lo ha resuelto
 y cómo? ¿Qué herramientas del ecosistema CNCF ya cubren parte de esto?
@@ -83,7 +83,7 @@ comoditizando gratis, qué riesgo técnico la mata. Estúdiala tan en serio como
 
 ---
 
-## Paso 3 — Documenta todo en Markdown
+## Paso 3: Documenta todo en Markdown
 
 Transcripciones, notas, análisis, capturas de tu investigación. **Markdown, no PDF**:
 gastas menos tokens y el modelo lo lee mejor.
@@ -92,7 +92,7 @@ Este material es el insumo directo del PRD. Sin él, el paso 5 no funciona.
 
 ---
 
-## Paso 4 — Completa tu `pvb.md`
+## Paso 4: Completa tu `pvb.md`
 
 Usa la plantilla de [`pvb.md`](./pvb.md). Al final del archivo está el ejemplo completo
 **Timonel**: ese es el nivel de detalle esperado.
@@ -110,7 +110,7 @@ que no se investigó.
 
 ---
 
-## Paso 5 — Co-crea tu `prd.md`
+## Paso 5: Co-crea tu `prd.md`
 
 1. **Copia tus documentos a `docs/`** (PVB, validación, crítica, entrevistas),
    reemplazando los del caso de referencia.
@@ -128,7 +128,7 @@ que no se investigó.
 > **El agente propone, tú apruebas.**
 
 Si dejas que la IA escupa el PRD completo y lo apruebas en bloque, perdiste el control del
-alcance — y se nota en la sustentación. Es la misma frontera que en el módulo 8 separa a
+alcance, y se nota en la sustentación. Es la misma frontera que en el módulo 8 separa a
 un agente que sugiere de uno que rompe producción.
 
 ### Si la IA no respeta el "segmento por segmento"
@@ -179,3 +179,5 @@ hiciste investigación adversarial.
 
 Tráelas a clase. Una duda resuelta el sábado vale más que una semana de trabajo en la
 dirección equivocada.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

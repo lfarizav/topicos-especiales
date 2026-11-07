@@ -35,13 +35,13 @@ Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
 | # | Módulo | Certificación | Carpeta |
 |---|---|---|---|
 | 1 | Fundamentos de Linux | LFCS | [`modulo1/`](./modulo1/) |
-| 2 | AI & Agentic Engineering | — | [`modulo2/`](./modulo2/) |
-| 3 | Docker, Compose y Runtimes de Contenedores | — | [`modulo3/`](./modulo3/) |
+| 2 | AI & Agentic Engineering | - | [`modulo2/`](./modulo2/) |
+| 3 | Docker, Compose y Runtimes de Contenedores | - | [`modulo3/`](./modulo3/) |
 | 4 | Kubernetes Fundamentals | KCNA | [`modulo4/`](./modulo4/) |
 | 5 | Certified Kubernetes Administrator | CKA | [`modulo5/`](./modulo5/) |
 | 6 | Certified Kubernetes Application Developer | CKAD | [`modulo6/`](./modulo6/) |
 | 7 | Certified Kubernetes Security Specialist | CKS | [`modulo7/`](./modulo7/) |
-| 8 | A Producción: Paisaje CNCF, Agentes y GitOps | — | [`modulo8/`](./modulo8/) |
+| 8 | A Producción: Paisaje CNCF, Agentes y GitOps | - | [`modulo8/`](./modulo8/) |
 | 9 | Helm: el gestor de paquetes de Kubernetes (opcional) | - | [`modulo9/`](./modulo9/) |
 
 > El módulo 9 es opcional: no tiene fecha en el cronograma de abajo, no reemplaza ninguna
@@ -50,32 +50,32 @@ Módulo 8  Producción       →  CNCF, agentes en el clúster y GitOps
 
 ---
 
-## Cronograma — 16 sesiones
+## Cronograma: 16 sesiones
 
 | # | Fecha | Sesión | Entregable |
 |---|---|---|---|
-| 1 | sáb 1 ago 2026 | Módulo 1 — Fundamentos de Linux | — |
-| 2 | sáb 8 ago 2026 | Módulo 2 — AI & Agentic Engineering | — |
-| 3 | sáb 15 ago 2026 | Módulo 3 — Docker, Compose y Runtimes | **PVB + PRD** |
-| 4 | sáb 22 ago 2026 | Módulo 4 — Kubernetes Fundamentals (KCNA) | — |
-| 5 | sáb 29 ago 2026 | **Examen 1** — módulos 1 a 4 | — |
-| 6 | sáb 5 sep 2026 | Módulo 5 — CKA (1/2) | — |
-| 7 | sáb 12 sep 2026 | Módulo 5 — CKA (2/2) | — |
-| — | **14 – 19 sep 2026** | **Semana de descanso — no hay clase** | — |
-| 8 | sáb 26 sep 2026 | Módulo 6 — CKAD (1/2) | — |
-| 9 | sáb 3 oct 2026 | Módulo 6 — CKAD (2/2) | — |
-| 10 | sáb 10 oct 2026 | **Examen 2** — módulos 5 y 6 | — |
-| 11 | sáb 17 oct 2026 | Módulo 7 — CKS (1/2) | — |
-| 12 | sáb 24 oct 2026 | Módulo 7 — CKS (2/2) | — |
-| 13 | sáb 31 oct 2026 | Módulo 8 — CNCF, Agentes y GitOps (1/2) | — |
-| 14 | sáb 7 nov 2026 | Módulo 8 — CNCF, Agentes y GitOps (2/2) | — |
-| 15 | sáb 14 nov 2026 | **Examen 3** — módulos 7 y 8 | — |
+| 1 | sáb 1 ago 2026 | Módulo 1: Fundamentos de Linux | - |
+| 2 | sáb 8 ago 2026 | Módulo 2: AI & Agentic Engineering | - |
+| 3 | sáb 15 ago 2026 | Módulo 3: Docker, Compose y Runtimes | **PVB + PRD** |
+| 4 | sáb 22 ago 2026 | Módulo 4: Kubernetes Fundamentals (KCNA) | - |
+| 5 | sáb 29 ago 2026 | **Examen 1**: módulos 1 a 4 | - |
+| 6 | sáb 5 sep 2026 | Módulo 5: CKA (1/2) | - |
+| 7 | sáb 12 sep 2026 | Módulo 5: CKA (2/2) | - |
+| - | **14 – 19 sep 2026** | **Semana de descanso (no hay clase)** | - |
+| 8 | sáb 26 sep 2026 | Módulo 6: CKAD (1/2) | - |
+| 9 | sáb 3 oct 2026 | Módulo 6: CKAD (2/2) | - |
+| 10 | sáb 10 oct 2026 | **Examen 2**: módulos 5 y 6 | - |
+| 11 | sáb 17 oct 2026 | Módulo 7: CKS (1/2) | - |
+| 12 | sáb 24 oct 2026 | Módulo 7: CKS (2/2) | - |
+| 13 | sáb 31 oct 2026 | Módulo 8: CNCF, Agentes y GitOps (1/2) | - |
+| 14 | sáb 7 nov 2026 | Módulo 8: CNCF, Agentes y GitOps (2/2) | - |
+| 15 | sáb 14 nov 2026 | **Examen 3**: módulos 7 y 8 | - |
 | 16 | sáb 21 nov 2026 | **Sustentación del proyecto final** | **Proyecto final** |
 
 Este cronograma es la fuente de verdad del curso. Si una fecha cambia, se cambia aquí
 primero.
 
-> **Tercer entregable del proyecto — unidades y tareas.** El módulo 5 lleva, además de los
+> **Tercer entregable del proyecto: unidades y tareas.** El módulo 5 lleva, además de los
 > dos laboratorios de CKA, el paso que convierte tu PVB y tu PRD en **unidades de trabajo
 > con sus tareas**, con el marco AI-DLC de AWS. La guía está en
 > [`modulo5/proyecto-final-de-prd-a-unidades-y-tareas.md`](./modulo5/proyecto-final-de-prd-a-unidades-y-tareas.md).
@@ -103,3 +103,5 @@ Cada carpeta de módulo tiene su `README.md` con objetivos, agenda, laboratorio 
 entregables. Empieza siempre por ahí.
 
 `research/` contiene paquetes de investigación profunda listos para ejecutar.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

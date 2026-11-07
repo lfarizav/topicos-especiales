@@ -1,4 +1,4 @@
-# Módulo 5 — Certified Kubernetes Administrator (CKA)
+# Módulo 5: Certified Kubernetes Administrator (CKA)
 
 **Sesiones 6 y 7 · sábados 5 y 12 de septiembre de 2026 · 9:00–12:00**
 
@@ -51,7 +51,7 @@ Casi un tercio del examen es diagnosticar cosas rotas. Estudia en ese orden.
 
 El módulo tiene **dos laboratorios**, uno por sesión. El segundo asume el primero.
 
-### Sesión 6 — [Laboratorio 1: El clúster es tuyo](./laboratorio-cka-1.md)
+### Sesión 6: [Laboratorio 1: El clúster es tuyo](./laboratorio-cka-1.md)
 
 **En clase, 95–110 minutos, 8 pasos.** Se hace sobre **dos máquinas virtuales de LXD** que
 tú creas y borras en la misma sesión. Es la primera vez en el curso que Kubernetes no viene
@@ -78,7 +78,7 @@ certificados, ~20 min.
 
 **Requisitos:** Linux con **LXD** funcionando y **6 GiB de RAM libres**.
 
-### Sesión 7 — [Laboratorio 2: Operar el clúster](./laboratorio-cka-2.md)
+### Sesión 7: [Laboratorio 2: Operar el clúster](./laboratorio-cka-2.md)
 
 **En clase, 120–140 minutos, 11 pasos.** Se hace sobre un clúster `kind` de **tres nodos**
 (un control plane y dos workers) que tú creas y borras en la sesión.
@@ -114,7 +114,7 @@ libres** (8 GiB con el Paso 10, 10 GiB con el anexo).
 
 ---
 
-## Trabajo de proyecto final — de tu PRD a las unidades con sus tareas
+## Trabajo de proyecto final: de tu PRD a las unidades con sus tareas
 
 Además de los dos laboratorios de CKA, este módulo lleva el **tercer paso del proyecto
 final**: convertir el `pvb.md` del módulo 2 y el `prd.md` del módulo 3 en la especificación
@@ -192,7 +192,7 @@ Ingress NGINX, Gateway API y NGINX Gateway Fabric, `openssl` y la API de CSR.
   escribes `StorageClass`, `Gateway` y RBAC. El Laboratorio 2 marca esa frontera.
 - **Módulo 7 (CKS):** la auditoría de RBAC que aquí es diagnóstico, allá es defensa.
 - **Módulo 8:** un agente de IA que diagnostica el clúster necesita exactamente estos
-  permisos de solo lectura — y entender por qué no más. Y el `helm install` manual del
+  permisos de solo lectura, y entender por qué no más. Y el `helm install` manual del
   Paso 10 es lo que GitOps convierte en un commit.
 
 ---

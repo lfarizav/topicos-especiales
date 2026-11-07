@@ -1,6 +1,6 @@
 # Product Vision Board
 
-**Módulo 2 — AI & Agentic Engineering**
+**Módulo 2: AI & Agentic Engineering**
 
 Este es tu primer artefacto de producto. Lo completas como tarea de la sesión 2
 (8 de agosto de 2026) y lo traes listo a la sesión 3 (**sábado 15 de agosto de 2026**).
@@ -38,8 +38,8 @@ _______________________________________
 
 **¿Este problema sobrevive a las próximas 2-3 generaciones de modelos foundation?**
 [ ] Sí, porque es un problema de WORKFLOW/INTEGRACIÓN, no de OUTPUT
-[ ] No estoy seguro — necesito investigar más
-[ ] No — mi problema es de generación/resumen y se commoditiza
+[ ] No estoy seguro: necesito investigar más
+[ ] No: mi problema es de generación/resumen y se commoditiza
 
 **Durability Score (1-5):** ___
 
@@ -62,9 +62,9 @@ _______________________________________
 Solo puedes elegir UNA como primaria. Es tu ventaja defensible principal.
 
 **Ventaja competitiva primaria:**
-[ ] Data — Generamos data única que competidores no pueden comprar ni copiar
-[ ] Distribution — Estamos embebidos en un canal/workflow difícil de replicar
-[ ] Trust — Ofrecemos reliability/safety/compliance que otros no pueden igualar
+[ ] Data: Generamos data única que competidores no pueden comprar ni copiar
+[ ] Distribution: Estamos embebidos en un canal/workflow difícil de replicar
+[ ] Trust: Ofrecemos reliability/safety/compliance que otros no pueden igualar
 
 **¿Qué data, distribución o trust única poseemos o podemos construir?**
 _______________________________________
@@ -76,9 +76,9 @@ _______________________________________
 ## 4. ARENA COMPETITIVA
 
 **¿En qué arena compites?**
-[ ] Pioneer (AI-Native) — Creo un mercado nuevo que no podría existir sin IA
-[ ] Disruptor (AI-Disrupted) — Reimagino un workflow existente haciéndolo 10x mejor
-[ ] Enhancer (AI-Enhanced) — Uso IA para fortalecer un producto/proceso existente
+[ ] Pioneer (AI-Native): Creo un mercado nuevo que no podría existir sin IA
+[ ] Disruptor (AI-Disrupted): Reimagino un workflow existente haciéndolo 10x mejor
+[ ] Enhancer (AI-Enhanced): Uso IA para fortalecer un producto/proceso existente
 
 **¿Cómo sobrevives o complementas a los gigantes (hyperscalers, vendors de plataforma,
 proyectos open source del ecosistema CNCF)?**
@@ -90,10 +90,10 @@ _______________________________________
 ## 5. UX PARADIGM
 
 **¿Cómo interactúa el usuario con tu producto?**
-[ ] Assistant — El usuario está en control, la IA sugiere
-[ ] Agent — La IA ejecuta tareas autónomamente dentro de límites
-[ ] Autonomous — La IA corre sin supervisión humana
-[ ] Embedded Intelligence — La IA mejora el producto de forma invisible
+[ ] Assistant: El usuario está en control, la IA sugiere
+[ ] Agent: La IA ejecuta tareas autónomamente dentro de límites
+[ ] Autonomous: La IA corre sin supervisión humana
+[ ] Embedded Intelligence: La IA mejora el producto de forma invisible
 
 **¿Por qué este paradigma para tu caso de uso?**
 _______________________________________
@@ -106,9 +106,9 @@ _______________________________________
 No puedes maximizar las tres. Elige la prioridad de tu producto.
 
 **Optimizo primariamente para:**
-[ ] Cost — Lo más barato posible (tareas de alto volumen)
-[ ] Capability — Lo más inteligente/preciso (decisiones de alto riesgo)
-[ ] Speed — Lo más rápido posible (experiencias en tiempo real)
+[ ] Cost: Lo más barato posible (tareas de alto volumen)
+[ ] Capability: Lo más inteligente/preciso (decisiones de alto riesgo)
+[ ] Speed: Lo más rápido posible (experiencias en tiempo real)
 
 **Trade-offs que acepto:**
 _______________________________________
@@ -182,15 +182,15 @@ _______________________________________
 # Ejemplo de referencia: Timonel
 
 > Product Vision Board completado. Úsalo como guía de **profundidad, formato y
-> honestidad** — tu PVB debe tener este nivel de detalle.
+> honestidad**: tu PVB debe tener este nivel de detalle.
 >
 > **Timonel es una empresa ficticia**, creada para este curso. El nombre viene del
 > griego *κυβερνήτης* (kybernḗtēs, "timonel"), la misma raíz de Kubernetes.
 >
 > **Convención de evidencia usada en este ejemplo:**
-> - **[INTERNO]** — proyección o supuesto del propio equipo. Inventado por
+> - **[INTERNO]**: proyección o supuesto del propio equipo. Inventado por
 >   construcción; en tu PVB real serían tus estimaciones, y deben ser defendibles.
-> - **[VERIFICAR]** — afirmación sobre el mundo exterior (mercado, competencia,
+> - **[VERIFICAR]**: afirmación sobre el mundo exterior (mercado, competencia,
 >   adopción) que **en un PVB real va con enlace y fecha**. Aquí queda marcada a
 >   propósito para que veas exactamente dónde debe ir tu evidencia.
 >
@@ -202,7 +202,7 @@ _______________________________________
 **Nombre del producto:** Timonel
 
 **Descripción en una línea:** Plataforma que lleva una aplicación de cero a producción
-en Kubernetes —infraestructura, despliegue, políticas y observabilidad— y luego la
+en Kubernetes (infraestructura, despliegue, políticas y observabilidad) y luego la
 mantiene ahí con agentes de IA que diagnostican incidentes y **proponen la corrección
 como pull request con evidencia**, nunca aplicándola por su cuenta.
 
@@ -233,7 +233,7 @@ en producción es un incidente esperando a ocurrir, y ningún SRE serio lo autor
 
 **¿Sobrevive al próximo salto de modelos?**
 
-**[X] Sí — es un problema de WORKFLOW/INTEGRACIÓN, no de OUTPUT.**
+**[X] Sí: es un problema de WORKFLOW/INTEGRACIÓN, no de OUTPUT.**
 
 Un modelo más inteligente diagnostica mejor, pero no resuelve quién aprueba el cambio,
 cómo queda auditado, con qué permisos actúa el agente, ni cómo se revierte. Eso es
@@ -267,7 +267,7 @@ si se equivoca o si alguien lo manipula?"*
 
 Si la respuesta no es **"nada: solo lee, y su única salida es un pull request"**, la
 conversación se acaba ahí. Por eso la arquitectura de permisos no es un detalle de
-implementación — **es el argumento de venta**.
+implementación: **es el argumento de venta**.
 
 ## 3. VENTAJA COMPETITIVA PRIMARIA
 
@@ -293,7 +293,7 @@ de acierto medida**, más la confianza que el SRE lead ya te dio.
 
 ## 4. ARENA COMPETITIVA
 
-**[X] Disruptor (AI-Disrupted)** — El workflow (operar Kubernetes) existe hace una
+**[X] Disruptor (AI-Disrupted)**: El workflow (operar Kubernetes) existe hace una
 década. Lo estamos reimaginando, no inventando.
 
 **Cómo sobrevivimos a los gigantes y al open source:**
@@ -302,7 +302,7 @@ década. Lo estamos reimaginando, no inventando.
   tooling de operación asistida no cruza nubes. Timonel es agnóstico y funciona igual
   en un clúster on-premise. **[VERIFICAR: productos concretos de cada hyperscaler]**
 - **Los proyectos open source del ecosistema** (K8sGPT, HolmesGPT, kagent) resuelven
-  el diagnóstico y lo resuelven bien — y son gratis. **Timonel no compite con ellos:
+  el diagnóstico y lo resuelven bien, y son gratis. **Timonel no compite con ellos:
   los orquesta.** El valor no está en diagnosticar; está en el bucle completo
   detectar → diagnosticar → proponer PR con evidencia → aprobar → reconciliar, y en
   el registro auditable que queda.
@@ -316,7 +316,7 @@ contemplado en la sección 9.
 
 ## 5. UX PARADIGM
 
-**[X] Agent** — La IA ejecuta autónomamente **dentro de límites duros**.
+**[X] Agent**: La IA ejecuta autónomamente **dentro de límites duros**.
 
 **Por qué no Autonomous:** porque la autonomía total es exactamente lo que el
 comprador no va a firmar. En operación de infraestructura, "la IA corre sin supervisión"
@@ -346,12 +346,12 @@ request malo que un humano tiene que aprobar**.
 - **Sacrifico cobertura al inicio.** Prefiero acertar en 6 tipos de incidente que
   opinar mal sobre 60. La cobertura se gana con historial, no con prompts.
 
-**Razón de fondo:** el costo de un diagnóstico equivocado no es el token desperdiciado
-— es la confianza del SRE lead, y esa se pierde una sola vez.
+**Razón de fondo:** el costo de un diagnóstico equivocado no es el token desperdiciado:
+es la confianza del SRE lead, y esa se pierde una sola vez.
 
 ## 7. MODELO ECONÓMICO
 
-**Modelo de pricing:** Hybrid Tiered — suscripción por clúster conectado, con límites
+**Modelo de pricing:** Hybrid Tiered: suscripción por clúster conectado, con límites
 crecientes de incidentes analizados por mes. **[INTERNO]**
 
 - **Team:** $400/mes hasta 3 clústeres y 150 incidentes analizados/mes.
@@ -376,7 +376,7 @@ incidentes analizados y no en asientos.
 | **Gross margin** | **77%** |
 
 El margen se sostiene si el filtrado de ruido funciona. Si el 60% de las alertas que
-llegan al agente son basura, el costo de inferencia se dispara y el margen se cae —
+llegan al agente son basura, el costo de inferencia se dispara y el margen se cae;
 por eso la clasificación previa con modelos baratos es una decisión económica, no
 técnica.
 
@@ -444,6 +444,8 @@ Tres vectores, en orden de probabilidad:
    self-hosted donde nada sale de la infraestructura del cliente.
 
 **Verdad incómoda:** este producto vive o muere por la confianza de una sola persona
-por cuenta —el SRE lead— y esa confianza se pierde con un solo incidente atribuible
+por cuenta (el SRE lead) y esa confianza se pierde con un solo incidente atribuible
 al agente. Por eso el límite de permisos no se relaja nunca, ni siquiera cuando el
 cliente lo pida.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -1,4 +1,4 @@
-# Timonel — Unidades y tareas
+# Timonel: Unidades y tareas
 
 > **Este es el formato del entregable.** Consolida, en un solo archivo legible, las unidades
 > de `unit-of-work.md` y las tareas de cada `*-code-generation-plan.md`.
@@ -32,7 +32,7 @@ un solo tipo de incidente. Se construye antes de profundizar en cualquier unidad
 
 ---
 
-## U1 — Catálogo y modelo de dominio
+## U1: Catálogo y modelo de dominio
 
 - **Responsabilidad:** definir y validar el `timonel.yaml` y los tipos de dominio compartidos.
 - **Qué no hace:** no lee el clúster, no decide, no tiene efectos secundarios.
@@ -49,11 +49,11 @@ un solo tipo de incidente. Se construye antes de profundizar en cualquier unidad
 | U1-T05 | Versionado del esquema y mensaje de migración | `go test ./internal/catalog -run TestVersionAntigua` | US-9.4 |
 | U1-T06 | CRDs de `Aplicacion` e `Incidente` en `config/crd/` | `kubectl apply --dry-run=server -f config/crd/` | US-1.1 |
 | U1-T07 | Pruebas de propiedad: validar es idempotente | `go test ./internal/catalog -run TestIdempotente` | US-1.2 |
-| U1-T08 | Resumen de la unidad | el resumen trae la salida real de `timonel validate` | — |
+| U1-T08 | Resumen de la unidad | el resumen trae la salida real de `timonel validate` | - |
 
 ---
 
-## U6 — Puerta de autonomía y RBAC
+## U6: Puerta de autonomía y RBAC
 
 - **Responsabilidad:** imponer el límite de autonomía de forma verificable. Toda acción del
   agente pasa por aquí.
@@ -75,11 +75,11 @@ un solo tipo de incidente. Se construye antes de profundizar en cualquier unidad
 | U6-T07 | Negar la creación de bindings | `kubectl auth can-i create clusterrolebindings --as=system:serviceaccount:timonel:agente` responde `no` | US-6.4 |
 | U6-T08 | Cablear la puerta en `diagnose/loop.go` (modificar en su sitio) | `grep -rn "kubernetes.NewForConfig" internal/diagnose/` no devuelve nada | US-6.2 |
 | U6-T09 | Cinco pruebas negativas de escalada | `go test ./test/gate -run TestEscalada` | US-6.2, US-6.3, US-6.4 |
-| U6-T10 | Resumen con la salida real de los cuatro `can-i` | el resumen trae las cuatro salidas pegadas | — |
+| U6-T10 | Resumen con la salida real de los cuatro `can-i` | el resumen trae las cuatro salidas pegadas | - |
 
 ---
 
-## U7 — Motor de diagnóstico con IA
+## U7: Motor de diagnóstico con IA
 
 - **Responsabilidad:** el bucle de razonamiento. De un incidente a un diagnóstico con su
   cadena de evidencia y su nivel de confianza.
@@ -100,7 +100,7 @@ un solo tipo de incidente. Se construye antes de profundizar en cualquier unidad
 | U7-T07 | Conjunto de evaluación con 20 incidentes grabados | `go test ./test/diagnose -run TestEvaluacion` reporta acierto por tipo | US-7.1 |
 | U7-T08 | Casos adversariales de inyección desde logs | `go test ./test/diagnose -run TestAdversarial` | US-7.3 |
 | U7-T09 | Corte por presupuesto de inferencia (usa U3) | `go test ./internal/diagnose -run TestCortePresupuesto` | US-4.3 |
-| U7-T10 | Resumen con la tabla de acierto por tipo de incidente | el resumen trae la salida real de la evaluación | — |
+| U7-T10 | Resumen con la tabla de acierto por tipo de incidente | el resumen trae la salida real de la evaluación | - |
 
 ---
 

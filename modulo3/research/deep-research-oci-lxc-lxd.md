@@ -224,3 +224,5 @@ La documentación oficial formula las siguientes definiciones textuales \[VERIFI
 > 31. A general question about containers technology \- Linux Containers Forum, [https://discuss.linuxcontainers.org/t/a-general-question-about-containers-technology/8353](https://discuss.linuxcontainers.org/t/a-general-question-about-containers-technology/8353)  
 > 32. About containers and VMs \- Incus documentation, [https://linuxcontainers.org/incus/docs/main/explanation/containers\_and\_vms/](https://linuxcontainers.org/incus/docs/main/explanation/containers_and_vms/)  
 > 33. LXC \- News \- Linux Containers, [https://linuxcontainers.org/de/lxc/news/2019\_03\_12\_15\_03.html](https://linuxcontainers.org/de/lxc/news/2019_03_12_15_03.html)
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

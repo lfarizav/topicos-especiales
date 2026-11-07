@@ -1,4 +1,4 @@
-# Módulo 3 — Docker, Compose y Runtimes de Contenedores
+# Módulo 3: Docker, Compose y Runtimes de Contenedores
 
 **Sesión 3 · sábado 15 de agosto de 2026 · 9:00–12:00**
 
@@ -40,18 +40,18 @@ el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Docume
 
 ---
 
-## Laboratorio en clase — runtimes y virtualización
+## Laboratorio en clase: runtimes y virtualización
 
 Antes de este laboratorio de Compose, en clase se hace
-[`laboratorio-virtualizacion-contenedores.md`](./laboratorio-virtualizacion-contenedores.md)
-— 75-90 minutos, en vivo: namespaces/cgroups compartidos, contenedor de sistema (LXC/LXD)
+[`laboratorio-virtualizacion-contenedores.md`](./laboratorio-virtualizacion-contenedores.md):
+75-90 minutos, en vivo: namespaces/cgroups compartidos, contenedor de sistema (LXC/LXD)
 vs contenedor de aplicación (Docker), máquina virtual ligera, y por qué el tamaño de una
 imagen y el usuario del proceso son decisiones de seguridad medibles, no solo de buenas
 prácticas. Es un laboratorio distinto de este; los dos son complementarios.
 
 ## Laboratorio
 
-**Dockerfile multi-stage y Compose de producción** — 60 minutos, 7 pasos:
+**Dockerfile multi-stage y Compose de producción**, 60 minutos, 7 pasos:
 
 1. Build multi-stage de una app Go hacia una imagen `distroless`
 2. `compose.yaml` sin clave `version:`, validado con `docker compose config`
@@ -118,7 +118,7 @@ invertida. **Ese es el fallo que el proceso de este módulo existe para prevenir
 ### La patología conocida del PRD
 
 Cada sesión con el agente abre direcciones nuevas y el alcance crece sin que nadie haya
-decidido que creciera. La salida no es más disciplina personal — es volver al tablero y
+decidido que creciera. La salida no es más disciplina personal, es volver al tablero y
 hacer **una sola pregunta de corte**:
 
 > ¿esto sigue siendo el producto que quiero construir?
@@ -127,8 +127,8 @@ La técnica concreta: dale al agente el PVB y el PRD **juntos** y pídele que se
 conflictos y desalineaciones, **no que decida por ti**. El PRD está terminado cuando no
 le falta ni le sobra nada respecto de la visión.
 
-> **Por qué segmento por segmento.** Es la misma regla del módulo 8 —*el agente propone,
-> el humano aprueba*— aplicada a escribir especificaciones en vez de a operar un clúster.
+> **Por qué segmento por segmento.** Es la misma regla del módulo 8 (*el agente propone,
+> el humano aprueba*) aplicada a escribir especificaciones en vez de a operar un clúster.
 > Si dejas que la IA produzca el PRD completo de una vez y lo apruebas en bloque, ya
 > perdiste el control del alcance, y eso se nota en la sustentación.
 
@@ -142,3 +142,5 @@ le falta ni le sobra nada respecto de la visión.
   es el primer lugar donde se mira.
 - **Módulo 7 (CKS):** la cadena de suministro de software pesa 20%, y empieza en el
   `Dockerfile`.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

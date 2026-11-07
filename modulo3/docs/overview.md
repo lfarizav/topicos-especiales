@@ -40,7 +40,7 @@ seguridad. Es contenido evaluable en KCNA.
 
 > **Ojo con una confusión frecuente:** Backstage **no está graduado**. Es el portal de
 > desarrolladores más conocido del ecosistema y aun así permanece en Incubating.
-> Popularidad y madurez formal no son lo mismo — y esa distinción es justamente lo que
+> Popularidad y madurez formal no son lo mismo, y esa distinción es justamente lo que
 > la escala de la CNCF intenta capturar.
 
 **Datos de los tres agentes:**
@@ -91,7 +91,7 @@ Ninguno resuelve el escenario multinube ni on-premise, que es donde queda espaci
 ## 5. La tensión central de la categoría
 
 Esta es la formulación más útil que produjo la investigación. **Es un argumento, no un
-dato** — el propio reporte la etiquetó como especulativa, y así hay que presentarla:
+dato**: el propio reporte la etiquetó como especulativa, y así hay que presentarla:
 
 > El mercado se parte en dos extremos, y ninguno es satisfactorio:
 >
@@ -102,7 +102,7 @@ dato** — el propio reporte la etiquetó como especulativa, y así hay que pres
 >    remediación en un microservicio puede desencadenar fallas en cascada aguas abajo.
 
 El hueco es el puente entre ambos: ejecución con garantía. Ese puente es exactamente lo
-que propone Timonel — y también es la tesis del **módulo 8**: el agente propone, el
+que propone Timonel, y también es la tesis del **módulo 8**: el agente propone, el
 humano aprueba, GitOps reconcilia.
 
 Es importante que veas que **esto es una hipótesis, no un hecho de mercado**. Que la
@@ -144,4 +144,6 @@ Registrado a propósito, porque saber qué no sabes es parte del análisis:
 
 ---
 
-*Material de referencia — Tópicos Especiales en Informática*
+*Material de referencia, Tópicos Especiales en Informática*
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

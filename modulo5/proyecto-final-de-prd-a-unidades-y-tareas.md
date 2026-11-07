@@ -1,4 +1,4 @@
-# De tu PRD a las unidades con sus tareas — con el marco AI-DLC de AWS
+# De tu PRD a las unidades con sus tareas: con el marco AI-DLC de AWS
 
 **Módulo 5 · Trabajo de proyecto final · Tópicos Especiales en Informática**
 
@@ -73,8 +73,8 @@ Todo eso lo produce el marco. Tú **decides, respondes y apruebas**.
 ### Por qué paramos antes de codificar
 
 Porque la codificación de este proyecto no la hace un humano escribiendo archivo por
-archivo, ni un agente suelto improvisando. La hace un **loop de tres agentes** —
-orquestador, codificador y revisor — que arranca en los módulos siguientes y que **necesita
+archivo, ni un agente suelto improvisando. La hace un **loop de tres agentes**
+(orquestador, codificador y revisor) que arranca en los módulos siguientes y que **necesita
 un plan de tareas aprobado para poder funcionar**. Sin tareas verificables no hay nada que
 orquestar y nada que revisar: el loop se convierte en un agente escribiendo código y otro
 aplaudiéndolo.
@@ -96,7 +96,7 @@ con fases, artefactos y **compuertas de aprobación humanas**.
 
 El repositorio tiene hoy dos líneas muy distintas:
 
-| | **v1.0.1 — la que usamos** | v2.8.x — la línea nueva |
+| | **v1.0.1: la que usamos** | v2.8.x: la línea nueva |
 |---|---|---|
 | Qué se instala | Archivos **Markdown** que copias | Un **binario** (`aidlc`) + runtimes |
 | Agentes de código soportados | **Cualquiera** que lea reglas de proyecto | Siete, con nombre propio |
@@ -130,7 +130,7 @@ arranca. Se puede desactivar, pero es un obstáculo que este curso no necesita.
 
 ---
 
-## 3. Antes de empezar — requisitos reales
+## 3. Antes de empezar: requisitos reales
 
 | Requisito | Detalle |
 |---|---|
@@ -149,7 +149,7 @@ arranca. Se puede desactivar, pero es un obstáculo que este curso no necesita.
 
 ---
 
-## 4. Paso 1 — Crea el repositorio de tu proyecto
+## 4. Paso 1: Crea el repositorio de tu proyecto
 
 El proyecto **no vive dentro del repositorio del curso**. Es tu producto y va en su propio
 repositorio, porque en el módulo 8 lo va a reconciliar GitOps desde Git.
@@ -187,7 +187,7 @@ tiempo en la sustentación.
 
 ---
 
-## 5. Paso 2 — Descarga las reglas de AI-DLC v1.0.1
+## 5. Paso 2: Descarga las reglas de AI-DLC v1.0.1
 
 Descarga el ZIP a una carpeta **fuera** de tu proyecto:
 
@@ -245,7 +245,7 @@ cat aidlc-rules/VERSION
 
 ---
 
-## 6. Paso 3 — La receta universal, para cualquier agente
+## 6. Paso 3: La receta universal, para cualquier agente
 
 La instalación son **dos copias**. Siempre las mismas dos, sea cual sea tu agente:
 
@@ -360,7 +360,7 @@ resultado no va a tener ni artefactos ni compuertas.
 
 ---
 
-## 7. Paso 4 — Aplica el overlay optimizado (soluciona el contexto saturado)
+## 7. Paso 4: Aplica el overlay optimizado (soluciona el contexto saturado)
 
 Hay un problema real con el marco tal como viene, y este curso trae la solución hecha.
 
@@ -428,7 +428,7 @@ El detalle completo del overlay, con su procedencia y su licencia, está en
 
 ---
 
-## 8. Paso 5 — Escribe tu regla de autonomía como una extensión
+## 8. Paso 5: Escribe tu regla de autonomía como una extensión
 
 Este paso son diez minutos y es el que más nota te va a dar.
 
@@ -499,7 +499,7 @@ diapositiva: fue una regla bloqueante, con ID, citada en la bitácora de cada et
 
 ---
 
-## 9. Paso 6 — Arranca el flujo
+## 9. Paso 6: Arranca el flujo
 
 Abre tu agente en la raíz del proyecto y escribe, **con esa frase exacta al principio**:
 
@@ -521,7 +521,7 @@ Vuelve al Paso 3.
 
 ---
 
-## 10. Paso 7 — El contrato de co-creación: preguntas en archivos
+## 10. Paso 7: El contrato de co-creación: preguntas en archivos
 
 Esta es la parte que hace que el paso sea co-creación y no delegación, y es la razón por la
 que la v1.0.1 funciona con cualquier agente: **las preguntas no van en el chat, van en
@@ -573,7 +573,7 @@ estén llenas.
 
 ---
 
-## 11. Paso 8 — Las etapas de Inception, una por una
+## 11. Paso 8: Las etapas de Inception, una por una
 
 ### Mapa rápido: tu PRD contra las etapas de AI-DLC
 
@@ -598,7 +598,7 @@ consume. Eso es una señal útil, no un castigo: arregla el PRD y vuelve.
 
 ---
 
-### Etapa 1 — Workspace Detection · *siempre corre*
+### Etapa 1: Workspace Detection · *siempre corre*
 
 Detecta que tu proyecto es nuevo, registra tu petición original completa en `audit.md` y
 crea el estado. No te pregunta nada y avanza sola a la siguiente etapa.
@@ -609,7 +609,7 @@ prueba de que las reglas se están aplicando.
 
 ---
 
-### Etapa 2 — Reverse Engineering · *se salta*
+### Etapa 2: Reverse Engineering · *se salta*
 
 Solo corre en proyectos con código existente. Tu proyecto es nuevo, así que el marco la
 omite. Si tu producto sí parte de un repositorio previo, esta etapa lo analiza primero y
@@ -618,7 +618,7 @@ antes de seguir.
 
 ---
 
-### Etapa 3 — Requirements Analysis · *siempre corre*
+### Etapa 3: Requirements Analysis · *siempre corre*
 
 **Qué hace.** Convierte tu PRD en requisitos formales. Ajusta su profundidad sola
 (mínima, estándar o exhaustiva) según la claridad y el riesgo de lo que pediste.
@@ -641,7 +641,7 @@ requisitos sean excepcionalmente claros, un
 
 ---
 
-### Etapa 4 — User Stories · *condicional, y en tu caso sí corre*
+### Etapa 4: User Stories · *condicional, y en tu caso sí corre*
 
 **Qué hace.** Escribe las historias y las personas. Va en dos mitades: primero un **plan
 con preguntas** que tú respondes, y después la **generación** de las historias.
@@ -664,7 +664,7 @@ la evaluación en `aidlc-docs/inception/plans/`.
 
 ---
 
-### Etapa 5 — Workflow Planning · *siempre corre* · **la etapa que más te importa vigilar**
+### Etapa 5: Workflow Planning · *siempre corre* · **la etapa que más te importa vigilar**
 
 **Qué hace.** Decide **qué etapas se van a ejecutar y con qué profundidad**, y produce la
 visualización del flujo.
@@ -695,7 +695,7 @@ probabilidad e impacto, y el plan de entrega alineado a los módulos del curso.
 
 ---
 
-### Etapa 6 — Application Design · *condicional, imprescindible para ti*
+### Etapa 6: Application Design · *condicional, imprescindible para ti*
 
 **Qué hace.** Diseña la aplicación: componentes, los métodos de cada componente, los
 servicios y las dependencias entre componentes. **Es la etapa de la que dependen las
@@ -726,7 +726,7 @@ corre dentro del clúster y qué es un servicio externo.
 
 ---
 
-### Etapa 7 — Units Generation · **el corazón de este paso**
+### Etapa 7: Units Generation · **el corazón de este paso**
 
 **Qué hace.** Descompone el sistema en **unidades de trabajo**. La definición del marco es
 precisa: *«A unit of work is a logical grouping of stories for development purposes»*. Para
@@ -735,7 +735,7 @@ microservicios, cada unidad es un servicio despliegable por separado; para un mo
 
 Va en dos mitades.
 
-**Mitad 1 — Planning.** Produce `aidlc-docs/inception/plans/unit-of-work-plan.md`: un plan
+**Mitad 1: Planning.** Produce `aidlc-docs/inception/plans/unit-of-work-plan.md`: un plan
 con casillas y **preguntas con etiquetas `[Answer]:`**. El marco obliga al agente a
 generar preguntas sobre **seis categorías**, y a justificar explícitamente si se salta
 alguna:
@@ -753,7 +753,7 @@ Respóndelas todas en el archivo. Luego el agente **analiza tus respuestas** bus
 ambigüedades y contradicciones, y si las encuentra **añade preguntas de seguimiento** antes
 de poder avanzar.
 
-**Mitad 2 — Generation.** Ejecuta el plan aprobado y produce, en
+**Mitad 2: Generation.** Ejecuta el plan aprobado y produce, en
 `aidlc-docs/inception/application-design/`:
 
 | Archivo | Contenido |
@@ -762,7 +762,7 @@ de poder avanzar.
 | `unit-of-work-dependency.md` | La matriz de dependencias entre unidades |
 | `unit-of-work-story-map.md` | Qué historia implementa cada unidad |
 
-**Antes de aprobar, revisa** — y esta es la lista más importante de toda la guía:
+**Antes de aprobar, revisa**: y esta es la lista más importante de toda la guía:
 
 - **El grafo no tiene ciclos.** Si la unidad A depende de B y B depende de A, ninguna se
   puede construir primero y el loop de agentes se va a bloquear en el módulo siguiente.
@@ -797,7 +797,7 @@ ninguna de las 36 historias quedó huérfana.
 
 ---
 
-## 12. Paso 9 — Las tareas de cada unidad, y la parada
+## 12. Paso 9: Las tareas de cada unidad, y la parada
 
 Ya tienes las unidades. Las tareas salen de la etapa **Code Generation**, que está partida
 en dos mitades con una compuerta en medio:
@@ -837,7 +837,7 @@ aplicación:
 | NFR Design | Los patrones que materializan esos NFR | No |
 | Infrastructure Design | Servicios de infraestructura y arquitectura de despliegue | No |
 | Code Generation **Parte 1** | **El plan de tareas de la unidad** | **No** |
-| Code Generation Parte 2 | El código | **Sí — no llegues aquí** |
+| Code Generation Parte 2 | El código | **Sí, no llegues aquí** |
 
 Las cuatro primeras son condicionales: el plan de ejecución puede omitir alguna si tu
 unidad no la necesita. Eso está bien. La que no se puede omitir es Code Generation, porque
@@ -1048,7 +1048,7 @@ aparte.
 
 ---
 
-## Apéndice A — Si quieres usar la línea v2.8.x
+## Apéndice A: Si quieres usar la línea v2.8.x
 
 La línea nueva existe y es la que el repositorio promociona. **No la necesitas para este
 entregable**, pero si quieres probarla, esto es lo que cambia.
@@ -1098,26 +1098,26 @@ Qué cuesta, y por eso no es el camino principal del curso:
 
 Todas consultadas el **10 de septiembre de 2026**.
 
-1. **AWS Labs — `aidlc-workflows`** (repositorio del marco, licencia MIT-0).
+1. **AWS Labs: `aidlc-workflows`** (repositorio del marco, licencia MIT-0).
    <https://github.com/awslabs/aidlc-workflows>
-2. **AI-DLC v1.0.1 — release y ZIP de reglas** (publicado el 30 de junio de 2026).
+2. **AI-DLC v1.0.1: release y ZIP de reglas** (publicado el 30 de junio de 2026).
    <https://github.com/awslabs/aidlc-workflows/releases/tag/v1.0.1> ·
    `ai-dlc-rules-v1.0.1.zip`, 109 267 bytes, SHA-256
    `ac0601544b6c7ba41b541a7a96259d6ea3995ea0b94b2a58a333ae7898e22b39`
-3. **AI-DLC v1.0.1 — README** (instalación por agente, la sección «Other Agents» y la frase
+3. **AI-DLC v1.0.1: README** (instalación por agente, la sección «Other Agents» y la frase
    disparadora «Using AI-DLC, …»).
    <https://github.com/awslabs/aidlc-workflows/blob/v1.0.1/README.md>
 4. **`core-workflow.md` y los 31 archivos de `aws-aidlc-rule-details/`**, dentro del ZIP de
    la v1.0.1. Son la fuente de las etapas, artefactos y reglas citados en esta guía.
-5. **AWS — «AI-Driven Development Life Cycle»** (el artículo que presenta la metodología).
+5. **AWS: «AI-Driven Development Life Cycle»** (el artículo que presenta la metodología).
    <https://aws.amazon.com/blogs/devops/ai-driven-development-life-cycle/>
-6. **Andrew Ng — «Agentic Design Patterns Part 2, Reflection»**, The Batch, 27 de marzo de
+6. **Andrew Ng: «Agentic Design Patterns Part 2, Reflection»**, The Batch, 27 de marzo de
    2024.
    <https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-2-reflection/>
-7. **Andrew Ng — «Agentic Design Patterns Part 5, Multi-Agent Collaboration»**, The Batch,
+7. **Andrew Ng: «Agentic Design Patterns Part 5, Multi-Agent Collaboration»**, The Batch,
    17 de abril de 2024.
    <https://www.deeplearning.ai/the-batch/agentic-design-patterns-part-5-multi-agent-collaboration/>
-8. **Andrew Ng — «What's next for AI agentic workflows»**, Sequoia Capital AI Ascent,
+8. **Andrew Ng: «What's next for AI agentic workflows»**, Sequoia Capital AI Ascent,
    26 de marzo de 2024 (video, ~14 min). Presenta los cuatro patrones.
    <https://www.youtube.com/watch?v=sal78ACtGTc>
 

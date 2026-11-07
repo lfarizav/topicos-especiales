@@ -97,3 +97,5 @@ completo:
 6. Los **riesgos** que documentaste y cómo los mitigaste
 
 Se evalúa el arco completo y la honestidad del análisis, no solo que la demo funcione.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

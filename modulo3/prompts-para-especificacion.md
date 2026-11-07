@@ -1,6 +1,6 @@
 # Prompts para co-crear la especificación de tu producto
 
-**Módulo 3 — Tópicos Especiales en Informática**
+**Módulo 3: Tópicos Especiales en Informática**
 
 > [!NOTE]
 > Cada prompt se ejecuta **secuencialmente**, en conversaciones separadas. El output de
@@ -54,13 +54,13 @@ Prompt 1:
 - Revisa que cada cifra de tus documentos tenga **fuente verificable**.
 - Marca tus proyecciones internas como **[INTERNO]** y las afirmaciones sobre el mundo
   real sin verificar como **[VERIFICAR]**.
-- Lee [`research/README.md`](./research/README.md) — documenta cómo un reporte de deep
+- Lee [`research/README.md`](./research/README.md): documenta cómo un reporte de deep
   research generado con IA llegó con cifras inventadas, autocitadas y con la dirección
   del dato invertida. **Ese es el fallo que estos prompts intentan prevenir.**
 
 ---
 
-## Prompt 1 — PRD: visión, propuesta de valor y especificación funcional
+## Prompt 1: PRD, visión, propuesta de valor y especificación funcional
 
 Cópialo completo en una conversación nueva y adjunta **todos** los archivos de tu `docs/`.
 
@@ -232,7 +232,7 @@ MIS DOCUMENTOS
 
 ---
 
-## Prompt 2 — Arquitectura técnica
+## Prompt 2: Arquitectura técnica
 
 > [!WARNING]
 > **No ejecutes este prompt esta semana.** Lo vas a usar cuando tengas los módulos de
@@ -267,7 +267,7 @@ El documento final se guardará como specs/arquitectura.md.
 
 ---
 
-## Prompt 3 — Backlog de ingeniería
+## Prompt 3: Backlog de ingeniería
 
 > [!WARNING]
 > **No lo ejecutes todavía.** Requiere `specs/prd.md` y `specs/arquitectura.md`.
@@ -298,9 +298,9 @@ El documento final se guardará como specs/backlog.md.
 
 | Prompt | Cuándo | Output |
 |---|---|---|
-| **1 — PRD** | Ahora. Se entrega el sábado 15 de agosto de 2026, junto con el PVB | `specs/prd.md` |
-| **2 — Arquitectura** | Cuando tengas Kubernetes y CKA encima | `specs/arquitectura.md` |
-| **3 — Backlog** | Antes de empezar a construir en serio | `specs/backlog.md` |
+| **1: PRD** | Ahora. Se entrega el sábado 15 de agosto de 2026, junto con el PVB | `specs/prd.md` |
+| **2: Arquitectura** | Cuando tengas Kubernetes y CKA encima | `specs/arquitectura.md` |
+| **3: Backlog** | Antes de empezar a construir en serio | `specs/backlog.md` |
 
 Concéntrate en un `prd.md` sólido. Un PRD flojo se arrastra hasta la sustentación.
 
@@ -319,3 +319,5 @@ Es la frustración número uno del ejercicio. Tres salidas, en orden:
 Y si aun así se adelanta y produce cinco segmentos de una: **no los apruebes en bloque**.
 Revísalos uno por uno o pídele que rehaga desde el primero que no revisaste. Aprobar en
 bloque es exactamente el hábito que este ejercicio existe para desarmar.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

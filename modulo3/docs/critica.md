@@ -1,4 +1,4 @@
-# Investigación de crítica — Timonel
+# Investigación de crítica: Timonel
 
 > **Este es el documento más importante de la carpeta.**
 >
@@ -11,7 +11,7 @@
 
 ---
 
-## TL;DR — por qué Timonel podría fracasar
+## TL;DR: por qué Timonel podría fracasar
 
 1. **El 70% del producto ya existe gratis, mantenido por la CNCF y con Microsoft
    detrás.** K8sGPT, HolmesGPT y kagent hacen el diagnóstico; Argo CD y Flux hacen la
@@ -25,7 +25,7 @@
    "agente que arregla tu clúster".
 4. **Los actores más serios se autolimitan.** HolmesGPT (Robusta + Microsoft) es de solo
    lectura por diseño; Humanitec evita explícitamente ejecutar modelos estocásticos sobre
-   producción. Timonel presenta esa misma limitación como *virtud diferenciadora* — pero
+   producción. Timonel presenta esa misma limitación como *virtud diferenciadora*, pero
    si es la práctica estándar del sector, **no diferencia nada**.
 5. **El moat propuesto es un subproducto, no un activo.** "Registro de evidencia e
    historial de aciertos" suena defendible hasta que uno pregunta: ¿lo pagaría alguien
@@ -54,7 +54,7 @@ La pregunta incómoda: **¿qué queda que justifique una suscripción de $1.500/
 La respuesta de Timonel es "el bucle completo y el registro auditable". Puede ser cierto
 hoy. Pero el bucle es *integración*, y la integración es exactamente lo que la comunidad
 open source hace bien y rápido. HolmesGPT ya se integra con más de 30 herramientas de
-observabilidad. Cerrar el último tramo —abrir un PR con evidencia— no es un salto
+observabilidad. Cerrar el último tramo (abrir un PR con evidencia) no es un salto
 tecnológico difícil: es trabajo de plomería que cualquier mantenedor puede hacer en un
 ciclo de release.
 
@@ -71,7 +71,7 @@ la hoja de ruta de otro.
 ## 2. El riesgo base de la categoría
 
 > **Más del 40% de los proyectos de IA agéntica empresariales serán cancelados para
-> finales de 2027** — Gartner, 25 de junio de 2025. Causas: ROI no demostrable, costos
+> finales de 2027**, Gartner, 25 de junio de 2025. Causas: ROI no demostrable, costos
 > crecientes de inferencia y complejidad de gobernanza.
 
 Es la misma casa de análisis que produce las cifras optimistas del mercado. No se puede
@@ -105,7 +105,7 @@ como innovación lo que el comprador ya obtiene gratis.
 
 **Lo que sí podría diferenciar** es el tramo posterior: no *que* el agente se limite a
 leer, sino que lo que produce llegue hasta un PR revisable con evidencia trazable. Pero
-eso hay que decirlo así —es un diferenciador estrecho— en vez de envolverlo en el
+eso hay que decirlo así (es un diferenciador estrecho) en vez de envolverlo en el
 discurso de seguridad que todos comparten.
 
 ---
@@ -126,14 +126,14 @@ producción, porque se acumulan operando y no se compran con una API.
    producto a diario.
 3. **¿Sobrevive al cambio de modelo?** Si el historial de aciertos se midió con un modelo
    y al año siguiente se cambia por otro, ¿la calibración sigue valiendo? Probablemente
-   haya que recalibrar — es decir, el activo se deprecia solo.
+   haya que recalibrar, es decir, el activo se deprecia solo.
 
 ---
 
 ## 5. El fracaso más probable no es técnico: es el ruido
 
-La métrica que Timonel define como secundaria —proporción de alertas descartadas como
-ruido— es probablemente la que decide el destino del producto.
+La métrica que Timonel define como secundaria (proporción de alertas descartadas como
+ruido) es probablemente la que decide el destino del producto.
 
 El escenario de muerte no es "el agente se equivocó y rompió producción". Es más
 aburrido: **el agente abre 40 pull requests mediocres a la semana**, el ingeniero de
@@ -141,7 +141,7 @@ plataforma empieza a ignorarlos, y en tres meses nadie los revisa. El producto n
 ruidosamente; se vuelve invisible y no se renueva.
 
 Ese fallo tiene una propiedad desagradable: **las métricas de seguridad se ven perfectas
-mientras ocurre.** Cero propuestas revertidas, cero incidentes causados por el agente —
+mientras ocurre.** Cero propuestas revertidas, cero incidentes causados por el agente,
 porque nadie está aprobando nada.
 
 **Implicación de diseño:** la métrica de "PRs aprobados sin modificación" no debe leerse
@@ -171,7 +171,7 @@ Tres consecuencias que el PVB no aborda:
 
 1. **La revisión es el cuello de botella, y Timonel le echa más trabajo encima.** Si el
    tiempo de revisión ya se dispara con la adopción de IA, un agente que abre PRs empeora
-   la métrica que más duele — salvo que su tasa de acierto sea altísima desde el principio.
+   la métrica que más duele, salvo que su tasa de acierto sea altísima desde el principio.
 2. **La promesa de reducir toil puede invertirse.** El producto promete -40% en tiempo de
    diagnóstico, pero si añade horas de revisión, el balance neto puede ser negativo y
    nadie lo estaría midiendo, porque el PVB no tiene métrica de *tiempo de revisión*.
@@ -181,7 +181,7 @@ Tres consecuencias que el PVB no aborda:
 
 **Lo que salvaría el argumento:** que Timonel mida y publique el **tiempo de revisión de
 sus propias propuestas** como métrica de primer nivel. Si el PR del agente se revisa más
-rápido que uno humano —porque trae evidencia estructurada y diagnóstico adjunto— la
+rápido que uno humano (porque trae evidencia estructurada y diagnóstico adjunto) la
 crítica se desactiva con datos. Si no lo mide, la crítica queda en pie.
 
 > Nota de método: este dato es correlacional, no causal. Es posible que los equipos que
@@ -201,7 +201,7 @@ dentro de sus riesgos para aplicaciones con LLM.
 escritura, el peor caso no es un clúster comprometido sino **un pull request malicioso
 que un humano debe aprobar**.
 
-El hueco: eso traslada toda la carga de defensa al revisor humano — el mismo revisor que
+El hueco: eso traslada toda la carga de defensa al revisor humano, el mismo revisor que
 a las 3 a.m. está cansado y confía en la herramienta porque lleva seis meses acertando.
 **La confianza acumulada, que es el moat, es también el vector de ataque.** Cuanto mejor
 funciona el producto, menos escrutinio recibe cada propuesta.
@@ -230,8 +230,8 @@ funciona el producto, menos escrutinio recibe cada propuesta.
 
 ## 9. Veredicto
 
-**Riesgo: alto.** No por debilidad técnica —la arquitectura propuesta es sensata y
-coincide con la de los actores más serios— sino por **estrechez del espacio comercial**:
+**Riesgo: alto.** No por debilidad técnica (la arquitectura propuesta es sensata y
+coincide con la de los actores más serios) sino por **estrechez del espacio comercial**:
 lo que Timonel hace bien es gratis en un 70%, y el 30% restante es un tramo de
 integración que un mantenedor open source puede cerrar en un ciclo de release.
 
@@ -239,11 +239,11 @@ integración que un mantenedor open source puede cerrar en un ciclo de release.
 antes de ser defendible ante un inversionista.
 
 **Como proyecto del curso:** es excelente, y esa distinción importa. Obliga a tocar todo
-el arco —contenedores, Kubernetes, RBAC y seguridad, GitOps, observabilidad, agentes con
-límites verificables— y su tesis central es exactamente la del módulo 8.
+el arco (contenedores, Kubernetes, RBAC y seguridad, GitOps, observabilidad, agentes con
+límites verificables) y su tesis central es exactamente la del módulo 8.
 
 > **La lección que quiero que te lleves:** una idea puede ser mal negocio y excelente
-> proyecto de ingeniería al mismo tiempo. Confundir ambas cosas —en cualquier dirección—
+> proyecto de ingeniería al mismo tiempo. Confundir ambas cosas (en cualquier dirección)
 > es el error que este documento existe para prevenir.
 
 ---
@@ -259,17 +259,19 @@ estas afirmaciones habrían fortalecido el caso **si fueran ciertas**:
 | "La adopción de AIOps pasó de 30% (2021) a 65% (2025)" | No existe nota de prensa de Gartner que lo respalde |
 | "La IA reducirá 30% los costos operativos de TI para 2025" | **Dirección invertida:** el propio Gartner predijo después que el costo por resolución con GenAI *superaría* al del agente humano offshore para 2030 |
 | "Backstage tiene 89% del mercado de portales internos" | Fuente única: el blog de una empresa que vende Backstage gestionado |
-| "DORA: 38% de los equipos que usan IA aumentaron despliegues con aumento paralelo del CFR" | **La cifra no existe en ningún informe de DORA.** Lo que DORA sí reporta es una reducción estimada del 7,2% en estabilidad asociada a la adopción de IA — un hallazgo *menos* favorable, que el reporte convirtió en un porcentaje inventado que suena a validación |
+| "DORA: 38% de los equipos que usan IA aumentaron despliegues con aumento paralelo del CFR" | **La cifra no existe en ningún informe de DORA.** Lo que DORA sí reporta es una reducción estimada del 7,2% en estabilidad asociada a la adopción de IA, un hallazgo *menos* favorable, que el reporte convirtió en un porcentaje inventado que suena a validación |
 | "Faros AI: hasta 41% de los commits son generados por IA" | **No aparece en el PDF primario de Faros.** Cifra importada de otro lado y soldada a la cita |
 | "OpsRamp: 67% de los ingenieros ignora alertas / 85% son falsos positivos" | No existe informe localizable de OpsRamp con esas cifras. El único 67% real de OpsRamp responde a otra pregunta |
-| "Los equipos elite se recuperan 6.570 veces más rápido" | Cifra real, **pero del informe DORA de 2021**. El informe 2024 —el mismo que se cita para los niveles de desempeño— da 2.293x |
+| "Los equipos elite se recuperan 6.570 veces más rápido" | Cifra real, **pero del informe DORA de 2021**. El informe 2024 (el mismo que se cita para los niveles de desempeño) da 2.293x |
 | "La carga cognitiva baja 40-50% con platform engineering maduro" | Afirmación de un post de blog sin estudio detrás |
 
 > Si hubiera citado la primera fila sin auditarla, este documento habría afirmado con
 > aire de autoridad que los LLM fallan del 30 al 40% de las veces **diagnosticando
-> Kubernetes** — un dato que nadie ha medido. Habría sido una crítica demoledora,
+> Kubernetes**, un dato que nadie ha medido. Habría sido una crítica demoledora,
 > convincente y falsa.
 
 ---
 
-*Material de referencia — Tópicos Especiales en Informática*
+*Material de referencia, Tópicos Especiales en Informática*
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

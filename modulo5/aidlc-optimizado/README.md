@@ -1,4 +1,4 @@
-# AI-DLC optimizado — el despachador por fase
+# AI-DLC optimizado: el despachador por fase
 
 **Overlay para AI-DLC v1.0.1 · Módulo 5 · Tópicos Especiales en Informática**
 

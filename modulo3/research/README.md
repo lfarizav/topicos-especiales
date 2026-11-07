@@ -1,4 +1,4 @@
-# Investigación — módulo 3
+# Investigación: módulo 3
 
 Esta carpeta muestra **cómo se trabaja la investigación en este curso**, no solo su
 resultado. Léela en este orden:
@@ -33,7 +33,7 @@ De las afirmaciones verificadas contra fuente primaria:
 - **Estado de proyectos en la CNCF:** 4 de 12 con error. El peor: *Backstage listado como
   Graduated* cuando está en Incubating.
 - **Financiación de empresas:** 3 de 4 correctas. Un nombre de empresa **inventado**.
-- **Cifras de Gartner:** 5 de 7 correctas — pero **todas citadas a una página de análisis
+- **Cifras de Gartner:** 5 de 7 correctas, pero **todas citadas a una página de análisis
   bursátil de IBM** en vez de a Gartner. Dato bueno, citación inaceptable.
 - **Estadísticas de dolor operativo:** solo **4 de 10** sobrevivieron.
 
@@ -79,3 +79,5 @@ Cuando entregues tu propia investigación (validación y crítica):
 
 En la sustentación voy a preguntar por el origen de las cifras. Las que no tengan fuente
 se caen solas.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

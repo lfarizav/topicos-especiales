@@ -1138,7 +1138,7 @@ EOF
 Espera un par de minutos a que entre en `CrashLoopBackOff` (los primeros reintentos son
 inmediatos; el estado `CrashLoopBackOff` aparece cuando el kubelet empieza a espaciarlos).
 
-**Capa 1 — el estado:**
+**Capa 1: el estado:**
 
 ```bash
 kubectl get pods -l app=roto
@@ -1154,7 +1154,7 @@ roto-6b46997dc6-jmg7w   0/1     CrashLoopBackOff   5 (68s ago)   4m23s
 `CrashLoopBackOff` **no es la causa**: es «arranca, muere, y el kubelet espera cada vez más
 para reintentar». La causa está más abajo.
 
-**Capa 2 — el estado anterior del contenedor:**
+**Capa 2: el estado anterior del contenedor:**
 
 ```bash
 kubectl describe pod -l app=roto | grep -A5 "Last State"
@@ -1175,7 +1175,7 @@ arrancó y se mató sola. Aprende a leer los códigos: `0` salida limpia, `1` er
 aplicación, `137` = 128+9, matado por SIGKILL (casi siempre **OOMKilled**), `143` = 128+15,
 SIGTERM.
 
-**Capa 3 — los logs del intento anterior.** Esta es la bandera que separa a quien aprueba
+**Capa 3: los logs del intento anterior.** Esta es la bandera que separa a quien aprueba
 de quien no:
 
 ```bash
@@ -1198,7 +1198,7 @@ contenedor **actual**, que quizá aún no ha escrito nada o ni siquiera arrancó
 > el contenedor anterior ya fue recogido por la limpieza. Espera a que se vuelva a caer y
 > repite: en `CrashLoopBackOff` siempre hay otra oportunidad.
 
-**Capa 4 — los eventos:**
+**Capa 4: los eventos:**
 
 ```bash
 kubectl get events --field-selector involvedObject.name=$POD --sort-by=.lastTimestamp \
@@ -2148,19 +2148,19 @@ rm -f kind-cka.yaml dentro.yaml sin-toleracion.yaml sts.yaml sitios.yaml valores
 
 ## Para profundizar
 
-- Taints y tolerations — <https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/>
-- Asignar Pods a nodos (afinidad) — <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
-- Volúmenes persistentes — <https://kubernetes.io/docs/concepts/storage/persistent-volumes/>
-- StatefulSets — <https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/>
-- Deployments: rollouts y rollbacks — <https://kubernetes.io/docs/concepts/workloads/controllers/deployment/>
-- Services y `externalTrafficPolicy` — <https://kubernetes.io/docs/concepts/services-networking/service/>
-- HorizontalPodAutoscaler — <https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/>
-- RBAC — <https://kubernetes.io/docs/reference/access-authn-authz/rbac/>
-- Certificados y CSR — <https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/>
-- Ingress — <https://kubernetes.io/docs/concepts/services-networking/ingress/>
-- Gateway API — <https://gateway-api.sigs.k8s.io/>
-- Migrar de Ingress a Gateway API — <https://gateway-api.sigs.k8s.io/guides/migrating-from-ingress/>
-- Depurar Pods — <https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/>
+- Taints y tolerations: <https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/>
+- Asignar Pods a nodos (afinidad): <https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/>
+- Volúmenes persistentes: <https://kubernetes.io/docs/concepts/storage/persistent-volumes/>
+- StatefulSets: <https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/>
+- Deployments: rollouts y rollbacks: <https://kubernetes.io/docs/concepts/workloads/controllers/deployment/>
+- Services y `externalTrafficPolicy`: <https://kubernetes.io/docs/concepts/services-networking/service/>
+- HorizontalPodAutoscaler: <https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/>
+- RBAC: <https://kubernetes.io/docs/reference/access-authn-authz/rbac/>
+- Certificados y CSR: <https://kubernetes.io/docs/reference/access-authn-authz/certificate-signing-requests/>
+- Ingress: <https://kubernetes.io/docs/concepts/services-networking/ingress/>
+- Gateway API: <https://gateway-api.sigs.k8s.io/>
+- Migrar de Ingress a Gateway API: <https://gateway-api.sigs.k8s.io/guides/migrating-from-ingress/>
+- Depurar Pods: <https://kubernetes.io/docs/tasks/debug/debug-application/debug-pods/>
 
 ---
 

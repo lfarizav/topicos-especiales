@@ -25,7 +25,7 @@ que hace que el 95% sea aceptable.
 
 ---
 
-## Paso 0 — Resuelve qué es despachable
+## Paso 0: Resuelve qué es despachable
 
 Lee `unidades-y-tareas.md` y el grafo de `unit-of-work-dependency.md`. Una tarea es despachable
 solo si cumple **todo** esto:
@@ -54,7 +54,7 @@ Repórtalo y no despaches.
 
 ---
 
-## Paso 1 — Despacha, en paralelo cuando el grafo lo permita
+## Paso 1: Despacha, en paralelo cuando el grafo lo permita
 
 Del grafo salen las **olas**: conjuntos de tareas que pertenecen a unidades que no dependen
 entre sí. Las de una misma ola se despachan **a la vez**, un codificador por tarea, cada uno en
@@ -78,7 +78,7 @@ Lo que va en cada despacho:
 
 ---
 
-## Paso 2 — La ronda
+## Paso 2: La ronda
 
 ```mermaid
 flowchart LR
@@ -110,7 +110,7 @@ flowchart LR
 
 ---
 
-## Paso 3 — Arbitra
+## Paso 3: Arbitra
 
 Arbitrar es lo único que no delegas. Tres situaciones:
 

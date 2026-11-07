@@ -5,9 +5,9 @@ los prompts de [`../prompts-para-especificacion.md`](../prompts-para-especificac
 
 | Archivo | Origen | Cuándo |
 |---|---|---|
-| `prd.md` | Prompt 1 — PRD | **Sábado 15 de agosto de 2026**, junto con el PVB |
-| `arquitectura.md` | Prompt 2 — Arquitectura técnica | Cuando tengas Kubernetes y CKA encima |
-| `backlog.md` | Prompt 3 — Backlog de ingeniería | Antes de empezar a construir en serio |
+| `prd.md` | Prompt 1: PRD | **Sábado 15 de agosto de 2026**, junto con el PVB |
+| `arquitectura.md` | Prompt 2: Arquitectura técnica | Cuando tengas Kubernetes y CKA encima |
+| `backlog.md` | Prompt 3: Backlog de ingeniería | Antes de empezar a construir en serio |
 
 ---
 
@@ -34,7 +34,9 @@ Producir `specs/prd.md`:
 - **El alcance del MVP es construible** en lo que queda del semestre y desplegable en
   Kubernetes en el módulo 8.
 - **Si hay un agente que actúa sobre infraestructura, su límite de autonomía es
-  verificable** — no una promesa, algo que se comprueba con un comando.
+  verificable**, no una promesa, algo que se comprueba con un comando.
 - **Los riesgos incluyen los que van en contra del producto**, no solo los cómodos.
 
 > **No borres este archivo.** Explica qué va en esta carpeta a quien clone el repositorio.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

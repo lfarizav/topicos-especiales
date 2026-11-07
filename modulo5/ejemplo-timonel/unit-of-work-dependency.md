@@ -1,4 +1,4 @@
-# Timonel — Matriz de dependencias entre unidades
+# Timonel: Matriz de dependencias entre unidades
 
 > **Artefacto de ejemplo.** Esto es lo que produce la etapa **Units Generation** de AI-DLC,
 > junto con [`unit-of-work.md`](./unit-of-work.md) y

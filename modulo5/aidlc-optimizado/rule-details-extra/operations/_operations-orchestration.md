@@ -1,4 +1,4 @@
-# 🟡 OPERATIONS PHASE — Orchestration
+# 🟡 OPERATIONS PHASE: Orchestration
 
 **Loaded by CLAUDE.md when the active phase is OPERATIONS.**
 
@@ -23,3 +23,5 @@ The Operations stage will eventually include:
 - Production readiness checklists
 
 **Current State**: All build and test activities are handled in the CONSTRUCTION phase. See also `operations/operations.md`.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._

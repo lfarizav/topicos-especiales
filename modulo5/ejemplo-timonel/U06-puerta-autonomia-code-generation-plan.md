@@ -1,4 +1,4 @@
-# Plan de generación de código — U6 Puerta de autonomía y RBAC
+# Plan de generación de código: U6 Puerta de autonomía y RBAC
 
 > **Artefacto de ejemplo.** Esto es lo que produce la **Parte 1** de la etapa Code Generation
 > de AI-DLC, y es **el punto exacto donde este trabajo se detiene**. La Parte 2 ejecuta este
@@ -29,34 +29,34 @@ de por el cliente directo. Código de aplicación en la raíz; el resumen va en
 
 ## Pasos
 
-- [ ] **Paso 1 — `internal/gate/allowlist.go` (lista blanca de herramientas)**
+- [ ] **Paso 1: `internal/gate/allowlist.go` (lista blanca de herramientas)**
   Tabla explícita de las herramientas permitidas y, para cada una, los verbos y recursos que
   puede tocar. Lo que no está en la tabla se rechaza. Sin comodines.
   **Criterio de aceptación:** `go test ./internal/gate -run TestAllowlistRechazaLoNoListado`
   pasa, y la tabla no contiene la cadena `*` en la columna de verbos.
 
-- [ ] **Paso 2 — `internal/gate/rbac.go` (comprobación de permisos)**
+- [ ] **Paso 2: `internal/gate/rbac.go` (comprobación de permisos)**
   `CanI(verb, resource, namespace)` implementado con `SelfSubjectAccessReview` de la API de
   autorización. Se consulta **antes** de cada llamada, no se asume.
   **Criterio de aceptación:** `go test ./internal/gate -run TestCanI` pasa contra el clúster
   de pruebas, y `kubectl auth can-i get pods --as=system:serviceaccount:timonel:agente`
   responde `yes`.
 
-- [ ] **Paso 3 — `internal/gate/refuse.go` (rechazo duro de escritura)**
+- [ ] **Paso 3: `internal/gate/refuse.go` (rechazo duro de escritura)**
   Lista negra de verbos: `create`, `update`, `patch`, `delete`, `deletecollection`. Cualquiera
   devuelve `ErrEscrituraProhibida` antes de tocar la red. No es una comprobación de permisos:
   es una negativa del código, para que siga valiendo aunque alguien amplíe el RBAC por error.
   **Criterio de aceptación:** `go test ./internal/gate -run TestRechazaEscritura` pasa para
   los cinco verbos, y ninguna prueba requiere clúster (el rechazo es previo a la red).
 
-- [ ] **Paso 4 — `internal/gate/audit.go` (registro de cada decisión)**
+- [ ] **Paso 4: `internal/gate/audit.go` (registro de cada decisión)**
   Toda decisión de la puerta, permitida o rechazada, se añade al registro con marca de tiempo
   ISO 8601, herramienta, verbo, recurso e identificador de incidente. **Solo se añade, nunca
   se reescribe.**
   **Criterio de aceptación:** `go test ./internal/gate -run TestAuditSoloAnade` pasa: tras
   dos escrituras, la primera entrada sigue presente byte a byte.
 
-- [ ] **Paso 5 — `config/rbac/` (el ServiceAccount y su ClusterRole)**
+- [ ] **Paso 5: `config/rbac/` (el ServiceAccount y su ClusterRole)**
   `ServiceAccount` `timonel:agente`, `ClusterRole` con verbos `get`, `list` y `watch`
   únicamente, sobre los recursos que el catálogo declara. **Sin** `secrets`. **Sin**
   `rolebindings` ni `clusterrolebindings`.
@@ -68,13 +68,13 @@ de por el cliente directo. Código de aplicación en la raíz; el resumen va en
   kubectl auth can-i create clusterrolebindings --as=system:serviceaccount:timonel:agente  # no
   ```
 
-- [ ] **Paso 6 — Cablear la puerta en `internal/diagnose/loop.go` (MODIFICAR en su sitio)**
+- [ ] **Paso 6: Cablear la puerta en `internal/diagnose/loop.go` (MODIFICAR en su sitio)**
   Reemplazar el cliente directo de Kubernetes por `gate.Client()`. No crear
   `loop_nuevo.go` ni `loop_v2.go`: se modifica el archivo existente.
   **Criterio de aceptación:** `grep -rn "kubernetes.NewForConfig" internal/diagnose/` no
   devuelve nada, y `go test ./internal/diagnose` sigue pasando.
 
-- [ ] **Paso 7 — Pruebas negativas de escalada de privilegios (`test/gate/`)**
+- [ ] **Paso 7: Pruebas negativas de escalada de privilegios (`test/gate/`)**
   Las que importan. Cada una intenta salirse del límite y **debe** fallar:
   - intentar `create` sobre un `Deployment` por la vía normal;
   - intentar leer un `Secret` con una herramienta que sí está en la lista blanca;
@@ -84,7 +84,7 @@ de por el cliente directo. Código de aplicación en la raíz; el resumen va en
   **Criterio de aceptación:** `go test ./test/gate -run TestEscalada` pasa con los cinco
   casos, y cada uno afirma **el error concreto**, no solo que hubo error.
 
-- [ ] **Paso 8 — Resumen de la unidad**
+- [ ] **Paso 8: Resumen de la unidad**
   `aidlc-docs/construction/U6-gate/code/summary.md`: qué quedó construido, qué expone y qué
   comando demuestra el límite.
   **Criterio de aceptación:** el resumen contiene los cuatro comandos de `auth can-i` con su

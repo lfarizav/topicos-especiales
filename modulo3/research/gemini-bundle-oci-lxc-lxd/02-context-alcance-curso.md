@@ -1,6 +1,6 @@
 # Contexto: alcance del curso que va a usar este research
 
-Curso: "Tópicos Especiales en Informática" — Maestría en Ingeniería de Sistemas,
+Curso: "Tópicos Especiales en Informática", Maestría en Ingeniería de Sistemas,
 Pontificia Universidad Javeriana, Bogotá. Clases sábados 9am-12pm, semestre 2026-3.
 
 Módulos del curso (en orden):
@@ -25,4 +25,6 @@ Linux.
 El laboratorio termina con una sección "Para profundizar" que apunta a este research: es
 material de enriquecimiento conceptual (gobernanza, historia de proyecto, estudios
 publicados) para estudiantes que quieran ir más allá de lo que vieron correr en su
-propia terminal — no es contenido bloqueante para completar el laboratorio.
+propia terminal, no es contenido bloqueante para completar el laboratorio.
+
+_Creado con ❤️ por Luis Felipe Ariza Vesga._
