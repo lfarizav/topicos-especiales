@@ -1,16 +1,23 @@
 # Módulo 6: Certified Kubernetes Application Developer (CKAD)
 
-**Sesiones 8 y 9 · sábados 26 de septiembre y 3 de octubre de 2026 · 9:00–12:00**
+> Cambio de silla: el clúster es de otro y tú despliegas una aplicación en él, sin permisos de administrador y sin romper a los vecinos.
 
 Cambio de silla. En el módulo 5 el clúster era tuyo; aquí el clúster es de otro y tú
 tienes que desplegar una aplicación en él, sin permisos de administrador y sin romper
 a los vecinos.
 
-Certificación de referencia: **CKAD**.
+## De un vistazo
+
+| | |
+|---|---|
+| **Sesiones** | Sesiones 8 y 9 · sábados 26 de septiembre y 3 de octubre de 2026 · 9:00–12:00 |
+| **Certificación de referencia** | **CKAD** |
+| **Laboratorios** | [Laboratorio 1: construir, arrancar, observar y depurar](./laboratorio-ckad-1.md) (sesión 8) · [Laboratorio 2: extender, configurar, proteger, desplegar y exponer](./laboratorio-ckad-2.md) (sesión 9) |
+| **Entregable** | [El loop de agentes](./proyecto-final-loop-de-agentes.md) (cuarto paso del proyecto final) |
 
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Implementar **sidecars nativos**: `initContainers` con `restartPolicy: Always` (K8s 1.29+).
 - Desplegar charts de Helm desde registros OCI: `install`, `upgrade`, `rollback`.
@@ -21,7 +28,9 @@ Certificación de referencia: **CKAD**.
 
 ---
 
-## Dominios del examen CKAD
+## Contenido
+
+### Dominios del examen CKAD
 
 | Dominio | Peso |
 |---|---|
@@ -33,6 +42,17 @@ Certificación de referencia: **CKAD**.
 
 > Verifica los pesos vigentes en la página oficial del examen CKAD de la CNCF antes
 > de presentarlo.
+
+### Las tres sondas, en una tabla
+
+| Sonda | Pregunta que responde | Qué pasa si falla |
+|---|---|---|
+| `startupProbe` | ¿Ya terminó de arrancar? | Se reinicia el contenedor; **suspende a las otras dos mientras corre** |
+| `livenessProbe` | ¿Sigue vivo? | Se reinicia el contenedor |
+| `readinessProbe` | ¿Puede recibir tráfico? | Se saca del Service; **no** se reinicia |
+
+El error clásico es usar `livenessProbe` para una app de arranque lento: el contenedor
+entra en bucle de reinicios y nunca llega a arrancar. Para eso existe `startupProbe`.
 
 ---
 
@@ -74,20 +94,9 @@ como sistema a migrar), NGINX Gateway Fabric, `ingress2gateway`. `trivy` es opci
 
 ---
 
-## Las tres sondas, en una tabla
+## Entregables y evaluación
 
-| Sonda | Pregunta que responde | Qué pasa si falla |
-|---|---|---|
-| `startupProbe` | ¿Ya terminó de arrancar? | Se reinicia el contenedor; **suspende a las otras dos mientras corre** |
-| `livenessProbe` | ¿Sigue vivo? | Se reinicia el contenedor |
-| `readinessProbe` | ¿Puede recibir tráfico? | Se saca del Service; **no** se reinicia |
-
-El error clásico es usar `livenessProbe` para una app de arranque lento: el contenedor
-entra en bucle de reinicios y nunca llega a arrancar. Para eso existe `startupProbe`.
-
----
-
-## Trabajo de proyecto final: el loop de agentes
+### Trabajo de proyecto final: el loop de agentes
 
 Este módulo lleva el **cuarto paso del proyecto final**: la máquina que construye el código.
 En el módulo 5 llegaste a las unidades con sus tareas y te detuviste antes de codificar. Aquí
@@ -117,7 +126,7 @@ la misma regla que en el módulo 8 impide que un agente toque producción.
 
 ---
 
-## Cómo conecta con el resto del curso
+## Cómo se conecta
 
 - **Módulo 3:** la imagen que despliegas aquí es la que construiste allá.
 - **Módulo 5:** de ahí vienen las unidades y las tareas que el loop despacha, y de ahí sale la
@@ -127,5 +136,7 @@ la misma regla que en el módulo 8 impide que un agente toque producción.
   gobierna al agente dentro del clúster.
 
 ---
+
+[← Módulo 5](../modulo5/README.md) · [Inicio](../README.md) · [Módulo 7 →](../modulo7/README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -1,18 +1,22 @@
 # Módulo 5: Certified Kubernetes Administrator (CKA)
 
-**Sesiones 6 y 7 · sábados 5 y 12 de septiembre de 2026 · 9:00–12:00**
-
-El pivote técnico del semestre. Aquí dejas de usar Kubernetes y empiezas a
-administrarlo: el clúster es tuyo, y cuando se rompe, lo arreglas tú.
+> El pivote técnico del semestre: dejas de usar Kubernetes y empiezas a administrarlo. El clúster es tuyo, y cuando se rompe, lo arreglas tú.
 
 El CKA es un examen **práctico y cronometrado**: no hay preguntas de opción múltiple,
 hay una terminal y problemas que resolver. Se estudia con las manos.
 
-Certificación de referencia: **CKA**.
+## De un vistazo
+
+| | |
+|---|---|
+| **Sesiones** | Sesiones 6 y 7 · sábados 5 y 12 de septiembre de 2026 · 9:00–12:00 |
+| **Certificación de referencia** | **CKA** |
+| **Laboratorios** | [Laboratorio 1: El clúster es tuyo](./laboratorio-cka-1.md) (sesión 6, 95–110 min) · [Laboratorio 2: Operar el clúster](./laboratorio-cka-2.md) (sesión 7, 120–140 min) |
+| **Entregable** | [De tu PRD a las unidades con sus tareas](./proyecto-final-de-prd-a-unidades-y-tareas.md) (tercer paso del proyecto final) |
 
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Instalar un clúster desde cero con `kubeadm`: requisitos del host, `containerd`,
   `kubeadm init`, red de Pods y unión de nodos.
@@ -30,7 +34,9 @@ Certificación de referencia: **CKA**.
 
 ---
 
-## Dominios del examen CKA
+## Contenido
+
+### Dominios del examen CKA
 
 | Dominio | Peso |
 |---|---|
@@ -42,8 +48,23 @@ Certificación de referencia: **CKA**.
 
 Casi un tercio del examen es diagnosticar cosas rotas. Estudia en ese orden.
 
-> Verifica los pesos vigentes en la página oficial del examen CKA de la CNCF antes de
-> presentarlo.
+### Herramientas y conceptos del módulo
+
+`kubeadm`, `kubelet`, `kubectl`, `containerd`/CRI, `crictl`, LXD, `kind`, `etcdctl` y
+`etcdutl`, Helm, `metrics-server`, Prometheus y Grafana, Flannel, Calico, Cilium, kindnet,
+Ingress NGINX, Gateway API y NGINX Gateway Fabric, `openssl` y la API de CSR.
+
+### Cómo preparar el examen
+
+- **Practica contra reloj.** El CKA se pierde por tiempo, no por desconocimiento.
+- **Domina `kubectl explain` y la documentación oficial**, que sí puedes consultar
+  durante el examen. Saber buscar rápido vale más que memorizar campos.
+- **Aliases y `--dry-run=client -o yaml`.** Escribir YAML a mano cuesta minutos que
+  no tienes.
+- **Lee los mensajes de error completos.** Los dos laboratorios están construidos alrededor
+  de esa idea: `FailedScheduling`, `WaitForFirstConsumer`, `Failed to check br_netfilter`,
+  `doesn't contain any IP SANs` y `Forbidden: … at the cluster scope` **contienen la
+  respuesta**. En el examen, leerlos entero es más rápido que adivinar.
 
 ---
 
@@ -114,7 +135,9 @@ libres** (8 GiB con el Paso 10, 10 GiB con el anexo).
 
 ---
 
-## Trabajo de proyecto final: de tu PRD a las unidades con sus tareas
+## Entregables y evaluación
+
+### Trabajo de proyecto final: de tu PRD a las unidades con sus tareas
 
 Además de los dos laboratorios de CKA, este módulo lleva el **tercer paso del proyecto
 final**: convertir el `pvb.md` del módulo 2 y el `prd.md` del módulo 3 en la especificación
@@ -161,29 +184,7 @@ leíste, qué cambios pediste y qué aprobaste.
 
 ---
 
-## Herramientas y conceptos del módulo
-
-`kubeadm`, `kubelet`, `kubectl`, `containerd`/CRI, `crictl`, LXD, `kind`, `etcdctl` y
-`etcdutl`, Helm, `metrics-server`, Prometheus y Grafana, Flannel, Calico, Cilium, kindnet,
-Ingress NGINX, Gateway API y NGINX Gateway Fabric, `openssl` y la API de CSR.
-
----
-
-## Cómo preparar el examen
-
-- **Practica contra reloj.** El CKA se pierde por tiempo, no por desconocimiento.
-- **Domina `kubectl explain` y la documentación oficial**, que sí puedes consultar
-  durante el examen. Saber buscar rápido vale más que memorizar campos.
-- **Aliases y `--dry-run=client -o yaml`.** Escribir YAML a mano cuesta minutos que
-  no tienes.
-- **Lee los mensajes de error completos.** Los dos laboratorios están construidos alrededor
-  de esa idea: `FailedScheduling`, `WaitForFirstConsumer`, `Failed to check br_netfilter`,
-  `doesn't contain any IP SANs` y `Forbidden: … at the cluster scope` **contienen la
-  respuesta**. En el examen, leerlos entero es más rápido que adivinar.
-
----
-
-## Cómo conecta con el resto del curso
+## Cómo se conecta
 
 - **Módulo 1:** el troubleshooting de nodo se hace con `systemd` y `journalctl`.
 - **Módulo 3:** `crictl` te muestra los contenedores OCI que hay debajo de cada Pod.
@@ -196,5 +197,7 @@ Ingress NGINX, Gateway API y NGINX Gateway Fabric, `openssl` y la API de CSR.
   Paso 10 es lo que GitOps convierte en un commit.
 
 ---
+
+[← Módulo 4](../modulo4/README.md) · [Inicio](../README.md) · [Módulo 6 →](../modulo6/README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

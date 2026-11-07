@@ -5,24 +5,18 @@
 > evaluado. Existe para quien ya cursó el módulo 4 y quiere profundizar en una herramienta
 > que el módulo 8 solo menciona de paso.
 
----
+## De un vistazo
 
-## Por qué existe este módulo
-
-El módulo 8 nombra a Helm dentro del paisaje CNCF de producción (junto a Argo CD, Flux,
-Trivy, Cosign, Cilium, Crossplane) y su laboratorio usa un `HelmRelease` de Flux, pero
-ninguna sesión oficial del curso enseña Helm desde cero: qué es un chart, cómo se
-construye uno propio, cómo se actualiza y revierte una release. Ese hueco es exactamente
-lo que cubre este módulo.
-
-Casi todo el software de terceros que vas a instalar en un clúster real (ingress
-controllers, cert-manager, Prometheus, Grafana, el propio Argo CD) se distribuye como
-chart de Helm. Saber leer y escribir uno no es opcional en el trabajo real, aunque sí lo
-sea en este curso.
+| | |
+|---|---|
+| **Sesión** | Sin fecha: módulo opcional, fuera del cronograma de las 16 sesiones |
+| **Enfoque** | Helm: charts, releases y repositorios (sin certificación) |
+| **Laboratorio** | [Helm: charts, releases y el ciclo instalar / actualizar / revertir](./laboratorio-helm.md), 55-60 minutos, 10 pasos |
+| **Entregables** | Ninguno evaluado |
 
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Explicar la diferencia entre un **chart**, una **release** y un **repositorio** de
   Helm.
@@ -36,7 +30,22 @@ sea en este curso.
 
 ---
 
-## Agenda
+## Contenido
+
+### Por qué existe este módulo
+
+El módulo 8 nombra a Helm dentro del paisaje CNCF de producción (junto a Argo CD, Flux,
+Trivy, Cosign, Cilium, Crossplane) y su laboratorio usa un `HelmRelease` de Flux, pero
+ninguna sesión oficial del curso enseña Helm desde cero: qué es un chart, cómo se
+construye uno propio, cómo se actualiza y revierte una release. Ese hueco es exactamente
+lo que cubre este módulo.
+
+Casi todo el software de terceros que vas a instalar en un clúster real (ingress
+controllers, cert-manager, Prometheus, Grafana, el propio Argo CD) se distribuye como
+chart de Helm. Saber leer y escribir uno no es opcional en el trabajo real, aunque sí lo
+sea en este curso.
+
+### Agenda
 
 | Tema | Contenido |
 |---|---|
@@ -48,7 +57,7 @@ sea en este curso.
 
 ---
 
-## Laboratorio
+## Laboratorios
 
 [**Helm: charts, releases y el ciclo instalar / actualizar / revertir**](./laboratorio-helm.md),
 55-60 minutos, 10 pasos. Se hace sobre un clúster `kind` dedicado, `topicos-m9`, que tú
@@ -68,7 +77,15 @@ Deployments, Services, `kubectl`). Este módulo no repite esos fundamentos.
 
 ---
 
-## Cómo conecta con el resto del curso
+## Entregables y evaluación
+
+Este módulo no tiene entrega evaluada (es opcional y no aparece en el cronograma). El
+laboratorio detalla, en su propia sección de entregable, qué evidencia produce quien lo
+completa por su cuenta.
+
+---
+
+## Cómo se conecta
 
 - **Módulo 4:** este módulo asume que ya entiendes Deployments, Services y el loop de
   reconciliación; Helm no cambia esas piezas, solo empaqueta y versiona los manifiestos
@@ -80,10 +97,6 @@ Deployments, Services, `kubectl`). Este módulo no repite esos fundamentos.
 
 ---
 
-## Entregable
-
-Este módulo no tiene entrega evaluada (es opcional y no aparece en el cronograma). El
-laboratorio detalla, en su propia sección de entregable, qué evidencia produce quien lo
-completa por su cuenta.
+[← Módulo 8](../modulo8/README.md) · [Inicio](../README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

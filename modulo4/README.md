@@ -1,16 +1,21 @@
 # Módulo 4: Kubernetes Fundamentals (KCNA)
 
-**Sesión 4 · sábado 22 de agosto de 2026 · 9:00–12:00**
+> Kubernetes no ejecuta tu aplicación, **reconcilia** un estado deseado con el estado real, una y otra vez, para siempre.
 
-El primer contacto serio con Kubernetes. La idea central del módulo cabe en una frase:
-Kubernetes no ejecuta tu aplicación, **reconcilia** un estado deseado con el estado
-real, una y otra vez, para siempre. Todo lo demás es consecuencia de eso.
+El primer contacto serio con Kubernetes. Todo lo demás es consecuencia de esa idea
+central.
 
-Certificación de referencia: **KCNA** (Kubernetes and Cloud Native Associate).
+## De un vistazo
+
+| | |
+|---|---|
+| **Sesión** | Sesión 4 · sábado 22 de agosto de 2026 · 9:00–12:00 |
+| **Certificación de referencia** | **KCNA** (Kubernetes and Cloud Native Associate) |
+| **Laboratorio** | [Kubernetes: primeras cargas de trabajo y el loop de reconciliación](./laboratorio-kubernetes.md), 70–80 minutos, 4 pasos |
 
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Comprender el loop **Watch-Diff-Update** de los controladores: el corazón del sistema.
 - Entender EndpointSlices y cómo un Service llega realmente a sus pods.
@@ -20,7 +25,9 @@ Certificación de referencia: **KCNA** (Kubernetes and Cloud Native Associate).
 
 ---
 
-## Agenda
+## Contenido
+
+### Agenda
 
 | Tema | Contenido |
 |---|---|
@@ -29,9 +36,18 @@ Certificación de referencia: **KCNA** (Kubernetes and Cloud Native Associate).
 | Entrega de aplicaciones cloud native | Helm, Kustomize, introducción a GitOps |
 | Arquitectura cloud native | El ecosistema CNCF, CNI, runtimes |
 
+### Dominios del examen KCNA
+
+El examen cubre fundamentos de Kubernetes, orquestación de contenedores, entrega de
+aplicaciones cloud native, arquitectura cloud native y observabilidad.
+
+> **Consulta los pesos oficiales vigentes en la página del examen KCNA de la CNCF.**
+> El currículo se revisa periódicamente y los pesos cambian entre versiones; no
+> estudies con una tabla de pesos copiada de un blog.
+
 ---
 
-## Laboratorio
+## Laboratorios
 
 [**Kubernetes: primeras cargas de trabajo y el loop de reconciliación**](./laboratorio-kubernetes.md),
 en clase, 70–80 minutos, 4 pasos. Se hace sobre un clúster `kind` de un solo nodo que
@@ -66,21 +82,14 @@ Memory Swap. Helm y Kustomize se mencionan en la sesión, pero este laboratorio 
 
 ---
 
-## Dominios del examen KCNA
-
-El examen cubre fundamentos de Kubernetes, orquestación de contenedores, entrega de
-aplicaciones cloud native, arquitectura cloud native y observabilidad.
-
-> **Consulta los pesos oficiales vigentes en la página del examen KCNA de la CNCF.**
-> El currículo se revisa periódicamente y los pesos cambian entre versiones; no
-> estudies con una tabla de pesos copiada de un blog.
-
----
-
-## Cómo conecta con el resto del curso
+## Cómo se conecta
 
 - **Módulo 5 (CKA):** aquí ves el loop de reconciliación; allá lo depuras cuando falla.
 - **Módulo 8:** el bucle GitOps es exactamente este loop de reconciliación, extendido
   hasta el repositorio Git.
+
+---
+
+[← Módulo 3](../modulo3/README.md) · [Inicio](../README.md) · [Módulo 5 →](../modulo5/README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

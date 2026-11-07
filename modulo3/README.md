@@ -1,14 +1,23 @@
 # Módulo 3: Docker, Compose y Runtimes de Contenedores
 
-**Sesión 3 · sábado 15 de agosto de 2026 · 9:00–12:00**
+> Baja el contenedor de la metáfora al mecanismo, y convierte tu Product Vision Board en un PRD.
 
 Doble propósito. En lo técnico, este módulo baja el contenedor de la metáfora al
 mecanismo: namespaces, cgroups y union filesystem. En lo de producto, aquí conviertes
 el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Document).
 
+## De un vistazo
+
+| | |
+|---|---|
+| **Sesión** | Sesión 3 · sábado 15 de agosto de 2026 · 9:00–12:00 |
+| **Enfoque** | Contenedores y runtimes + especificación del producto (sin certificación) |
+| **Laboratorios** | [Runtimes y virtualización](./laboratorio-virtualizacion-contenedores.md) (en clase, 75-90 min) · Dockerfile multi-stage y Compose de producción (60 min) |
+| **Entregable** | **PVB + PRD**, hoy, sábado 15 de agosto de 2026 |
+
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Distinguir contenedor de máquina virtual: namespaces, cgroups, union filesystem.
 - Escribir un `Dockerfile` multi-stage que minimice tamaño y superficie de ataque.
@@ -19,7 +28,9 @@ el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Docume
 
 ---
 
-## Agenda
+## Contenido
+
+### Agenda
 
 | Tema | Contenido |
 |---|---|
@@ -37,42 +48,6 @@ el Product Vision Board del módulo 2 en un **PRD** (Product Requirements Docume
 4. Volúmenes con nombre explícito
 5. `cap_drop: [ALL]` y capacidades añadidas una por una
 6. `security_opt: no-new-privileges:true`
-
----
-
-## Laboratorio en clase: runtimes y virtualización
-
-Antes de este laboratorio de Compose, en clase se hace
-[`laboratorio-virtualizacion-contenedores.md`](./laboratorio-virtualizacion-contenedores.md):
-75-90 minutos, en vivo: namespaces/cgroups compartidos, contenedor de sistema (LXC/LXD)
-vs contenedor de aplicación (Docker), máquina virtual ligera, y por qué el tamaño de una
-imagen y el usuario del proceso son decisiones de seguridad medibles, no solo de buenas
-prácticas. Es un laboratorio distinto de este; los dos son complementarios.
-
-## Laboratorio
-
-**Dockerfile multi-stage y Compose de producción**, 60 minutos, 7 pasos:
-
-1. Build multi-stage de una app Go hacia una imagen `distroless`
-2. `compose.yaml` sin clave `version:`, validado con `docker compose config`
-3. Secretos por archivo (`POSTGRES_PASSWORD_FILE`)
-4. `depends_on` con `condition: service_healthy`
-5. Red y volumen con nombre explícito
-6. Hardening: `cap_drop: [ALL]`, `no-new-privileges:true`
-7. Comprobar que pertenecer al grupo `docker` equivale a ser root en el host
-
-**Herramientas:** Docker Engine y CLI, Docker Compose v2, Podman, Trivy,
-`containerd`, imágenes distroless.
-
----
-
-## Entregable de producto: PVB + PRD
-
-> **Ambos se entregan hoy, sábado 15 de agosto de 2026.** El trabajo se hace durante la
-> semana posterior al módulo 2; esta carpeta contiene las herramientas y el caso de
-> referencia que necesitas para hacerlo.
-
-Tu `pvb.md` (módulo 2) y tu `prd.md` co-creado con IA, segmento por segmento.
 
 ### Cómo está organizada esta carpeta
 
@@ -104,6 +79,46 @@ defendible. Y lee [`research/README.md`](./research/README.md): documenta cómo 
 de deep research llegó con cifras inventadas, autocitadas y con la dirección del dato
 invertida. **Ese es el fallo que el proceso de este módulo existe para prevenir.**
 
+---
+
+## Laboratorios
+
+### Laboratorio en clase: runtimes y virtualización
+
+Antes de este laboratorio de Compose, en clase se hace
+[`laboratorio-virtualizacion-contenedores.md`](./laboratorio-virtualizacion-contenedores.md):
+75-90 minutos, en vivo: namespaces/cgroups compartidos, contenedor de sistema (LXC/LXD)
+vs contenedor de aplicación (Docker), máquina virtual ligera, y por qué el tamaño de una
+imagen y el usuario del proceso son decisiones de seguridad medibles, no solo de buenas
+prácticas. Es un laboratorio distinto de este; los dos son complementarios.
+
+### Laboratorio: Dockerfile multi-stage y Compose de producción
+
+60 minutos, 7 pasos:
+
+1. Build multi-stage de una app Go hacia una imagen `distroless`
+2. `compose.yaml` sin clave `version:`, validado con `docker compose config`
+3. Secretos por archivo (`POSTGRES_PASSWORD_FILE`)
+4. `depends_on` con `condition: service_healthy`
+5. Red y volumen con nombre explícito
+6. Hardening: `cap_drop: [ALL]`, `no-new-privileges:true`
+7. Comprobar que pertenecer al grupo `docker` equivale a ser root en el host
+
+**Herramientas:** Docker Engine y CLI, Docker Compose v2, Podman, Trivy,
+`containerd`, imágenes distroless.
+
+---
+
+## Entregables y evaluación
+
+### Entregable de producto: PVB + PRD
+
+> **Ambos se entregan hoy, sábado 15 de agosto de 2026.** El trabajo se hace durante la
+> semana posterior al módulo 2; esta carpeta contiene las herramientas y el caso de
+> referencia que necesitas para hacerlo.
+
+Tu `pvb.md` (módulo 2) y tu `prd.md` co-creado con IA, segmento por segmento.
+
 ### El proceso
 
 1. Reemplaza los archivos de `docs/` por los de tu producto.
@@ -134,7 +149,7 @@ le falta ni le sobra nada respecto de la visión.
 
 ---
 
-## Cómo conecta con el resto del curso
+## Cómo se conecta
 
 - **Módulo 4 en adelante:** Kubernetes no construye imágenes; orquesta las que aquí
   aprendes a construir.
@@ -142,5 +157,9 @@ le falta ni le sobra nada respecto de la visión.
   es el primer lugar donde se mira.
 - **Módulo 7 (CKS):** la cadena de suministro de software pesa 20%, y empieza en el
   `Dockerfile`.
+
+---
+
+[← Módulo 2](../modulo2/README.md) · [Inicio](../README.md) · [Módulo 4 →](../modulo4/README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -1,16 +1,20 @@
 # Módulo 1: Fundamentos de Linux (LFCS)
 
-**Sesión 1 · sábado 1 de agosto de 2026 · 9:00–12:00**
+> Todo lo que viene después corre sobre Linux: un contenedor es un proceso con namespaces y cgroups, y un nodo de Kubernetes es una máquina Linux.
 
-Todo lo que viene después corre sobre Linux. Un contenedor es un proceso de Linux con
-namespaces y cgroups; un nodo de Kubernetes es una máquina Linux. Si este módulo queda
-flojo, los módulos 3 a 8 se vuelven magia negra.
+Si este módulo queda flojo, los módulos 3 a 8 se vuelven magia negra.
 
-Certificación de referencia: **LFCS** (Linux Foundation Certified System Administrator).
+## De un vistazo
+
+| | |
+|---|---|
+| **Sesión** | Sesión 1 · sábado 1 de agosto de 2026 · 9:00–12:00 |
+| **Certificación de referencia** | **LFCS** (Linux Foundation Certified System Administrator) |
+| **Laboratorio** | Hardening de host, almacenamiento y red: 90 minutos, 9 pasos |
 
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Manejar con fluidez los comandos esenciales: archivos, permisos, búsqueda y Git.
 - Operar servicios con `systemd`, escribir scripts de Bash y gestionar paquetes.
@@ -20,7 +24,9 @@ Certificación de referencia: **LFCS** (Linux Foundation Certified System Admini
 
 ---
 
-## Agenda
+## Contenido
+
+### Agenda
 
 | Tema | Contenido |
 |---|---|
@@ -31,9 +37,7 @@ Certificación de referencia: **LFCS** (Linux Foundation Certified System Admini
 | Redes | IPv4/IPv6, `nftables`, proxy inverso, NTP |
 | Almacenamiento | Particiones, LVM, sistemas de archivos, NFS, rendimiento |
 
----
-
-## Dominios del examen LFCS
+### Dominios del examen LFCS
 
 | Dominio | Peso |
 |---|---|
@@ -48,7 +52,7 @@ Certificación de referencia: **LFCS** (Linux Foundation Certified System Admini
 
 ---
 
-## Laboratorio
+## Laboratorios
 
 **Hardening de host, almacenamiento y red**: 90 minutos, 9 pasos:
 
@@ -67,11 +71,15 @@ SSSD/LDAP, Git, `gpg`, `sha256sum`, `losetup`, OpenSSH.
 
 ---
 
-## Cómo conecta con el resto del curso
+## Cómo se conecta
 
 - **Módulo 3:** los namespaces y cgroups que aquí son teoría, allá son el contenedor.
 - **Módulo 5 (CKA):** el 30% del examen es troubleshooting, y buena parte se
   diagnostica desde el nodo con `systemd`, `journalctl` y herramientas de red.
 - **Módulo 7 (CKS):** el hardening del sistema operativo del nodo es un dominio propio.
+
+---
+
+[Inicio](../README.md) · [Módulo 2 →](../modulo2/README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._

@@ -1,18 +1,24 @@
 # Módulo 7: Certified Kubernetes Security Specialist (CKS)
 
-**Sesiones 11 y 12 · sábados 17 y 24 de octubre de 2026 · 9:00–12:00**
+> El módulo más exigente del curso: un clúster de Kubernetes por defecto no es seguro, y endurecerlo es trabajo explícito.
 
-El módulo más exigente del curso. Requiere tener CKA vigente para presentar el examen,
-y con razón: no se puede asegurar lo que no se sabe administrar.
+Requiere tener CKA vigente para presentar el examen, y con razón: no se puede
+asegurar lo que no se sabe administrar.
 
 Premisa del módulo: **un clúster de Kubernetes por defecto no es seguro**. Es
 permisivo por diseño, para que funcione. Endurecerlo es trabajo explícito.
 
-Certificación de referencia: **CKS**.
+## De un vistazo
+
+| | |
+|---|---|
+| **Sesiones** | Sesiones 11 y 12 · sábados 17 y 24 de octubre de 2026 · 9:00–12:00 |
+| **Certificación de referencia** | **CKS** (requiere CKA vigente) |
+| **Laboratorios** | [Laboratorio 1: endurecer un clúster y las cargas que corren en él](./laboratorio-cks-1.md) (sesión 11) · [Laboratorio 2: defensa en runtime y cadena de suministro](./laboratorio-cks-2.md) (sesión 12) |
 
 ---
 
-## Objetivos de aprendizaje
+## Qué vas a aprender
 
 - Defensa activa en tiempo real con **Tetragon** (enforcement con eBPF).
 - Cifrado pod-a-pod con **Cilium + WireGuard**, sin gestionar certificados a mano.
@@ -25,7 +31,9 @@ Certificación de referencia: **CKS**.
 
 ---
 
-## Dominios del examen CKS
+## Contenido
+
+### Dominios del examen CKS
 
 | Dominio | Peso |
 |---|---|
@@ -39,9 +47,22 @@ Certificación de referencia: **CKS**.
 > Verifica los pesos vigentes en la página oficial del examen CKS de la CNCF antes de
 > presentarlo.
 
+### Falco y Tetragon no son lo mismo
+
+| | Falco | Tetragon |
+|---|---|---|
+| Qué hace | **Detecta** y alerta | Detecta y **bloquea** (`Sigkill`) |
+| Momento | Después del hecho | En el momento de la llamada al kernel |
+| Riesgo | Te enteras tarde | Una política mal escrita mata procesos legítimos |
+
+Se usan juntos: Falco para cobertura amplia de detección, Tetragon para enforcement
+quirúrgico en lo que de verdad no puede pasar.
+
 ---
 
-## Laboratorio 1
+## Laboratorios
+
+### Laboratorio 1
 
 **[Laboratorio 1: endurecer un clúster y las cargas que corren en él](./laboratorio-cks-1.md)**
 (sesión 11, 130–150 min). Sus salidas se capturaron ejecutando los comandos en clústeres `kind`
@@ -56,9 +77,7 @@ limpios (kind v0.33, Kubernetes v1.37); no están escritas a mano.
 7. Cifrado de Secrets en reposo con `aescbc`, leído con `etcdctl` antes y después
 8. Reto estilo examen de 10 chequeos, calificado por `verifier-reto1.sh`
 
----
-
-## Laboratorio 2
+### Laboratorio 2
 
 **[Laboratorio 2: defensa en runtime y cadena de suministro](./laboratorio-cks-2.md)**
 (sesión 12, 130–150 min). Sus salidas se capturaron ejecutando los comandos en un clúster `kind`
@@ -78,9 +97,7 @@ esperada) ocurrieron de verdad y se dejan como material de aprendizaje.
 **Lo que no se pudo demostrar:** la sonda `security_kernel_module_request` de Tetragon carga pero
 no se logró dispararla desde un Pod sin privilegios; el laboratorio lo dice explícitamente.
 
----
-
-## Laboratorio
+### Laboratorio complementario
 
 **Tetragon, Kyverno y CIS Benchmark** (60 minutos, 5 pasos, requiere Tetragon y
 Kyverno instalados vía Helm):
@@ -98,24 +115,15 @@ Kyverno instalados vía Helm):
 
 ---
 
-## Falco y Tetragon no son lo mismo
-
-| | Falco | Tetragon |
-|---|---|---|
-| Qué hace | **Detecta** y alerta | Detecta y **bloquea** (`Sigkill`) |
-| Momento | Después del hecho | En el momento de la llamada al kernel |
-| Riesgo | Te enteras tarde | Una política mal escrita mata procesos legítimos |
-
-Se usan juntos: Falco para cobertura amplia de detección, Tetragon para enforcement
-quirúrgico en lo que de verdad no puede pasar.
-
----
-
-## Cómo conecta con el resto del curso
+## Cómo se conecta
 
 - **Módulo 1:** el fortalecimiento del sistema operativo del nodo empieza en Linux.
 - **Módulo 3:** la cadena de suministro empieza en el `Dockerfile` y la imagen base.
 - **Módulo 8:** el RBAC restrictivo del agente de IA en el clúster es una aplicación
   directa de este módulo. Un agente con permisos de escritura es un hallazgo de CKS.
+
+---
+
+[← Módulo 6](../modulo6/README.md) · [Inicio](../README.md) · [Módulo 8 →](../modulo8/README.md)
 
 _Creado con ❤️ por Luis Felipe Ariza Vesga._
