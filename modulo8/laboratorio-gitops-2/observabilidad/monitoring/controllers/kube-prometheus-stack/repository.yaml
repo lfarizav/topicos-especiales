@@ -6,7 +6,7 @@ spec:
   interval: 1h
   url: oci://ghcr.io/prometheus-community/charts/kube-prometheus-stack
   ref:
-    semver: "92.x"
+    semver: "92.22.0"   # version exacta del chart (verificada el 2026-11-07); no flota con lanzamientos nuevos
   layerSelector:
     mediaType: "application/vnd.cncf.helm.chart.content.v1.tar+gzip"
     operation: copy

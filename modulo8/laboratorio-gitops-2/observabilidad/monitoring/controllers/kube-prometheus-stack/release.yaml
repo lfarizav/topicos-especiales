@@ -41,4 +41,4 @@ spec:
             app.kubernetes.io/component: monitoring
     grafana:
       defaultDashboardsEnabled: false
-      adminPassword: flux
+      # sin adminPassword: el chart genera una contrasena aleatoria y la guarda en el Secret kube-prometheus-stack-grafana

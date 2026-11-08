@@ -159,15 +159,18 @@ flowchart LR
 
 La contraseña de Gitea la **inventas tú** y viaja solo en una variable de entorno. No se
 escribe en ningún archivo del repositorio. Corre el montaje (tarda un minuto; guarda su
-registro completo en `/tmp/montar-gitops2.log` y aquí solo vemos el final):
+registro completo en `~/lab-gitops-2-notas/montar.log` y aquí solo vemos el final). Si aún no
+tienes el repositorio, clónalo primero (`git clone https://github.com/lfarizav/topicos-especiales.git ~/topicos-especiales`);
+si lo tienes en otra carpeta, haz `cd` a su carpeta `modulo8` en lugar de la que aparece abajo.
 
 ```bash
+mkdir -p ~/lab-gitops-2-notas
 cd ~/topicos-especiales/modulo8
 export GITEA_PASS="${GITEA_PASS:-$(head -c 15 /dev/urandom | base64 | tr -d '/+=')}"
 echo "GITEA_PASS tiene ${#GITEA_PASS} caracteres"
 export MAT="$PWD/laboratorio-gitops-2"
-"$MAT/montar.sh" > /tmp/montar-gitops2.log 2>&1; echo "montaje rc=$?"
-tail -n 4 /tmp/montar-gitops2.log
+"$MAT/montar.sh" > ~/lab-gitops-2-notas/montar.log 2>&1; echo "montaje rc=$?"
+tail -n 4 ~/lab-gitops-2-notas/montar.log
 ```
 **Salida real de esta máquina:**
 
@@ -180,7 +183,10 @@ MONTAJE LISTO. Gitea: http://172.18.0.9:3000/lab/fleet.git  Registro: localhost:
 ```
 
 Si algo falla, el script se detiene con un código que dice **qué** falló (`PUERTO-OCUPADO`,
-`CLUSTER-EXISTE`, `SUMA-SHA256`, `SUSTRATO-SIN-RUTA-A-GITEA`...). Cada terminal nueva que abras
+`CONTRASENA`, `SUMA-SHA256`, `SUSTRATO-SIN-RUTA-A-GITEA`...) y qué hacer después: corrige la
+causa y **vuelve a correr el mismo `montar.sh`**. Es repetible: si encuentra un montaje anterior
+(completo o a medias) lo desmonta y empieza de cero, así que no necesitas limpiar a mano. El
+archivo `~/lab-gitops-2/env.sh` se escribe al principio del montaje, no al final. Cada terminal nueva que abras
 necesita el entorno del laboratorio y la contraseña (`export GITEA_PASS=...` con la **misma**
 que usaste en el montaje):
 
@@ -265,10 +271,10 @@ contra la que dejó el montaje.
 
 ```bash
 cd ~/lab-gitops-2/app
-cp tests/test_ruleta.py /tmp/test_ruleta.bak
+cp tests/test_ruleta.py ~/lab-gitops-2/.test_ruleta.bak
 sed -i 's/\[0, 1, 11, 50\]/[0]/' tests/test_ruleta.py
 bash ~/lab-gitops-2/comprobar/t1.sh; echo "exit=$?"
-cp /tmp/test_ruleta.bak tests/test_ruleta.py
+cp ~/lab-gitops-2/.test_ruleta.bak tests/test_ruleta.py
 ```
 **Salida real de esta máquina:**
 
@@ -677,7 +683,7 @@ until [ "$(objetivos)" = 2 ]; do sleep 5; done
 echo "objetivos de la ruleta con up==1: $(objetivos)"
 kubectl get --raw "$P?query=ruleta_info" | python3 -c 'import json,sys;[print(r["metric"]["pod"], "version", r["metric"]["version"]) for r in json.load(sys.stdin)["data"]["result"]]'
 kubectl -n monitoring get configmap -l grafana_dashboard=1 -o name
-kubectl get --raw /api/v1/namespaces/monitoring/services/kube-prometheus-stack-grafana:80/proxy/api/health
+kubectl get --raw /api/v1/namespaces/monitoring/services/kube-prometheus-stack-grafana:80/proxy/api/health; echo
 ```
 **Salida real de esta máquina:**
 
@@ -697,8 +703,8 @@ configmap/ruleta-grafana-dashboard-9bc48ct457
 Dos objetivos, una serie `ruleta_info` por pod con la etiqueta `version`, dos paneles
 (`flux-grafana-dashboards` y `ruleta-grafana-dashboard`) y Grafana respondiendo. Si quieres
 verlo con tus ojos, `kubectl -n monitoring port-forward svc/kube-prometheus-stack-grafana
-3000:80` y abre `http://localhost:3000` (la contraseña de `admin` está en el Secret
-`kube-prometheus-stack-grafana`).
+3000:80` y abre `http://localhost:3000` (usuario `admin`; la contraseña la generó el chart y está en el Secret
+`kube-prometheus-stack-grafana`: `kubectl -n monitoring get secret kube-prometheus-stack-grafana -o jsonpath='{.data.admin-password}' | base64 -d`).
 
 ```bash
 bash ~/lab-gitops-2/comprobar/t4.sh; echo "exit=$?"
@@ -744,7 +750,7 @@ cat static/tema.css
 docker build -q --provenance=false --build-arg VERSION=1.1.0 -t localhost:5092/ruleta:1.1.0 . > /dev/null
 docker push localhost:5092/ruleta:1.1.0 | tail -n 1
 D=localhost:5092/ruleta@$(digest_de ruleta 1.1.0)
-date +%s > /tmp/gitops2-t0
+date +%s > "$W/t0"
 cd "$W/llaves" && COSIGN_PASSWORD="" cosign sign --yes --key cosign.key --allow-insecure-registry --use-signing-config=false --tlog-upload=false "$D" 2>&1 | tail -n 1
 ```
 **Salida real de esta máquina:**
@@ -763,7 +769,7 @@ Y ahora, solo mirar. Este bloque cronometra cada eslabón de la cadena:
 
 ```bash
 source ~/lab-gitops-2/env.sh
-T0=$(( $(cat /tmp/gitops2-t0) ))
+T0=$(( $(cat "$W/t0") ))
 t() { echo "T+$(( $(date +%s) - T0 ))s  $*"; }
 until [ "$(kubectl -n flux-system get imagepolicy ruleta -o jsonpath='{.status.latestRef.tag}')" = 1.1.0 ]; do sleep 2; done
 t "la ImagePolicy resuelve 1.1.0"
@@ -1165,7 +1171,9 @@ k8sgpt analyze --filter=Pod --namespace=tienda --output=json --no-cache
 }
 ```
 
-Un problema, con el texto exacto del error y la etiqueta inexistente. Un LLM entraría **aquí**
+Un problema, con el texto exacto del error y la etiqueta inexistente. (Según cuántos segundos hayan
+pasado, el texto puede empezar con `Back-off pulling image ...: ErrImagePull:` y el nombre del Pod
+será distinto; lo que importa es `catalogo:9.9.9` y `not found`.) Un LLM entraría **aquí**
 a explicar la causa en lenguaje natural, pero el hallazgo ya está, y es evidencia
 reproducible: el mismo comando da el mismo resultado.
 
@@ -1244,7 +1252,7 @@ Hallazgo: la imagen gitops2-registry:5000/catalogo:9.9.9 no se puede bajar
  1 file changed, 1 insertion(+), 1 deletion(-)
 remote:
 remote: Create a new pull request for 'agente/arreglo-catalogo':
-remote:   http://localhost:3000/lab/fleet/pulls/new/agente/arreglo-catalogo
+remote:   http://127.0.0.1:3092/lab/fleet/pulls/new/agente/arreglo-catalogo
 remote:
 == 4. PR con evidencia (el agente redacta; el humano decide)
 PR abierto: http://127.0.0.1:3092/lab/fleet/pulls/1
@@ -1336,9 +1344,9 @@ curl -s -w ' [HTTP %{http_code}]\n' -X POST "$API/repos/lab/fleet/pulls/$N/revie
 
 ```
 humano, sin aprobar:
-{"message":"Does not have enough approvals","url":"http://localhost:3000/api/swagger"} [HTTP 405]
+{"message":"Does not have enough approvals","url":"http://127.0.0.1:3092/api/swagger"} [HTTP 405]
 agente, aprobándose a sí mismo:
-{"message":"approve your own pull is not allowed","url":"http://localhost:3000/api/swagger"} [HTTP 422]
+{"message":"approve your own pull is not allowed","url":"http://127.0.0.1:3092/api/swagger"} [HTTP 422]
 ```
 
 **Fallo productivo, dos veces.** Ni tú, sin aprobar, ni el agente, aprobándose solo, pueden
@@ -1592,7 +1600,8 @@ El desmontaje borra solo lo que creó el montaje: el clúster `gitops2`, los con
 `~/lab-gitops-2`. Tus notas (`~/lab-gitops-2-notas`) se quedan. No toca ningún otro clúster.
 
 ```bash
-bash ~/topicos-especiales/modulo8/laboratorio-gitops-2/desmontar.sh
+source ~/lab-gitops-2/env.sh   # define MAT, la carpeta del material (donde sea que clonaste)
+bash "$MAT/desmontar.sh"
 kind get clusters
 docker ps --filter name=gitops2 --format '{{.Names}}'
 ls -d ~/lab-gitops-2 2>&1 | tail -1
