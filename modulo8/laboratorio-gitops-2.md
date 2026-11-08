@@ -1,6 +1,6 @@
 # Laboratorio 2 (Módulo 8) – La ruleta de extremo a extremo y el agente que propone
 
-**Módulo 8 · sesión 14 · en clase · 140–160 minutos.** En el laboratorio 1 construiste la
+**Módulo 8 · sesión 14 · en clase · 160–185 minutos.** En el laboratorio 1 construiste la
 mecánica de GitOps con una aplicación de juguete. Hoy la usas con una aplicación de verdad, la
 **ruleta** (una pequeña aplicación web en Flask que gira entre 2 y 10 valores), y recorres todo
 su ciclo de vida: una prueba automática que protege el código, una imagen construida y
@@ -9,7 +9,8 @@ blanco) que **Flux detecta y confirma solo**, un tablero de Grafana que muestra 
 y una reversa que, si la haces a medias, **se deshace sola**. Con esos cimientos en pie le
 pones encima la IA: **K8sGPT** diagnostica, un agente abre un *pull request* con evidencia, y
 **tú, el humano, apruebas**. Al final, un verificador califica el estado de un sistema que
-alguien más dañó, igual que el examen.
+alguien más dañó, igual que el examen, y un último incidente, que nadie te explica, lo
+resuelves a mano.
 
 | Bloque | Paso | Tiempo | ¿Se puede dejar para casa? |
 |---|---|---|---|
@@ -23,6 +24,7 @@ alguien más dañó, igual que el examen.
 | El sandbox del agente: una ServiceAccount de solo lectura, por Git | 7 | ~10 min | No |
 | El agente propone, el humano aprueba, GitOps reconcilia | 8 | ~20 min | No |
 | **Reto** estilo examen, calificado por script | 9 | ~25 min | No |
+| **Incidente** en producción, a mano y calificado por el mismo script | 10 | ~20–25 min | No |
 
 > La tesis del módulo cabe en una línea: **el agente propone, un humano aprueba, GitOps
 > reconcilia.** El laboratorio 1 construyó la tercera pieza. Hoy construyes las otras dos y ves
@@ -43,6 +45,7 @@ flowchart LR
   H --> F["Flux reconcilia"]
   P6 --> R["9 Reto"]
   F --> R
+  R --> I["10 Incidente<br/>a mano"]
 ```
 
 ---
@@ -55,7 +58,7 @@ Este laboratorio usa las mismas cuatro técnicas de enseñanza que el laboratori
 |---|---|---|
 | **Predice, ejecuta, explica** | Antes de cada bloque marcado **🔮 Predice**, escribe en `predicciones.md` qué crees que va a pasar. Después compara. | PRIMM (Sentance y Waite, 2019) y Predict-Observe-Explain (White y Gunstone, 1992) |
 | **Fallo productivo** | Varios pasos te hacen romper algo **a propósito** (una prueba recortada, una bandera que ya no existe, un `git revert` a medias, un agente que se aprueba solo) antes de ver la forma correcta. El error es el material. | Productive Failure (Kapur, 2008) |
-| **Andamiaje que se retira** | Los pasos 1 a 8 te dan el comando. El Paso 9 solo te da el objetivo y un script que califica el resultado, igual que el examen. | Efecto del ejemplo resuelto y reversión por experticia (Sweller; Kalyuga et al., 2003) |
+| **Andamiaje que se retira** | Los pasos 1 a 8 te dan el comando. El Paso 9 solo te da el objetivo y un script que califica el resultado, igual que el examen. El Paso 10 no te da ni el comando ni la causa: solo los síntomas. | Efecto del ejemplo resuelto y reversión por experticia (Sweller; Kalyuga et al., 2003) |
 | **Práctica de recuperación** | Al final respondes de memoria, sin releer. Recordar cuesta más que releer, y por eso fija más. | Test-Enhanced Learning (Roediger y Karpicke, 2006) |
 
 ```bash
@@ -92,6 +95,9 @@ Al terminar vas a poder responder, señalando evidencia en tu terminal:
    con `kubectl auth can-i`?
 7. ¿Qué parte del trabajo del agente es determinista (K8sGPT sin `--explain`), dónde entraría
    un modelo de lenguaje, y qué mecanismo impide que el agente apruebe su propio cambio?
+8. Dado un incidente con varias causas y solo síntomas, ¿cómo lo investigas con la evidencia
+   que ya sabes leer (Git, Prometheus, `kubectl`, K8sGPT) y cómo dejas una corrección que
+   un verificador no pueda confundir con un atajo?
 
 **Requisito:** el laboratorio 1 (Flux, `git revert`, `cosign` por digest) y los módulos 5 a 7.
 Este laboratorio **no usa claves de API de ningún servicio**: el agente es un script
@@ -1413,74 +1419,43 @@ Reto preparado: ruleta:1.2.0 está en el registro SIN firma y la política vuelv
 
 ### 9.2 El verificador
 
-Este script escribe un verificador de 13 chequeos. Léelo antes de ejecutarlo: es parte de lo
-que aprendes. No se fía de lo que dices: lee el clúster, pregunta a Gitea y al registro,
-verifica firmas con tu llave pública y espera dos intervalos de la automatización.
+El verificador **ya está en el repositorio**, junto al montaje: `$MAT/verificar-reto.sh`. No
+lo escribes tú y no lo editas: es la regla del examen, y una regla que el examinado puede
+reescribir no mide nada. Léelo antes de ejecutarlo; es parte de lo que aprendes. No se fía
+de lo que dices: lee el clúster, pregunta a Gitea y al registro, verifica firmas con tu llave
+pública y espera dos intervalos de la automatización. Con `--reto` ejecuta los 13 chequeos de
+este paso; sin argumentos ejecuta además los del Paso 10.
 
 ```bash
 source ~/lab-gitops-2/env.sh
-cat > ~/lab-gitops-2/verificar-reto.sh <<'EOF'
-#!/usr/bin/env bash
-# Verificador del Reto: califica el ESTADO FINAL, no los comandos que usaste.
-export W="$HOME/lab-gitops-2" REG=127.0.0.1:5092 API="http://127.0.0.1:3092/api/v1"
-export PATH="$W/bin:$PATH" KUBECONFIG="$W/kubeconfig"
-export URL="http://$(cat "$W/gitea.ip"):3000/lab/fleet.git" CL=$(mktemp -d)
-git clone -q "$URL" "$CL/f" 2>/dev/null
-OK=0; TOTAL=0
-chequeo() {  # $1 = descripcion, $2 = funcion que sale con 0 si el mundo esta bien
-  TOTAL=$((TOTAL+1))
-  if bash -c "$2" >/dev/null 2>&1; then echo "  [OK]    $1"; OK=$((OK+1)); else echo "  [FALLA] $1"; fi
-}
-digest() { curl -fsI -H 'Accept: application/vnd.oci.image.index.v1+json,application/vnd.oci.image.manifest.v1+json,application/vnd.docker.distribution.manifest.v2+json' "http://$REG/v2/ruleta/manifests/$1" | tr -d '\r' | awk -F': ' 'tolower($1)=="docker-content-digest"{print $2}'; }
-firmada() { cosign verify --key "$W/llaves/cosign.pub" --insecure-ignore-tlog --allow-insecure-registry "$REG/ruleta@$1"; }
-export D110=$(digest 1.1.0) D120=$(digest 1.2.0)
+grep -n '^chequeo "' "$MAT/verificar-reto.sh" | head -n 13 | cut -c1-150
+```
+**Salida real de esta máquina:**
 
-c_flux() { for d in source-controller kustomize-controller helm-controller notification-controller image-reflector-controller image-automation-controller; do
-  [ "$(kubectl -n flux-system get deploy $d -o jsonpath='{.status.availableReplicas}')" = 1 ] || return 1; done; }
-c_politica() { [ "$(kubectl -n flux-system get imagepolicy ruleta -o jsonpath='{.status.latestRef.tag}')" = 1.1.0 ]; }
-c_rango() { R=$(kubectl -n flux-system get imagepolicy ruleta -o jsonpath='{.spec.policy.semver.range}')
-  [ -n "$R" ] && [ "$R" != 1.x ] && grep -Eq "range: *\"?${R}\"?\$" "$CL/f/apps/ruleta/imagepolicy.yaml"; }
-pods_ruleta() { kubectl -n ruleta get pods -l app=ruleta -o json | python3 -c 'import json,sys
-for p in json.load(sys.stdin)["items"]:
-    if p["metadata"].get("deletionTimestamp"): continue   # un pod que termina no cuenta
-    cs=(p["status"].get("containerStatuses") or [{}])[0]
-    print(p["spec"]["containers"][0]["image"], cs.get("imageID",""))'; }
-c_pods() { [ "$(kubectl -n ruleta get deploy ruleta -o jsonpath='{.status.availableReplicas}')" = "$(kubectl -n ruleta get deploy ruleta -o jsonpath='{.spec.replicas}')" ] &&
-  ! pods_ruleta | awk '{print $1}' | grep -qv ':1.1.0$'; }
-c_digest() { pods_ruleta | awk '{print $2}' | grep -qv "$D110" && return 1
-  firmada "$D110"; }
-c_evidencia() { curl -fs "http://$REG/v2/ruleta/tags/list" | grep -q '"1.2.0"'; }
-c_sin_firma() { ! firmada "$D120"; }
-c_automatizacion() { [ "$(kubectl -n flux-system get imageupdateautomation ruleta -o jsonpath='{.spec.suspend}')" != true ] &&
-  grep -q 'kind: ImageUpdateAutomation' "$CL/f/apps/ruleta/imageupdateautomation.yaml" && ! grep -q 'suspend: true' "$CL/f/apps/ruleta/imageupdateautomation.yaml"; }
-c_git() { grep -q 'ruleta:1.1.0 # {"$imagepolicy"' "$CL/f/apps/ruleta/deployment.yaml"; }
-c_aguanta() { TC=$(git -C "$CL/f" log -1 --format=%ct -- apps/ruleta)
-  LR=$(date -d "$(kubectl -n flux-system get imageupdateautomation ruleta -o jsonpath='{.status.lastAutomationRunTime}')" +%s); [ "$LR" -ge $((TC+60)) ]; }
-c_rbac() { [ "$(kubectl auth can-i patch deployments.apps -n tienda --as=system:serviceaccount:agentes:agente)" = no ]; }
-c_proteccion() { curl -fs -u "lab:$GITEA_PASS" "$API/repos/lab/fleet/branch_protections/main" | python3 -c 'import json,sys;b=json.load(sys.stdin);sys.exit(0 if b.get("merge_whitelist_usernames")==["lab"] and b.get("push_whitelist_usernames")==["lab"] and b.get("required_approvals",0)>=1 else 1)'; }
-c_catalogo() { [ "$(kubectl -n tienda get deploy catalogo -o jsonpath='{.status.availableReplicas}')" = 1 ]; }
-export -f firmada pods_ruleta c_flux c_politica c_rango c_pods c_digest c_evidencia c_sin_firma c_automatizacion c_git c_aguanta c_rbac c_proteccion c_catalogo
+```
+47:chequeo "Los seis controladores de Flux están disponibles" c_flux
+48:chequeo "La ImagePolicy resuelve 1.1.0, la versión más nueva FIRMADA" c_politica
+49:chequeo "El rango de la política ya no es 1.x y está escrito en Git (no en el clúster)" c_rango
+50:chequeo "Todos los pods corren ruleta:1.1.0 y el Deployment está completo" c_pods
+51:chequeo "Los pods corren el digest que firmaste, verificado con cosign.pub" c_digest
+52:chequeo "La etiqueta 1.2.0 sigue en el registro (no se borró la evidencia)" c_evidencia
+53:chequeo "La 1.2.0 sigue SIN firma (no se firmó para taparla)" c_sin_firma
+54:chequeo "La automatización existe, está en Git y no está suspendida" c_automatizacion
+55:chequeo "Git (main) fija 1.1.0 en el Deployment" c_git
+56:chequeo "Pasaron 2 intervalos de la automatización desde el último commit de apps/ruleta" c_aguanta
+57:chequeo "El agente sigue sin poder parchear Deployments (el RBAC no se tocó)" c_rbac
+58:chequeo "La rama main sigue protegida: solo lab empuja y fusiona, con 1 aprobación" c_proteccion
+59:chequeo "catalogo (Paso 8) sigue disponible: el reto no deshizo el trabajo anterior" c_catalogo
+```
 
-chequeo "Los seis controladores de Flux están disponibles" c_flux
-chequeo "La ImagePolicy resuelve 1.1.0, la versión más nueva FIRMADA" c_politica
-chequeo "El rango de la política ya no es 1.x y está escrito en Git (no en el clúster)" c_rango
-chequeo "Todos los pods corren ruleta:1.1.0 y el Deployment está completo" c_pods
-chequeo "Los pods corren el digest que firmaste, verificado con cosign.pub" c_digest
-chequeo "La etiqueta 1.2.0 sigue en el registro (no se borró la evidencia)" c_evidencia
-chequeo "La 1.2.0 sigue SIN firma (no se firmó para taparla)" c_sin_firma
-chequeo "La automatización existe, está en Git y no está suspendida" c_automatizacion
-chequeo "Git (main) fija 1.1.0 en el Deployment" c_git
-chequeo "Pasaron 2 intervalos de la automatización desde el último commit de apps/ruleta" c_aguanta
-chequeo "El agente sigue sin poder parchear Deployments (el RBAC no se tocó)" c_rbac
-chequeo "La rama main sigue protegida: solo lab empuja y fusiona, con 1 aprobación" c_proteccion
-chequeo "catalogo (Paso 8) sigue disponible: el reto no deshizo el trabajo anterior" c_catalogo
-rm -rf "$CL"
-echo "Resultado: $OK/$TOTAL"
-[ "$OK" = "$TOTAL" ]
-EOF
-chmod +x ~/lab-gitops-2/verificar-reto.sh
+Abre el archivo completo en tu editor y lee las funciones `c_*`: cada una es la definición
+exacta de lo que se te pide. Ahora califícate; el reto está recién preparado, así que parte
+de un estado dañado.
+
+```bash
+source ~/lab-gitops-2/env.sh
 sleep 45
-~/lab-gitops-2/verificar-reto.sh
+bash "$MAT/verificar-reto.sh" --reto
 ```
 **Salida real de esta máquina:**
 
@@ -1505,7 +1480,8 @@ Resultado: 7/13
 cuando quieras; no cambia nada.
 
 ```bash
-~/lab-gitops-2/verificar-reto.sh
+source ~/lab-gitops-2/env.sh
+bash "$MAT/verificar-reto.sh" --reto
 ```
 **Salida real de esta máquina:**
 
@@ -1534,7 +1510,7 @@ la automatización** para que deje de desplegar lo que no te gusta.
 ```bash
 source ~/lab-gitops-2/env.sh
 flux suspend image update ruleta
-~/lab-gitops-2/verificar-reto.sh | grep -E 'FALLA|Resultado'
+bash "$MAT/verificar-reto.sh" --reto | grep -E 'FALLA|Resultado'
 flux resume image update ruleta
 ```
 **Salida real de esta máquina:**
@@ -1586,18 +1562,153 @@ Eso no es arreglar.
 Cuando creas que terminaste:
 
 ```bash
-~/lab-gitops-2/verificar-reto.sh
+source ~/lab-gitops-2/env.sh
+bash "$MAT/verificar-reto.sh" --reto
 ```
 
-El objetivo es `Resultado: 13/13`.
+El objetivo es `Resultado: 13/13`. Con eso terminas el Paso 9; el Paso 10 es otro examen
+sobre el sistema que acabas de dejar en pie.
+
+---
+
+## Paso 10: Incidente en producción, a mano (20–25 min)
+
+**Este paso no tiene solución.** Ni en este documento, ni en la sección del final, ni en un
+comando que puedas copiar. Los pasos 1 a 9 te enseñaron a **hacer** cosas con una guía al
+lado; aquí demuestras que sabes **decidir** qué hacer. Es el examen: un sistema en
+producción falla, recibes el ticket de la guardia con los **síntomas**, y tienes que
+averiguar las causas, corregirlas por el camino correcto y dejar evidencia. Cómo lo haces lo
+decides tú; lo único que se califica es el **estado final**.
+
+> El ticket, las causas y los valores cambian en **cada corrida y para cada alumno**. Los
+> comandos o las capturas de un compañero no te sirven, y el verificador lo comprueba.
+
+### 10.1 Abre el incidente
+
+Parte del Paso 9 terminado (`Resultado: 13/13` con `--reto`). Este es el **único** comando
+de este paso que te damos. Se ejecuta **una sola vez**: un segundo intento no abre otro
+incidente y queda registrado.
+
+```bash
+source ~/lab-gitops-2/env.sh
+bash "$MAT/preparar-incidente.sh"
+```
+**Salida real de esta máquina:**
+
+```
+============================================================
+ TICKET INC-fdb748                          prioridad: ALTA
+ Abierto: 2026-11-07 23:13    Reporta: guardia de operaciones
+============================================================
+ Síntomas (lo que se observa, no la causa):
+  1. En Grafana, el panel de la ruleta quedó vacío. Prometheus
+     ya no muestra objetivos de la ruleta con up==1.
+  2. Auditoría de seguridad: la identidad del agente (Paso 7)
+     ya no cumple lo que se acordó que podía hacer.
+  3. El K8sGPT de la guardia reporta un hallazgo nuevo en el
+     namespace tienda.
+ Nadie reconoce haber tocado el clúster a mano.
+ Su trabajo: Paso 10 del laboratorio (estado requerido y reglas).
+ Su ficha secreta quedó en /home/lfarizav/lab-gitops-2/.incidente; no la comparta.
+============================================================
+```
+
+Tu ficha del incidente (un código aleatorio) queda en `~/lab-gitops-2/.incidente`, fuera
+del repositorio. No la compartas, no la borres, no la edites.
+
+### 10.2 El problema
+
+Recibiste tres síntomas, no tres causas. Cuántas causas hay, dónde viven y si están
+relacionadas es parte del trabajo. Una pista de método, no de contenido: **nadie dice haber
+tocado el clúster a mano**, así que la historia de lo que pasó está donde el laboratorio te
+enseñó que está. Los pasos 3 a 8 te dieron todas las herramientas necesarias; ninguna es
+nueva.
+
+### 10.3 El estado que debes dejar
+
+Deja el sistema en este estado. **Tienes 25 minutos.**
+
+1. Prometheus vuelve a ver **los dos objetivos** de la ruleta con `up==1`.
+2. La identidad del agente vuelve a ser la del Paso 7: puede **leer** en el namespace
+   `tienda` y no puede **escribir, borrar, leer secretos ni entrar a un contenedor**, ni
+   en el clúster ni en lo que dice Git.
+3. K8sGPT, con los filtros de Pods y Services en el namespace `tienda`, reporta **cero
+   problemas**, y `catalogo` sigue existiendo y disponible, **con** su Service.
+4. Todo lo anterior está **escrito en Git (`main`)** y aplicado por Flux: el clúster y el
+   repositorio dicen lo mismo, y ninguna `Kustomization` de Flux está suspendida.
+5. Dejas en `main` un informe `incidentes/<ID del ticket>.md` de **al menos 5 líneas con
+   contenido** que cite el **ID del ticket** y el **SHA corto (7 caracteres) del commit que
+   causó el incidente**: la causa, escrita por ti con evidencia.
+6. El historial de `main` conserva el commit sospechoso (no se reescribe la historia) y la
+   protección de `main` sigue exactamente como la dejó el montaje.
+
+### 10.4 Reglas, y las trampas que el verificador detecta y castiga
+
+Se trabaja como en producción: **el cambio entra por Git** y lo aplica Flux. El repositorio
+es la fuente de verdad; el clúster es su reflejo.
+
+**Trampas que el verificador detecta y castiga:** arreglar el clúster con `kubectl` en vez
+de Git (Flux lo deshace y, además, Git queda mal); suspender una `Kustomization` de Flux;
+borrar la ficha `~/lab-gitops-2/.incidente` (o el registro del incidente en el clúster);
+volver a ejecutar `preparar-incidente.sh` buscando otra versión del problema; borrar el
+`Service` o el `ServiceMonitor` para que el síntoma desaparezca; quitarle al agente lo que
+sí debe poder hacer; reescribir la historia con un empuje forzado; debilitar la protección
+de `main`; reutilizar el informe o los valores de un compañero. Todas hacen desaparecer el
+síntoma y dejan el sistema peor protegido de lo que parece. Eso no es arreglar.
+
+### 10.5 El verificador, y la huella
+
+Es el mismo verificador de siempre, ahora **sin** `--reto`: los 13 chequeos del Paso 9 más
+**dos** del incidente, con un motivo breve cuando uno falla (el motivo describe el estado
+que observa; no te dice qué teclear). Recién abierto el incidente se ve así:
+
+```bash
+source ~/lab-gitops-2/env.sh
+bash "$MAT/verificar-reto.sh"
+```
+**Salida real de esta máquina:**
+
+```
+  [OK]    Los seis controladores de Flux están disponibles
+  [OK]    La ImagePolicy resuelve 1.1.0, la versión más nueva FIRMADA
+  [OK]    El rango de la política ya no es 1.x y está escrito en Git (no en el clúster)
+  [OK]    Todos los pods corren ruleta:1.1.0 y el Deployment está completo
+  [OK]    Los pods corren el digest que firmaste, verificado con cosign.pub
+  [OK]    La etiqueta 1.2.0 sigue en el registro (no se borró la evidencia)
+  [OK]    La 1.2.0 sigue SIN firma (no se firmó para taparla)
+  [OK]    La automatización existe, está en Git y no está suspendida
+  [OK]    Git (main) fija 1.1.0 en el Deployment
+  [OK]    Pasaron 2 intervalos de la automatización desde el último commit de apps/ruleta
+  [FALLA] El agente sigue sin poder parchear Deployments (el RBAC no se tocó)
+  [OK]    La rama main sigue protegida: solo lab empuja y fusiona, con 1 aprobación
+  [OK]    catalogo (Paso 8) sigue disponible: el reto no deshizo el trabajo anterior
+  [FALLA] Incidente (Paso 10): el sistema volvió al estado correcto, en Git y en el clúster
+          motivo: en Git, el rol del agente concede verbos de escritura: ['patch', 'update'] sobre ['deployments']
+  [FALLA] Incidente (Paso 10): la corrección es legítima (ticket íntegro, una sola corrida, historial y protección intactos, informe escrito)
+          motivo: en main no hay un informe incidentes/INC-fdb748.md
+Resultado: 12/15
+Huella: (se calcula solo con el incidente resuelto)
+Verificador: 7025b0bdefc6
+```
+
+Cuando el incidente esté resuelto, el verificador cerrará con `Resultado: 15/15` y una línea
+**`Huella`**: los 12 primeros caracteres del SHA-256 de tu ficha secreta más el UID de tu
+clúster. Es distinta para cada alumno y para cada corrida, no se puede calcular sin tu ficha
+ni tu clúster, y es lo que entregas junto al resultado. El profesor la recalcula con el
+mismo verificador sobre tu máquina en la sustentación; la de un compañero no coincide con tu
+clúster. Junto a ella, el verificador imprime la suma de **sí mismo** (`Verificador:`), para
+que se note si lo editaste.
+
+El verificador espera hasta dos minutos a que Flux y Prometheus converjan antes de declarar
+un fallo del clúster: investiga, corrige, y solo entonces califícate.
 
 ---
 
 ## Limpieza (3 min)
 
 El desmontaje borra solo lo que creó el montaje: el clúster `gitops2`, los contenedores
-`gitops2-gitea` y `gitops2-registry`, las etiquetas locales `localhost:5092/*` y la carpeta
-`~/lab-gitops-2`. Tus notas (`~/lab-gitops-2-notas`) se quedan. No toca ningún otro clúster.
+`gitops2-gitea` y `gitops2-registry`, las etiquetas locales `localhost:5092/*`, la carpeta
+`~/lab-gitops-2` (con la ficha del incidente del Paso 10). Tus notas (`~/lab-gitops-2-notas`) se quedan. No toca ningún otro clúster.
 
 ```bash
 source ~/lab-gitops-2/env.sh   # define MAT, la carpeta del material (donde sea que clonaste)
@@ -1631,6 +1742,7 @@ ls: cannot access '/home/lfarizav/lab-gitops-2': No such file or directory
 | 7 | Acotaste al agente con RBAC | `can-i`: lee pods, `no` a `patch`, `delete`, `secrets` y `exec` |
 | 8 | Cerraste el bucle con IA | K8sGPT sin modelo, PR con evidencia, `405` a la autofusión, fusión humana, Flux reconcilia |
 | 9 | Corregiste el daño de un compañero | `Resultado: 13/13` |
+| 10 | Resolviste a mano un incidente de varias causas, solo con síntomas | `Resultado: 15/15`, la `Huella` y tu informe `incidentes/<ID>.md` |
 
 > **El agente propone, un humano aprueba, GitOps reconcilia.** Hoy viste que las tres frases
 > descansan en cimientos: pruebas, firma, observabilidad y una reversa que se sostiene por el
@@ -1656,6 +1768,9 @@ Cierra el documento y responde en `predicciones.md`, de memoria:
 7. ¿Qué parte del triage es determinista y en qué punto entraría un modelo de lenguaje?
 8. En el Reto, ¿por qué Flux desplegó una imagen sin firma, y qué dos cambios en Git la
    dejaron fuera?
+
+9. Sin mirar el Paso 10: ¿por qué el verificador exige que la corrección esté en Git y no solo en
+   el clúster, y qué le pasó a cada atajo que se te ocurrió?
 
 Compara con los pasos. Lo que no pudiste recordar es lo que vale la pena repasar.
 
@@ -1728,7 +1843,7 @@ until [ "$(kubectl -n flux-system get imagepolicy ruleta -o jsonpath='{.status.l
 until [ "$(kubectl -n ruleta get deploy ruleta -o jsonpath='{.spec.template.spec.containers[0].image}')" = gitops2-registry:5000/ruleta:1.1.0 ]; do sleep 3; done
 kubectl -n ruleta rollout status deploy/ruleta --timeout=3m | tail -n 1
 sleep 75
-~/lab-gitops-2/verificar-reto.sh
+bash "$MAT/verificar-reto.sh" --reto
 ```
 **Salida real de esta máquina:**
 
@@ -1757,9 +1872,9 @@ daño colateral que un «arreglo» descuidado deja: alguien le da permisos de ed
 ```bash
 source ~/lab-gitops-2/env.sh
 kubectl create clusterrolebinding agente-escritura --clusterrole=edit --serviceaccount=agentes:agente
-~/lab-gitops-2/verificar-reto.sh | grep -E 'FALLA|Resultado'
+bash "$MAT/verificar-reto.sh" --reto | grep -E 'FALLA|Resultado'
 kubectl delete clusterrolebinding agente-escritura
-~/lab-gitops-2/verificar-reto.sh | grep -E 'FALLA|Resultado'
+bash "$MAT/verificar-reto.sh" --reto | grep -E 'FALLA|Resultado'
 ```
 **Salida real de esta máquina:**
 

@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # Verificador del Reto 1 (módulo 8, GitOps): califica el ESTADO FINAL, no los comandos que usaste.
 # Uso: bash verificador-reto1.sh        (despues de bash montar.sh; no necesita estar en ninguna carpeta)
-# Salida: una línea [OK]/[FALLA] por chequeo (con el motivo) y "Resultado: X/7".
-# Código de salida: 0 si sacas 7/7, 1 si no.
+# Salida: una línea [OK]/[FALLA] por chequeo (con el motivo) y "Resultado: X/8" y una línea final "Huella".
+# Código de salida: 0 si sacas 8/8, 1 si no.
+# El chequeo 8 solo se puede pasar después del Paso 9 (incidente en producción).
 # Atención: los chequeos 3, 4 y 7 PROVOCAN una falla a propósito (escalan un Deployment, editan un ConfigMap)
 # y esperan a que tu sistema la corrija. Tarda entre 1 y 4 minutos.
 set -uo pipefail
@@ -82,7 +83,12 @@ c_deriva() (
 c_revert() (
   T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
   GIT_TERMINAL_PROMPT=0 git clone -q "$URL" "$T/r" || exit 1; cd "$T/r"
-  R=$(git log --format=%H --grep='^This reverts commit [0-9a-f]\{40\}' main | head -1)
+  # El revert del incidente del Paso 9 (si existe) lo califica el chequeo 8, no este
+  INC=""; test -s "$W/.incidente" && INC=$(sed -n "s/^BADSHA='\([0-9a-f]*\)'.*/\1/p" "$W/.incidente")
+  R=$(git log --format=%H --grep='^This reverts commit [0-9a-f]\{40\}' main | while read -r c; do
+        x=$(git show -s --format=%B "$c" | sed -n 's/^This reverts commit \([0-9a-f]\{40\}\).*/\1/p' | head -1)
+        test -n "$INC" -a "$x" = "$INC" || { echo "$c"; break; }
+      done)
   test -n "$R" || { echo "no hay ningún commit creado con git revert en main"; exit 1; }
   X=$(git show -s --format=%B "$R" | sed -n 's/^This reverts commit \([0-9a-f]\{40\}\).*/\1/p' | head -1)
   git merge-base --is-ancestor "$X" main || { echo "el commit revertido ya no está en la historia (se reescribió)"; exit 1; }
@@ -144,6 +150,66 @@ c_tofu() (
   test "$(K -n iac-lab get cm ajustes -o jsonpath='{.data.nivel}')" = produccion || { echo "la deriva sigue ahí"; exit 1; }
 )
 
+# ---------- 8. Incidente en producción (Paso 9): se califica el estado final, no los comandos ----------
+c_incidente() (
+  F="$W/.incidente"
+  MARCA_GIT=$(curl -fs "http://127.0.0.1:3088/api/v1/repos/lab/fleet" 2>/dev/null | python3 -I -c 'import sys,json; print(json.load(sys.stdin).get("description",""))' 2>/dev/null)
+  if ! test -s "$F"; then
+    if echo "$MARCA_GIT" | gq '^incidente-'; then echo "el incidente ya se inyectó pero se borró su estado local; no se puede calificar un incidente borrado"; else echo "no ejecutaste preparar-incidente.sh"; fi
+    exit 1
+  fi
+  TK=; BADSHA=; PREIMG=; CLUSTER_UID=; MARCA=; TRAMPA=; . "$F" 2>/dev/null
+  test -n "$TK" -a -n "$BADSHA" -a -n "$PREIMG" -a -n "$MARCA" || { echo "el estado del incidente está dañado"; exit 1; }
+  test "$MARCA" = "$MARCA_GIT" || { echo "el estado del incidente no coincide con el registrado en el servidor Git"; exit 1; }
+  test "$CLUSTER_UID" = "$(K get ns kube-system -o jsonpath='{.metadata.uid}')" || { echo "este estado de incidente pertenece a otro clúster"; exit 1; }
+  T=$(mktemp -d); trap 'rm -rf "$T"' EXIT
+  GIT_TERMINAL_PROMPT=0 git clone -q "$URL" "$T/r" 2>/dev/null || { echo "Gitea no responde"; exit 1; }; cd "$T/r"
+  git merge-base --is-ancestor "$BADSHA" main 2>/dev/null || { echo "el commit del compañero desapareció de la historia de main (se reescribió); un incidente se corrige sin borrar su rastro"; exit 1; }
+  PEND=""
+  pend() { PEND="$PEND
+            - $1"; }
+  test -z "$TRAMPA" || pend "una calificación anterior detectó escrituras de kubectl ($TRAMPA); lo que debe llegar por Git o por OpenTofu no se repara a mano, y esa marca no se borra"
+  RV=$(git log --format=%H --grep="^This reverts commit $BADSHA" main | head -1)
+  test -n "$RV" || pend "el cambio del compañero sigue sin deshacerse con un commit de reversa que quede en la historia"
+  git show main:apps/saludo/deployment.yaml 2>/dev/null | gq -F "image: $PREIMG" || pend "en Git, saludo no tiene la imagen que tenía antes del incidente"
+  git grep -l "$TK" main -- clusters/m08 >/dev/null 2>&1 || pend "en Git no hay nada bajo clusters/m08 que declare el token $TK"
+  test "$(K -n flux-system get kustomization apps -o jsonpath='{.spec.suspend}')" != true || pend "la Kustomization apps sigue pausada"
+  test "$(K -n flux-system get kustomization flux-system -o jsonpath='{.spec.suspend}')" != true || pend "la Kustomization flux-system está pausada"
+  test "$(K -n iac-lab get cm ajustes -o jsonpath='{.data.nivel}')" = produccion || pend "iac-lab/ajustes no dice nivel=produccion"
+  if test -n "$PEND"; then echo "faltan:$PEND"; exit 1; fi
+  HEAD=$(git rev-parse main)
+  for i in $(seq 1 30); do
+    K -n flux-system get kustomization apps -o jsonpath='{.status.lastAppliedRevision}' | gq "$HEAD" && K -n flux-system get kustomization flux-system -o jsonpath='{.status.lastAppliedRevision}' | gq "$HEAD" && break; sleep 3
+  done
+  K -n flux-system get kustomization apps -o jsonpath='{.status.lastAppliedRevision}' | gq "$HEAD" || pend "la Kustomization apps no aplicó el último commit de main"
+  K -n flux-system get kustomization flux-system -o jsonpath='{.status.lastAppliedRevision}' | gq "$HEAD" || pend "la Kustomization flux-system no aplicó el último commit de main"
+  test "$(K -n saludo get deploy saludo -o jsonpath='{.spec.template.spec.containers[0].image}')" = "$PREIMG" || pend "el Deployment saludo no corre la imagen anterior al incidente"
+  kubectl -n saludo rollout status deploy/saludo --timeout=60s >/dev/null 2>&1 || pend "el despliegue de saludo no terminó"
+  test "$(K -n saludo get deploy saludo -o jsonpath='{.status.availableReplicas}')" = "$(K -n saludo get deploy saludo -o jsonpath='{.spec.replicas}')" || pend "saludo no tiene todas sus réplicas disponibles"
+  if K -n saludo get pods -o jsonpath='{range .items[*]}{.status.containerStatuses[*].state.waiting.reason}{"\n"}{end}' | gq -E 'ImagePull|ErrImage'; then pend "quedan Pods de saludo con error de imagen"; fi
+  test "$(K -n saludo get cm ticket -o jsonpath='{.data.token}')" = "$TK" || pend "el ConfigMap ticket del namespace saludo no existe o no contiene el token $TK"
+  test "$(K -n saludo get cm ticket -o jsonpath='{.metadata.labels.kustomize\.toolkit\.fluxcd\.io/name}')" = flux-system || pend "el ConfigMap ticket no lo entrega la Kustomization flux-system"
+  ( cd "$W/tofu" && TF_IN_AUTOMATION=1 tofu plan -detailed-exitcode -input=false >/dev/null 2>&1 ); test $? = 0 || pend "el plan de OpenTofu no está vacío"
+  if test -n "$PEND"; then echo "faltan:$PEND"; exit 1; fi
+  echo "incidente $TK resuelto: revert $(echo "$RV" | cut -c1-8) en Git, entrega reanudada, ticket entregado por flux-system, OpenTofu sin deriva"
+)
+
+# Instantánea ANTES de que cualquier chequeo provoque nada (c_deriva escala y c_tofu repara, y eso borraría la evidencia de quién escribió):
+# si kubectl escribió los objetos del incidente, queda una marca permanente en el estado del incidente.
+if test -s "$W/.incidente"; then
+  mgr() {  # $1=ns $2=tipo $3=nombre $4=campo opcional: gestores (managedFields) del objeto, o solo los dueños de ese campo
+    K -n "$1" get "$2" "$3" --show-managed-fields -o json | CAMPO="${4:-}" python3 -I -c '
+import sys, json, os
+c = os.environ.get("CAMPO", "")
+for e in json.load(sys.stdin)["metadata"].get("managedFields", []):
+    if not c or c in json.dumps(e.get("fieldsV1", {})): print(e["manager"])' 2>/dev/null
+  }
+  TR=""
+  test "$(K -n iac-lab get cm ajustes -o jsonpath='{.data.nivel}')" = produccion && mgr iac-lab cm ajustes f:nivel | gq -E '^kubectl' && TR="$TR iac-lab/ajustes"
+  mgr saludo cm ticket | gq -E '^kubectl' && TR="$TR saludo/ticket"
+  if test -n "$TR" && ! gq '^TRAMPA=' "$W/.incidente"; then echo "TRAMPA='${TR# }'" >> "$W/.incidente"; fi
+fi
+
 echo "Reto 1 (módulo 8, GitOps) en el clúster m08-gitops1"
 chequeo "Flux se instaló desde Git: 4 controladores, fuente en Gitea, ruta clusters/m08, HEAD aplicado" c_flux
 chequeo "La app saludo entró por Git: Kustomization apps con prune, imagen por digest, sin kubectl"     c_app
@@ -152,5 +218,13 @@ chequeo "Rollback con git revert: el commit malo sigue en la historia, el clúst
 chequeo "La compuerta pre-commit rechaza tipo y campo inválidos y acepta un cambio válido"             c_compuerta
 chequeo "cosign: hola firmada por digest, intruso y una llave ajena no verifican"                      c_cosign
 chequeo "OpenTofu: plan vacío, deriva detectada con código 2 y reparada por apply"                     c_tofu
+chequeo "Incidente en producción (Paso 9): todas las causas resueltas por Git y OpenTofu, sin rastro borrado" c_incidente
 echo "Resultado: $OK/$TOTAL"
+# Huella: liga esta salida a ESTE clúster y a ESTE incidente (si copias la salida de otra máquina, la huella no coincide)
+HUELLA="sin-incidente"
+if test -s "$W/.incidente"; then
+  HT=$(sed -n "s/^TK='\([^']*\)'.*/\1/p" "$W/.incidente"); HU=$(K get ns kube-system -o jsonpath='{.metadata.uid}')
+  HUELLA=$(printf '%s:%s' "$HT" "$HU" | sha256sum | cut -c1-12)
+fi
+echo "Huella: $HUELLA"
 [ "$OK" = "$TOTAL" ]

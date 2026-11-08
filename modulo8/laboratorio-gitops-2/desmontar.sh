@@ -4,4 +4,6 @@ W="$HOME/lab-gitops-2"
 kind delete cluster --name gitops2 2>&1 | tail -1
 docker rm -f gitops2-gitea gitops2-registry >/dev/null 2>&1
 docker rmi localhost:5092/catalogo:1.0.0 localhost:5092/intruso:1.0.0 localhost:5092/ruleta:1.0.0 localhost:5092/ruleta:1.1.0 localhost:5092/ruleta:1.2.0 >/dev/null 2>&1
+# El estado del Paso 10 (ticket y ficha del incidente) vive en $W/.incidente y en el clúster y Gitea que se borran aquí
+rm -f "$W/.incidente" "$W/.inyeccion.py"
 rm -rf "$W"; echo "TEARDOWN LISTO"

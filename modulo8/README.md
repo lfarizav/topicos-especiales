@@ -85,6 +85,7 @@ viven en `laboratorio-gitops-1/`.
 7. Firmar y verificar una imagen por digest con `cosign`, y la etiqueta que se mueve
 8. OpenTofu: `plan`, `apply` y deriva con `tofu plan -detailed-exitcode`
 9. Reto estilo examen de 7 chequeos, calificado por `verificador-reto1.sh`
+10. Incidente en producción que se resuelve a mano, sin solución publicada (8 chequeos en total)
 
 Se entrega en la sesión 15, ver la [guía de entrega](./guia-entrega-laboratorios-gitops.md).
 
@@ -94,7 +95,8 @@ Se entrega en la sesión 15, ver la [guía de entrega](./guia-entrega-laboratori
 ruleta de extremo a extremo con CI, firma, automatización de imágenes de Flux, observabilidad y
 reversa, y la IA sobre los cimientos con K8sGPT y un agente que propone cambios. Construye sobre lo
 que dejó el laboratorio 1: el agente tiene un destino fijo, un pull request con evidencia, nunca un
-`kubectl apply`. El reto final (Paso 9, 13 chequeos) lo califica `verificar-reto.sh` y se entrega
+`kubectl apply`. El reto final (Paso 9, 13 chequeos) y el incidente que se resuelve a mano
+(Paso 10, 15 chequeos en total) los califica `laboratorio-gitops-2/verificar-reto.sh`, que viene en el repositorio, y se entrega
 en la sesión 15, ver la [guía de entrega](./guia-entrega-laboratorios-gitops.md).
 
 **Herramientas:** kagent, K8sGPT, HolmesGPT, Flux v2 (source-controller,

@@ -1,6 +1,6 @@
 # Laboratorio 1 (Módulo 8) – GitOps desde cero: de Git al clúster, de la firma a la infraestructura
 
-**Módulo 8 · sesión 13 · en clase · 120–140 minutos.** Hasta el módulo 7 tú eras quien
+**Módulo 8 · sesión 13 · en clase · 145–165 minutos.** Hasta el módulo 7 tú eras quien
 tecleaba `kubectl apply`. Hoy dejas de serlo. Vas a instalar **Flux** de modo que el clúster
 salga a buscar su estado deseado en un repositorio Git (el *modelo de extracción*), a
 desplegar una aplicación **sin tocar el clúster**, a ver cómo Flux deshace una edición a
@@ -20,6 +20,7 @@ de un laboratorio nuevo, igual que el examen.
 | Firmar y verificar una imagen por digest con `cosign` | 6 | ~15 min | Sí |
 | OpenTofu: `plan`, `apply` y deriva | 7 | ~15 min | Sí |
 | **Reto** estilo examen, calificado por script | 8 | ~25 min | No |
+| **Incidente en producción**, a mano y sin pistas de comandos | 9 | ~20–25 min | No |
 
 > La idea central de esta sesión cabe en una frase: **en GitOps el repositorio es la única
 > puerta de entrada, y todo lo demás es un reconciliador que vigila que el mundo coincida con
@@ -39,7 +40,7 @@ adorno: cambian lo que haces en cada paso.
 |---|---|---|
 | **Predice, ejecuta, explica** | Antes de cada bloque marcado **🔮 Predice**, escribe en `predicciones.md` qué crees que va a pasar. Después compara. | PRIMM (Sentance y Waite, 2019) y Predict-Observe-Explain (White y Gunstone, 1992) |
 | **Fallo productivo** | Varios pasos te hacen romper algo **a propósito** (una edición a mano, una imagen que no existe, un commit inválido) antes de ver la forma correcta. El error es el material. | Productive Failure (Kapur, 2008) |
-| **Andamiaje que se retira** | Los pasos 1 a 7 te dan el comando. El Paso 8 solo te da el objetivo y un script que califica el resultado, igual que el examen. | Efecto del ejemplo resuelto y reversión por experticia (Sweller; Kalyuga et al., 2003) |
+| **Andamiaje que se retira** | Los pasos 1 a 7 te dan el comando. Los pasos 8 y 9 solo te dan el objetivo y un script que califica el resultado, igual que el examen; el Paso 9 ni siquiera te dice dónde mirar. | Efecto del ejemplo resuelto y reversión por experticia (Sweller; Kalyuga et al., 2003) |
 | **Práctica de recuperación** | Al final respondes de memoria, sin releer. Recordar cuesta más que releer, y por eso fija más. | Test-Enhanced Learning (Roediger y Karpicke, 2006) |
 
 ```bash
@@ -73,6 +74,8 @@ Al terminar vas a poder responder, señalando evidencia en tu terminal:
    mueve la etiqueta?
 7. ¿Qué agrega `tofu plan` que `kubectl apply` no tiene, y qué significa su código de salida
    2?
+8. Ante un incidente con varias causas que nadie te explicó, ¿cómo lo diagnosticas y lo
+   corriges sin borrar su rastro y sin salirte de Git y OpenTofu?
 
 **Requisito:** módulos 5 a 7 completos (sabes crear un clúster `kind`, leer `kubectl get -o
 jsonpath` y razonar sobre Deployments, Services y namespaces), y Git en el nivel de
@@ -1259,13 +1262,167 @@ bash "$LAB_DIR/verificador-reto1.sh"
 
 El objetivo es `Resultado: 7/7`.
 
+> **Nota sobre las salidas de este paso.** Se capturaron cuando el verificador tenía siete
+> chequeos. Hoy imprime un octavo, el del Paso 9 (incidente en producción), que aquí falla con
+> `no ejecutaste preparar-incidente.sh`, y el resultado se escribe `X/8`. En este paso tu meta es
+> que los siete primeros estén en `[OK]` (`Resultado: 7/8`); el octavo es el siguiente paso.
+
+---
+
+## Paso 9: Incidente en producción, a mano (20-25 min)
+
+**Este paso no tiene solución escrita en este documento, ni comandos para resolverlo.** Todo lo
+que necesitas ya lo practicaste en los pasos 1 a 8; lo nuevo es que nadie te dice **cuál** es
+el problema ni **en qué orden** atacarlo. Es el paso que no se puede saltar: el verificador
+califica un incidente que se genera **en tu máquina, con un token que solo existe en tu
+ejecución**. La salida de un compañero no te sirve y la tuya no le sirve a él.
+
+```mermaid
+flowchart LR
+  P["preparar-incidente.sh<br/>(una vez por montaje)"] --> T["ticket con síntomas<br/>y estado final exigido"]
+  T --> D["tú diagnosticas<br/>y corriges"]
+  D --> V["verificador-reto1.sh<br/>chequeo 8 + Huella"]
+  V -->|"faltan: ..."| D
+```
+
+Necesitas el laboratorio **terminado** (el estado del Paso 8, con los siete primeros chequeos en
+`[OK]`): el incidente se inyecta sobre él y el script se niega a correr si no lo está.
+
+### 9.1 Calibra: el chequeo 8 existe y todavía no pasa
+
+Con tu laboratorio terminado y **antes** de pedir el incidente, el chequeo 8 ya falla, porque no
+hay incidente que calificar:
+
+```bash
+bash "$LAB_DIR/verificador-reto1.sh" | tail -4
+```
+
+**Salida real de esta máquina:**
+
+```
+  [FALLA] Incidente en producción (Paso 9): todas las causas resueltas por Git y OpenTofu, sin rastro borrado
+            -> no ejecutaste preparar-incidente.sh
+Resultado: 7/8
+Huella: sin-incidente
+```
+
+### 9.2 Pide el incidente
+
+Ejecútalo **una sola vez** (necesita `GITEA_PASS`, la misma de `montar.sh`). Un segundo intento
+se niega, y no hay forma de «reiniciar» sin desmontar y rehacer todo el laboratorio:
+
+```bash
+export GITEA_PASS='la-contraseña-de-montar.sh'
+bash "$LAB_DIR/preparar-incidente.sh"
+```
+
+**Salida real de esta máquina** (tu token y tu hora serán otros):
+
+```
+================ TICKET DE INCIDENTE INC-170c98d3 ================
+Prioridad: alta. Reportado por la guardia de produccion el 2026-11-07T23:04:14-0500.
+
+Sintomas:
+  - Desde hace unos minutos, los Pods nuevos de la aplicacion saludo no arrancan.
+    Carlos Perez dice que subio "una mejora de la campana" y que, como tenia prisa,
+    no la paso por la compuerta.
+  - Alguien intento "detener el dano" y dejo algo a medias; el equipo no recuerda que.
+  - OpenTofu ya no reconoce el ConfigMap ajustes del namespace iac-lab como suyo.
+
+Estado final exigido (todo debe entrar por Git o por OpenTofu, nada a mano):
+  1. El cambio de Carlos queda deshecho SIN borrarlo de la historia de main
+     (auditoria exige ver el cambio y su reversa).
+  2. saludo vuelve a su imagen anterior al incidente, con todas sus replicas disponibles,
+     y la Kustomization apps aplica el ultimo commit de main.
+  3. Existe un ConfigMap llamado ticket en el namespace saludo con data.token = INC-170c98d3,
+     entregado por Git a traves de la Kustomization flux-system (la que lee clusters/m08).
+  4. iac-lab/ajustes vuelve a producir nivel=produccion y 'tofu plan' queda vacio.
+  5. Nadie escribio estos objetos con kubectl (managedFields), y los siete chequeos
+     anteriores del verificador siguen en [OK].
+
+Cuando creas que terminaste:  bash verificador-reto1.sh
+Copia el token ahora: este ticket no se vuelve a imprimir.
+========================================================
+```
+
+**Copia el token ahora**: el ticket no se vuelve a imprimir.
+
+### El problema
+
+Un incidente real casi nunca tiene una sola causa. El ticket describe **síntomas**, no
+causas ni comandos: descubrir qué pasó es la mitad del trabajo, y la otra mitad es corregirlo
+sin destruir la evidencia. Tienes **20-25 minutos**, tus notas y la documentación oficial. Nadie
+te va a decir qué mirar, y tampoco lo hace este documento.
+
+### El estado final que se califica
+
+Es el que enumera tu ticket (los cinco puntos). El verificador no lee tu historial de comandos:
+lee el clúster, Gitea y OpenTofu.
+
+### Trampas que el verificador detecta y castiga
+
+Todas hacen desaparecer un síntoma y dejan el sistema peor protegido de lo que parece:
+
+- **Borrar el rastro del cambio malo** (reescribir la historia de `main`). Un incidente se
+  corrige sin borrar su evidencia.
+- **Corregir a mano**: escribir con `kubectl` los objetos que deben llegar por Git o por
+  OpenTofu. `managedFields` dice quién escribió cada campo.
+- **Resolver solo el síntoma visible** y dejar las demás causas sin resolver.
+- **Reiniciar el ejercicio**: volver a pedir el incidente, o borrar el archivo de estado que
+  guarda tu token. El registro del incidente también vive en el servidor Git; el verificador
+  los compara.
+- **Reutilizar la evidencia de otra máquina o de otra ejecución**: el token y la huella son tuyos.
+
+### Cómo se califica y qué es la «Huella»
+
+Cuando creas que terminaste:
+
+```bash
+bash "$LAB_DIR/verificador-reto1.sh"
+```
+
+Mientras haya causas sin resolver, el chequeo 8 las lista como `faltan: ...`, **describiendo el
+estado que no cumple, no el comando que lo arregla**. Por ejemplo, justo después de pedir el
+incidente, en la máquina donde se escribió este laboratorio:
+
+**Salida real de esta máquina** (el chequeo 8 en rojo, como debe estar al empezar):
+
+```
+Reto 1 (módulo 8, GitOps) en el clúster m08-gitops1
+  [OK]    Flux se instaló desde Git: 4 controladores, fuente en Gitea, ruta clusters/m08, HEAD aplicado
+  [FALLA] La app saludo entró por Git: Kustomization apps con prune, imagen por digest, sin kubectl
+            -> la Kustomization apps no existe o no está Ready
+  [FALLA] Una edición a mano se deshace sola: intervalo de 60 s o menos, medido
+            -> apps está suspendida
+  [FALLA] Rollback con git revert: el commit malo sigue en la historia, el clúster se recuperó
+            -> apps/saludo no volvió al estado anterior al cambio
+  [OK]    La compuerta pre-commit rechaza tipo y campo inválidos y acepta un cambio válido
+  [OK]    cosign: hola firmada por digest, intruso y una llave ajena no verifican
+  [FALLA] OpenTofu: plan vacío, deriva detectada con código 2 y reparada por apply
+            -> el ConfigMap ajustes no dice nivel=produccion
+  [FALLA] Incidente en producción (Paso 9): todas las causas resueltas por Git y OpenTofu, sin rastro borrado
+            -> faltan:
+            - el cambio del compañero sigue sin deshacerse con un commit de reversa que quede en la historia
+            - en Git, saludo no tiene la imagen que tenía antes del incidente
+            - en Git no hay nada bajo clusters/m08 que declare el token INC-170c98d3
+            - la Kustomization apps sigue pausada
+            - iac-lab/ajustes no dice nivel=produccion
+Resultado: 3/8
+Huella: 71028ad175ba
+```
+
+La última línea, **`Huella`**, son los 12 primeros caracteres del SHA-256 de tu token y del
+identificador único de tu clúster. Cambia con cada montaje y cada incidente; **entrega la salida
+completa del verificador, con su `Huella`**: el profesor la recalcula con los datos de tu
+máquina, y una salida copiada de otra no coincide. El objetivo es `Resultado: 8/8`.
+
 ---
 
 ## Limpieza (3 min)
 
 El desmontaje borra solo lo que creó el montaje: el clúster `m08-gitops1`, los contenedores
 `gitops1-gitea` y `gitops1-registry`, las etiquetas locales `localhost:5088/lab/*` y la carpeta
-`~/lab-gitops-1`. Tus notas (`~/lab-gitops-1-notas`) se quedan.
+`~/lab-gitops-1` (con el estado del incidente del Paso 9). Tus notas (`~/lab-gitops-1-notas`) se quedan.
 
 ```bash
 cd "$LAB_DIR"
@@ -1297,7 +1454,8 @@ ls: cannot access '/home/lfarizav/lab-gitops-1': No such file or directory
 | 5 | Pusiste una compuerta de CI | Dos commits inválidos rechazados, uno válido aceptado, y `--no-verify` como límite |
 | 6 | Firmaste por digest | `verify` OK por digest, `no signatures found` por etiqueta movida |
 | 7 | Declaraste infraestructura en código | `plan` con código 2 ante la deriva, 0 tras el `apply` |
-| 8 | Reconstruiste todo sin guía | `Resultado: 7/7` |
+| 8 | Reconstruiste todo sin guía | Los siete primeros chequeos en `[OK]` |
+| 9 | Resolviste un incidente de varias causas, a mano | `Resultado: 8/8` y una huella que solo corresponde a tu clúster |
 
 > Esta es la primera mitad de la tesis del módulo. **El agente propone, un humano aprueba,
 > GitOps reconcilia.** Hoy construiste la tercera pieza y viste por qué funciona: porque lo
