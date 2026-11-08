@@ -167,8 +167,14 @@ escribe en ningún archivo del repositorio ni del laboratorio:
 
 ```bash
 export GITEA_PASS="$(openssl rand -hex 8)-lab"
+echo "Anota tu contraseña de Gitea: $GITEA_PASS"
 bash montar.sh
 ```
+
+Anota esa contraseña (en papel o en tu libreta, **no** en un archivo del repositorio): vas a
+necesitarla en **cada terminal nueva**, porque una variable de entorno vive solo en la
+terminal donde la exportaste. El montaje tarda unos 2 a 4 minutos (descarga cuatro
+herramientas y tres imágenes).
 
 **Salida real de esta máquina:**
 
@@ -181,11 +187,25 @@ Have a question, bug, or feature request? Let us know! https://kind.sigs.k8s.io/
 MONTAJE LISTO. Gitea: http://172.18.0.5:3000/lab/fleet.git  Registro: localhost:5088  Carpeta: /home/lfarizav/lab-gitops-1
 ```
 
-Si algo falla, el script se detiene con un código que dice **qué** falló (`PUERTO-OCUPADO`,
-`CLUSTER-EXISTE`, `SUMA-SHA256`...). Cada terminal nueva que abras necesita el entorno del
-laboratorio (el `PATH` con las herramientas fijadas, el kubeconfig privado) y la contraseña:
+**Si `montar.sh` se detiene** (verás `ERROR <código>: ...` y debajo `EL MONTAJE SE DETUVO`,
+con los pasos a seguir), el código dice **qué** falló (`PUERTO-OCUPADO`, `DESCARGA`,
+`SUMA-SHA256`, `DOCKER`...). Corrige esa causa y repite; el script se puede ejecutar las veces
+que haga falta, porque limpia solo los restos del intento anterior:
 
 ```bash
+bash desmontar.sh      # borra lo que dejó el intento fallido (es seguro aunque no haya nada)
+export GITEA_PASS="$(openssl rand -hex 8)-lab"; echo "Tu contraseña nueva: $GITEA_PASS"
+bash montar.sh
+```
+
+Cada terminal nueva que abras necesita el entorno del laboratorio (el `PATH` con las
+herramientas fijadas, el kubeconfig privado) y la contraseña. El archivo `entorno.sh` lo escribe
+`montar.sh` **al empezar**, así que existe aunque el montaje se haya detenido a la mitad. Si
+`GITEA_PASS` no está exportada, `entorno.sh` te lo avisa y te dice cómo recuperarla. En una
+terminal nueva, exporta primero la contraseña que anotaste y luego carga el entorno:
+
+```bash
+# (en una terminal nueva, antes: export GITEA_PASS='...' con la contraseña que anotaste)
 source ~/lab-gitops-1/entorno.sh
 cd "$LAB_DIR"
 kubectl get nodes

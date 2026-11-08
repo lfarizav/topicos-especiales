@@ -1,7 +1,8 @@
 #!/bin/bash
 # Montaje del laboratorio 1 del módulo 8 (GitOps desde cero). Un cluster kind propio, un Gitea y un registro locales.
-# Requiere: export GITEA_PASS=<contrasena de 12+ caracteres inventada por usted> (nunca se escribe en archivos del repo)
+# Se puede repetir: si un montaje anterior se detuvo, lo limpia y empieza de nuevo. Requiere: export GITEA_PASS=<contrasena de 12+ caracteres inventada por usted> (nunca se escribe en archivos del repo)
 set -euo pipefail
+LAB_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 W="$HOME/lab-gitops-1"
 CL=m08-gitops1; GT=gitops1-gitea; RG=gitops1-registry
 NODO_IMG="kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5"
@@ -10,16 +11,46 @@ REG_IMG="registry:3@sha256:1be55279f18a2fe1a74edf2664cac61c1bea305b7b4642dab412e
 BB="busybox:1.37.0@sha256:9db7b59979c38555a39def84a31fb98b5296952f9e3afd4f6f11f05b07adfab0"
 AL="alpine:3.22@sha256:14358309a308569c32bdc37e2e0e9694be33a9d99e68afb0f5ff33cc1f695dce"
 FLUX_V=2.10.0; KC_V=0.8.0; TOFU_V=1.12.6; COSIGN_V=3.1.3
+SIGUIENTE="QUE HACER AHORA: 1) lea el ERROR de arriba y corrija esa causa; 2) bash $LAB_DIR/desmontar.sh; 3) export GITEA_PASS=<su contrasena>; 4) bash $LAB_DIR/montar.sh. (montar.sh se puede repetir las veces que haga falta.)"
 fallo() { echo "ERROR $1: $2" >&2; exit 1; }
+# Si el montaje se detiene por cualquier causa (con fallo() o por un comando que falla), dice exactamente que hacer
+alsalir() { local rc=$?; if test $rc -ne 0; then echo "" >&2; echo "EL MONTAJE SE DETUVO (codigo $rc)." >&2; echo "$SIGUIENTE" >&2; fi; }
+trap alsalir EXIT
 
-# 1. Comprobaciones previas (se mide, no se asume)
-test "${#GITEA_PASS}" -ge 12 2>/dev/null || fallo CONTRASENA "haga export GITEA_PASS=<12 o mas caracteres> antes del montaje"
-for t in docker kind kubectl git curl tar unzip sha256sum python3; do command -v $t >/dev/null || fallo HERRAMIENTA-FALTANTE "$t no esta en el PATH"; done
-docker info >/dev/null 2>&1 || fallo DOCKER "docker no responde sin sudo"
-for p in 3088 5088; do if ss -ltn 2>/dev/null | grep -q "127.0.0.1:$p "; then fallo PUERTO-OCUPADO "el puerto $p de 127.0.0.1 debe estar libre"; fi; done
-if kind get clusters 2>/dev/null | grep -qx $CL; then fallo CLUSTER-EXISTE "corra primero el teardown"; fi
-if test -e "$W"; then fallo CARPETA-EXISTE "$W existe; corra primero el teardown"; fi
+# 1. Comprobaciones previas (se mide, no se asume). Aun no se crea nada.
+GITEA_PASS="${GITEA_PASS:-}"
+test "${#GITEA_PASS}" -ge 12 2>/dev/null || fallo CONTRASENA "haga export GITEA_PASS=<12 o mas caracteres> y repita bash montar.sh"
+for t in docker kind kubectl git curl tar unzip sha256sum python3; do command -v $t >/dev/null || fallo HERRAMIENTA-FALTANTE "$t no esta en el PATH; instalela y repita bash montar.sh"; done
+docker info >/dev/null 2>&1 || fallo DOCKER "docker no responde sin sudo; arregle Docker y repita bash montar.sh"
+
+# 1b. Idempotencia: si hay restos de un montaje anterior que NO termino, se limpian solos; si termino, no se rehace.
+hay_restos() { test -e "$W" || kind get clusters 2>/dev/null | grep -x $CL >/dev/null || docker ps -a --format '{{.Names}}' | grep -Ex "$GT|$RG" >/dev/null; }
+if test -e "$W/.montaje-completo" && kind get clusters 2>/dev/null | grep -x $CL >/dev/null; then
+  echo "El laboratorio ya esta montado ($W). Nada que hacer."
+  echo "Para empezar de cero: bash $LAB_DIR/desmontar.sh && bash $LAB_DIR/montar.sh"
+  echo "Para trabajar en una terminal nueva: source $W/entorno.sh"
+  exit 0
+fi
+if hay_restos; then
+  echo "Hay restos de un montaje anterior que no termino: se limpian con desmontar.sh antes de continuar."
+  bash "$LAB_DIR/desmontar.sh"
+fi
+
+# 1c. El entorno se escribe PRIMERO, para que 'source ~/lab-gitops-1/entorno.sh' funcione aunque un paso posterior falle
 mkdir -p "$W/bin" "$W/llaves" "$W/tofu"
+cat > "$W/entorno.sh" <<EEOF
+# Entorno de cada terminal del laboratorio 1 (modulo 8). Se escribe al inicio de montar.sh.
+W="\$HOME/lab-gitops-1"
+LAB_DIR="$LAB_DIR"
+export PATH="\$W/bin:\$PATH" KUBECONFIG="\$W/kubeconfig" TF_VAR_kubeconfig="\$W/kubeconfig"
+if test "\${#GITEA_PASS}" -lt 12; then
+  echo "AVISO: falta GITEA_PASS en esta terminal. Haga export GITEA_PASS=<la contrasena que uso en montar.sh>." >&2
+  echo "Si la olvido: docker exec gitops1-gitea gitea admin user change-password --username lab --password <NUEVA-de-12-o-mas> --must-change-password=false ; y luego export GITEA_PASS=<NUEVA>" >&2
+fi
+EEOF
+
+# 1d. Puertos libres (se mide despues de escribir el entorno, para que entorno.sh exista aunque esto falle)
+for p in 3088 5088; do if ss -ltn 2>/dev/null | grep "127.0.0.1:$p " >/dev/null; then fallo PUERTO-OCUPADO "el puerto $p de 127.0.0.1 lo usa otro programa; liberelo y repita bash montar.sh (no lo cierra este laboratorio)"; fi; done
 
 # 2. Herramientas fijadas por version, con la suma SHA-256 del lanzamiento oficial (verificadas el 2026-11-06)
 bajar() { # url destino suma
@@ -40,7 +71,7 @@ flux --version; kubeconform -v; tofu version | head -1; cosign version 2>&1 | gr
 # 3. Cluster kind propio, con kubeconfig privado
 kind create cluster --name $CL --image "$NODO_IMG" --kubeconfig "$W/kubeconfig" --wait 120s
 export KUBECONFIG="$W/kubeconfig"
-kubectl get nodes --no-headers | grep -qw Ready || fallo NODO "el nodo no esta Ready"
+kubectl get nodes --no-headers | grep -w Ready >/dev/null || fallo NODO "el nodo no esta Ready"
 
 # 4. Gitea local (el servidor Git del laboratorio) en la red de kind
 docker run -d --name $GT --network kind -p 127.0.0.1:3088:3000 \
@@ -74,10 +105,6 @@ GEOF
 chmod +x "$W/bin/g"
 git clone -q "http://$GIP:3000/lab/fleet.git" "$W/fleet"
 git -C "$W/fleet" config user.name "Alumno del laboratorio"; git -C "$W/fleet" config user.email "alumno@example.com"
-# 7. Entorno de cada terminal: W, PATH con las herramientas fijadas y el kubeconfig privado del laboratorio
-cat > "$W/entorno.sh" <<EEOF
-W="\$HOME/lab-gitops-1"
-LAB_DIR="$(cd "$(dirname "$0")" && pwd)"
-export PATH="\$W/bin:\$PATH" KUBECONFIG="\$W/kubeconfig" TF_VAR_kubeconfig="\$W/kubeconfig"
-EEOF
+touch "$W/.montaje-completo"
 echo "MONTAJE LISTO. Gitea: http://$GIP:3000/lab/fleet.git  Registro: localhost:5088  Carpeta: $W"
+echo "SIGUIENTE PASO: source $W/entorno.sh   (en cada terminal nueva; la contrasena GITEA_PASS tambien hay que exportarla en cada una)"
