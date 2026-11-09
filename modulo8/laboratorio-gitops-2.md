@@ -110,7 +110,7 @@ salidas): Linux, Docker 29.9.3, `kind` v0.33.0, `kubectl` cliente v1.37.0, nodo
 del lanzamiento oficial verificada** a `~/lab-gitops-2/bin`, sin tocar las que ya tengas.
 Necesitas Docker sin `sudo`, `kind`, `kubectl`, `git`, `curl`, `tar`, `sha256sum` y `python3`
 con `venv` en el `PATH`, unos **8 GiB de RAM libres** (la pila de monitoreo es pesada), los
-puertos `3092` y `5092` de `127.0.0.1` libres, y salida a internet durante el montaje y los
+puertos `3092`, `5092` y `8092` de `127.0.0.1` libres, y salida a internet durante el montaje y los
 pasos 2 y 4 (imágenes y paquetes). El laboratorio crea el clúster `gitops2` y los
 contenedores `gitops2-gitea` y `gitops2-registry`; no toca ningún otro.
 
@@ -157,6 +157,7 @@ flowchart LR
     GT[("Gitea, repo lab/fleet<br/>main protegida")]
     N["clúster kind gitops2<br/>nodo v1.36.1"]
   end
+  B["tu navegador<br/>http://localhost:8092"] -->|"puerto 8092 a NodePort 30092"| N
   A -->|"docker push"| R
   G -->|"g push (GITEA_PASS)"| GT
   N -.->|"Flux sale a leer (Paso 3)"| GT
@@ -621,6 +622,23 @@ exit=0
 `kustomize-controller` y **no** a `kubectl`, la misma prueba de quién escribió el objeto que
 usaste en el laboratorio 1.
 
+**Ábrela en tu navegador.** Abre <http://localhost:8092>: es la ruleta, con fondo **negro**
+(`v1.0.0`). El Service de la ruleta es de tipo `NodePort` (puerto `30092`, que `kind` publica en
+el `8092` de tu máquina; lo declara `plantilla/apps/ruleta/service.yaml` y entró por Git como
+todo lo demás). Se usa `NodePort` y no `kubectl port-forward` porque ese túnel se pega a **un
+solo pod** y se corta cuando Flux reemplaza los pods en el Paso 5. Sin navegador, el mismo dato
+sale por `curl`:
+
+```bash
+curl -s localhost:8092/static/tema.css | grep -- '--fondo'
+```
+**Salida real de esta máquina** (capturada con el mismo `extraPortMappings`, el mismo Service y
+la misma imagen `1.0.0` en un clúster `kind` mínimo de prueba):
+
+```
+  --fondo: #000000;
+```
+
 ---
 
 ## Paso 4: Observabilidad, Prometheus ve la ruleta y Grafana tiene sus paneles (15 min)
@@ -829,6 +847,19 @@ segundos conviven un pod viejo (`1.0.0`) y dos nuevos (`1.1.0`): es la actualiza
 Kubernetes, y es lo que el panel de Grafana de la ruleta dibuja «por versión». Cada `IMAGEID`
 termina en el digest que firmaste. La página servida ya es blanca.
 
+**Míralo en el navegador:** recarga <http://localhost:8092> (si sigue negra, `Ctrl+Shift+R`;
+el servidor ya responde con `Cache-Control: no-cache`, así que una recarga normal basta). Debes
+ver el fondo **blanco** de `v1.1.0`, y el mismo dato por la red:
+
+```bash
+curl -s localhost:8092/static/tema.css | grep -- '--fondo'
+```
+**Salida real de esta máquina** (clúster `kind` mínimo de prueba, imagen `1.1.0`):
+
+```
+  --fondo: #ffffff;
+```
+
 **Una limitación honesta.** La automatización de Flux **no verifica firmas**: despliega lo que
 la política resuelva, esté firmado o no. Compruébalo en la API del propio clúster:
 
@@ -982,6 +1013,17 @@ El commit de `fluxcdbot` dice `1.1.0 -> 1.0.0`, ningún commit nuevo apareció, 
 automatización (apaga el control en lugar de usarlo), **borrarla**, **borrar la etiqueta
 `1.1.0`** del registro (borra evidencia) o `kubectl edit` (Flux lo deshace). Y exige haber
 esperado dos intervalos después del último commit antes de dar el rollback por bueno.
+
+**Recarga <http://localhost:8092>:** debe volver el fondo **negro**. Por `curl`:
+
+```bash
+curl -s localhost:8092/static/tema.css | grep -- '--fondo'
+```
+**Salida real de esta máquina** (clúster `kind` mínimo de prueba, de nuevo la imagen `1.0.0`):
+
+```
+  --fondo: #000000;
+```
 
 ---
 

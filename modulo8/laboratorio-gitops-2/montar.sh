@@ -6,7 +6,7 @@
 set -euo pipefail
 AQUI="$(cd "$(dirname "$0")" && pwd)"
 W="$HOME/lab-gitops-2"
-CL=gitops2; GT=gitops2-gitea; RG=gitops2-registry; PG=3092; PR=5092
+CL=gitops2; GT=gitops2-gitea; RG=gitops2-registry; PG=3092; PR=5092; PN=8092
 NODO_IMG="kindest/node:v1.36.1@sha256:3489c7674813ba5d8b1a9977baea8a6e553784dab7b84759d1014dbd78f7ebd5"
 GITEA_IMG="gitea/gitea:1.27.2-rootless@sha256:c7953964c6e8fe532cf7fc3f3efdea1d0b161d7859c47e04f5e05489d494dea0"
 REG_IMG="registry:3@sha256:1be55279f18a2fe1a74edf2664cac61c1bea305b7b4642dab412e7affdcb3e33"
@@ -41,7 +41,7 @@ if kind get clusters 2>/dev/null | esta -x $CL || docker ps -a --format '{{.Name
   echo "Encontre un montaje anterior del laboratorio 2; lo desmonto y empiezo de nuevo."
   bash "$AQUI/desmontar.sh"
 fi
-for p in $PG $PR; do if ss -ltn 2>/dev/null | esta "127.0.0.1:$p "; then fallo PUERTO-OCUPADO "el puerto $p de 127.0.0.1 lo usa otro programa; liberelo y vuelva a correr montar.sh"; fi; done
+for p in $PG $PR $PN; do if ss -ltn 2>/dev/null | esta "127.0.0.1:$p "; then fallo PUERTO-OCUPADO "el puerto $p de 127.0.0.1 lo usa otro programa; liberelo y vuelva a correr montar.sh"; fi; done
 mkdir -p "$W/bin" "$W/llaves"
 
 # 1b. El entorno se escribe PRIMERO: si el montaje falla mas adelante, "source ~/lab-gitops-2/env.sh" ya funciona.
@@ -97,6 +97,11 @@ name: $CL
 nodes:
   - role: control-plane
     image: $NODO_IMG
+    extraPortMappings:
+      - containerPort: 30092
+        hostPort: $PN
+        listenAddress: "127.0.0.1"
+        protocol: TCP
 containerdConfigPatches:
   - |-
     [plugins."io.containerd.grpc.v1.cri".registry]
