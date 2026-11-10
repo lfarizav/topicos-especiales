@@ -36,7 +36,7 @@ flowchart LR
   S["Paso 0<br/>montaje"] --> P1["1 pytest"]
   P1 --> P2["2 build + cosign"]
   P2 --> P3["3 flux bootstrap"]
-  P3 --> P4["4 Prometheus<br/>y Grafana"]
+  P3 --> P4["4 Prometheus<br/>y "]
   P3 --> P5["5 v1.1.0<br/>autor fluxcdbot"]
   P5 --> P6["6 reversa:<br/>fijar la política"]
   P3 --> P7["7 RBAC de<br/>solo lectura"]
@@ -87,7 +87,7 @@ Al terminar vas a poder responder, señalando evidencia en tu terminal:
 3. ¿Qué tres objetos de Flux (`ImageRepository`, `ImagePolicy`, `ImageUpdateAutomation`) hacen
    que una versión nueva llegue al clúster sin que nadie toque Git, y qué línea del
    Deployment es lo único que la automatización sabe reescribir?
-4. ¿Cómo ves la transición de `v1.0.0` a `v1.1.0` en Prometheus y Grafana, y por qué un
+4. ¿Cómo ves la transición de `v1.0.0` a `v1.1.0` en Prometheus y , y por qué un
    `ServiceMonitor` existente puede no ser leído por nadie?
 5. ¿Por qué `git revert` **solo** no revierte una versión desplegada por automatización, y
    qué cambio en Git sí lo sostiene?
@@ -670,7 +670,11 @@ spec:
   endpoints:
     - {port: http, path: /metrics, interval: 15s}
 ```
-
+Para obtener la contrasena del usuario admin ejecutar el siguiente comando:
+```bash
+kubectl get secret --namespace monitoring kube-prometheus-stack-grafana -o jsonpath="{.data.admin-password}" | base64 --decode ; echo
+5gEF7qnKAycakPQbCL4bwRE5gGqLsZp13Vo3WeaB
+```
 Por defecto, Prometheus solo toma los `ServiceMonitor` que llevan la etiqueta de **su propia**
 versión de Helm. Con `serviceMonitorSelectorNilUsesHelmValues: false` toma también el de la
 ruleta. Sin esa línea el `ServiceMonitor` existe y **nadie lo lee**: el síntoma es
